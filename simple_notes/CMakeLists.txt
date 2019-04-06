@@ -1,0 +1,13 @@
+add_executable (simple_notes main.c)
+
+target_link_libraries (simple_notes shared)
+
+add_subdirectory (Application)
+add_subdirectory (CLIControllers)
+add_subdirectory (CLIViews)
+add_subdirectory (DataStructures)
+add_subdirectory (Event)
+add_subdirectory (Models)
+add_subdirectory (Responder)
+add_subdirectory (SQLiteController)
+add_subdirectory (SQLiteStore)

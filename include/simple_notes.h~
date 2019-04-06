@@ -1,0 +1,18 @@
+//
+//  PrefixHeader.pch
+//  simple_notes
+//
+//  Created by Petr Yanenko on 10/21/17.
+//  Copyright (c) 2017 Petr Yanenko. All rights reserved.
+//
+
+#ifndef simple_notes_PrefixHeader_pch
+#define simple_notes_PrefixHeader_pch
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#include <glib-object.h>
+#include "global_functions.h"
+
+#endif
