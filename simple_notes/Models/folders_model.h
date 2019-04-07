@@ -10,7 +10,7 @@
 #define simple_notes_folders_model____FILEEXTENSION___
 
 #include "selected_list_model.h"
-#include "../DataStructures/light_folder.h"
+#include "light_folder.h"
 
 #define SIMPLE_NOTES_TYPE_FOLDERS_MODEL simple_notes_folders_model_get_type ()
 G_DECLARE_FINAL_TYPE(SimpleNotesFoldersModel, simple_notes_folders_model, SIMPLE_NOTES, FOLDERS_MODEL, SimpleNotesSelectedListModel)

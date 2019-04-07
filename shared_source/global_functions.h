@@ -10,7 +10,6 @@
 #define simple_notes_global_functions_h
 
 #include <gio.h>
-#include "../simple_notes/SQLiteController/sqlite_controller.h"
 
 extern gchar *const kFile;
 extern gchar *const kNoteFolder;

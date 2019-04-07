@@ -8,12 +8,12 @@
 
 #include <locale.h>
 #include <string.h>
-#include "Application/application.h"
+#include "application.h"
 #include "responder_stub.h"
 #include "help.h"
 #include "folder_window.h"
 #include "note_window.h"
-#include "Models/mediator.h"
+#include "mediator.h"
 
 gint32 simple_notes_command_line (GApplication *application, GApplicationCommandLine *cmdline) {
     SimpleNotesResponderStub *stub = simple_notes_responder_stub_new();

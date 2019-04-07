@@ -9,6 +9,7 @@
 #include "selected_list_model.h"
 #include "model_utility.h"
 #include "mediator.h"
+#include "stdint.h"
 
 enum {
     PROP_SELECTED_OBJECT_ID = 1,
@@ -29,9 +30,9 @@ static void simple_notes_selected_list_model_real_append_object (SimpleNotesSele
 static void simple_notes_selected_list_model_real_delete_object (SimpleNotesSelectedListModel *object, SimpleNotesObject *item);
 static void simple_notes_selected_list_model_real_changed (SimpleNotesBaseModel *object);
 
-static SimpleNotesObject *simple_notes_selected_list_model_find_object_with_condition (
+/*static SimpleNotesObject *simple_notes_selected_list_model_find_object_with_condition (
         SimpleNotesSelectedListModel *object, gboolean (^condition) (SimpleNotesObject *item)
-);
+	);*/
 
 static void simple_notes_base_model_set_property (
         GObject      *object,
@@ -48,7 +49,7 @@ static void simple_notes_base_model_set_property (
             objectID = g_value_get_uint64(value);
             SimpleNotesObject *item = simple_notes_selected_list_model_find_object(self, objectID);
             if (item) {
-                SimpleNotesObject *previousSelected = simple_notes_selected_list_model_find_selected_object(self);
+	      SimpleNotesObject *previousSelected = simple_notes_selected_list_model_find_selected_object(self);
                 if (previousSelected) {
                     simple_notes_object_assign_selected(previousSelected, FALSE);
                 }
@@ -56,7 +57,7 @@ static void simple_notes_base_model_set_property (
 
                 glong const size = 2;
                 glong count = size;
-                SimpleNotesObject *items[size] = { item, previousSelected };
+                SimpleNotesObject *items[2] = { item, previousSelected };
                 
                 if (!previousSelected) {
                     count--;
@@ -88,7 +89,7 @@ static void simple_notes_base_model_get_property (
     switch (property_id)
     {
         case PROP_SELECTED_OBJECT_ID:
-            selectedObject = simple_notes_selected_list_model_find_selected_object(self);
+	  selectedObject = simple_notes_selected_list_model_find_selected_object(self);
             if (selectedObject) {
                 objectID = simple_notes_object_get_id(selectedObject);
             }
@@ -240,18 +241,18 @@ void simple_notes_selected_list_model_assign_selected_object_id (SimpleNotesSele
 }
 
 SimpleNotesObject *simple_notes_selected_list_model_find_object (SimpleNotesSelectedListModel *object, guint64 objectID) {
-    return simple_notes_selected_list_model_find_object_with_condition(object, ^gboolean(SimpleNotesObject *item) {
+    return NULL/*simple_notes_selected_list_model_find_object_with_condition(object, ^gboolean(SimpleNotesObject *item) {
         return simple_notes_object_get_id(item) == objectID;
-    });
+	})*/;
 }
 
 SimpleNotesObject *simple_notes_selected_list_model_find_selected_object (SimpleNotesSelectedListModel *object) {
-    return simple_notes_selected_list_model_find_object_with_condition(object, ^gboolean(SimpleNotesObject *item) {
+    return NULL/*simple_notes_selected_list_model_find_object_with_condition(object, ^gboolean(SimpleNotesObject *item) {
         return simple_notes_object_get_selected(item);
-    });
+	})*/;
 }
 
-static SimpleNotesObject *simple_notes_selected_list_model_find_object_with_condition (
+/*static SimpleNotesObject *simple_notes_selected_list_model_find_object_with_condition (
         SimpleNotesSelectedListModel *object, gboolean (^condition) (SimpleNotesObject *item)
 ) {
     GList *item = simple_notes_list_model_get_item(SIMPLE_NOTES_LIST_MODEL(object), 0);
@@ -265,7 +266,7 @@ static SimpleNotesObject *simple_notes_selected_list_model_find_object_with_cond
         item = item->next;
     }
     return foundObject;
-}
+    }*/
 
 static SimpleNotesObject *simple_notes_selected_list_model_real_get_object (SimpleNotesSelectedListModel *object, guint position) {
     GList *item = simple_notes_list_model_get_item(SIMPLE_NOTES_LIST_MODEL(object), position);

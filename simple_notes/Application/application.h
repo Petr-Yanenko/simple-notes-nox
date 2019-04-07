@@ -9,7 +9,7 @@
 #ifndef simple_notes_application____FILEEXTENSION___
 #define simple_notes_application____FILEEXTENSION___
 
-#include "responder.h"
+#include "../Responder/responder.h"
 
 #define SIMPLE_NOTES_TYPE_APPLICATION simple_notes_application_get_type ()
 G_DECLARE_FINAL_TYPE(SimpleNotesApplication, simple_notes_application, SIMPLE_NOTES, APPLICATION, SimpleNotesResponder)

@@ -3,7 +3,6 @@ project (simple-notes-nox)
 
 include_directories (
   include
-  shared_source
   /usr/include
   /usr/include/glib-2.0
   /usr/include/glib-2.0/gio

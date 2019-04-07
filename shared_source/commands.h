@@ -9,7 +9,7 @@
 #ifndef simple_notes_commands____FILEEXTENSION___
 #define simple_notes_commands____FILEEXTENSION___
 
-#include "PrefixHeader.pch"
+#include "simple_notes.h"
 
 extern gchar *const kExitCommand;
 extern gchar *const kHelpCommand;

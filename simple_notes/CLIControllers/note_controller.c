@@ -8,6 +8,7 @@
 
 #include "note_controller.h"
 #include "commands.h"
+#include "note.h"
 #include <stdlib.h>
 
 struct _SimpleNotesNoteController {

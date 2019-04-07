@@ -5,8 +5,9 @@ add_library (model
   selected_list_model.c
   folders_model.c
   notes_model.c
-  mediator.c)
+  mediator.c
+  )
 
 target_include_directories (model PUBLIC ./)
 
-target_link_libraries (model sqlite_controller)
+target_link_libraries (model sqlite_controller data_structures)

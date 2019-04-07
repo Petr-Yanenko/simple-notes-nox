@@ -9,8 +9,12 @@ add_library (view
   table_view.c
   table_view_cell.c
   label.c
-  label_cell.c)
+  label_cell.c
+  )
 
 target_include_directories (view PUBLIC ./)
 
-target_link_libraries (view controller responder)
+target_link_libraries (view
+  controller
+  responder
+  )

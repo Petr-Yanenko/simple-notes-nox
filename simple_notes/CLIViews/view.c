@@ -179,7 +179,7 @@ void simple_notes_view_remove_from_superview (SimpleNotesView *object) {
 
 gboolean  simple_notes_view_is_descendant_of_view (SimpleNotesView *object, SimpleNotesView *parent) {
     SimpleNotesViewPrivate *parentPrivate = simple_notes_view_get_instance_private(parent);
-    return g_ptr_array_find(parentPrivate->_subviews, object, NULL);
+    return FALSE/*g_ptr_array_find(parentPrivate->_subviews, object, NULL)*/;
 }
 
 void simple_notes_view_size_to_fit (SimpleNotesView *object) {

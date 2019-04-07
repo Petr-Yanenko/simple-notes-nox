@@ -9,7 +9,7 @@
 #ifndef simple_notes_folder_iface____FILEEXTENSION___
 #define simple_notes_folder_iface____FILEEXTENSION___
 
-#include "PrefixHeader.pch"
+#include "simple_notes.h"
 
 #define SIMPLE_NOTES_TYPE_LIGHT_FOLDER simple_notes_light_folder_get_type ()
 G_DECLARE_INTERFACE(SimpleNotesLightFolder, simple_notes_light_folder, SIMPLE_NOTES, LIGHT_FOLDER, GObject)

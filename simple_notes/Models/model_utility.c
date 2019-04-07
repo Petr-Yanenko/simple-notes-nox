@@ -8,7 +8,7 @@
 
 #include "model_utility.h"
 
-void simple_notes_delete_object (SimpleNotesSelectedListModel *object, guint64 identifier, void (^deletedObjectHandler)(SimpleNotesObject *)) {
+/*void simple_notes_delete_object (SimpleNotesSelectedListModel *object, guint64 identifier, void (^deletedObjectHandler)(SimpleNotesObject *)) {
     SimpleNotesObject *foundItem = simple_notes_selected_list_model_find_object(object, identifier);
     if (foundItem) {
         deletedObjectHandler(foundItem);
@@ -29,7 +29,7 @@ void simple_notes_save_objects (
         handler(items[i]);
     }
     simple_notes_sqlite_controller_commit_transaction();
-}
+    }*/
 
 void simple_notes_model_changed (SimpleNotesBaseModel *object) {
     SimpleNotesBaseModelClass *klass;

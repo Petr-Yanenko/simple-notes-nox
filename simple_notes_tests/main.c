@@ -12,7 +12,7 @@
 #include "sqlite_controller_testing.c"
 #include "folders_model_testing.c"
 #include "notes_model_testing.c"
-#include "content_model_testing.c"
+//#include "content_model_testing.c"
 
 int main(int argc, char **argv)
 {

@@ -3,3 +3,7 @@ CMakeFiles
 cmake_install.cmake
 compile_commands.json
 Makefile
+*.a
+simple_notes
+simple_notes_tests
+simple_notes.data

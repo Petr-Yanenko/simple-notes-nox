@@ -103,18 +103,22 @@ static gulong simple_notes_note_window_real_width_for_column (SimpleNotesTableVi
 }
 
 static SimpleNotesTableViewCell *simple_notes_note_window_real_create_header_for_column (SimpleNotesTableWindow *object, gulong column) {
-    switch (column) {
-        case kIdColumn:
+  if (column == kIdColumn) {
             return SIMPLE_NOTES_TABLE_VIEW_CELL(simple_notes_table_window_create_cell("id\0", SimpleNotesLabelTextAlignmentRight));
-        case kSelectedColumn:
+  }
+  else if (column == kSelectedColumn) {
             return SIMPLE_NOTES_TABLE_VIEW_CELL(simple_notes_table_window_create_cell("selected\0", SimpleNotesLabelTextAlignmentRight));
-        case kContentColumn:
+  }
+  else if (column == kContentColumn) {
             return SIMPLE_NOTES_TABLE_VIEW_CELL(simple_notes_table_window_create_cell("content\0", SimpleNotesLabelTextAlignmentLeft));
-        case kFolderIdColumn:
+  }
+  else if (column == kFolderIdColumn) {
             return SIMPLE_NOTES_TABLE_VIEW_CELL(simple_notes_table_window_create_cell("folder id\0", SimpleNotesLabelTextAlignmentRight));
-        case kLastEditedColumn:
+  }
+  else if (column == kLastEditedColumn) {
             return SIMPLE_NOTES_TABLE_VIEW_CELL(simple_notes_table_window_create_cell("last edited\0", SimpleNotesLabelTextAlignmentRight));
-        default:
+  }
+  else {
             return NULL;
     }
 }
@@ -122,42 +126,36 @@ static SimpleNotesTableViewCell *simple_notes_note_window_real_create_header_for
 static SimpleNotesTableViewCell *simple_notes_note_window_real_create_cell_for_row_column (SimpleNotesTableWindow *object, gulong row, gulong column) {
     SimpleNotesNoteWindow *window = SIMPLE_NOTES_NOTE_WINDOW(object);
     SimpleNotesLabelCell *cell = NULL;
-    switch (column) {
-        case kIdColumn: {
+    if (column == kIdColumn) {
             gchar buff[kLongLongSymbols];
             guint64 identifier = simple_notes_light_note_get_id(window->_notes[row]);
             simple_notes_print_guint64_value(buff, identifier);
             cell = simple_notes_table_window_create_cell(buff, SimpleNotesLabelTextAlignmentRight);
-            break;
         }
-        case kSelectedColumn: {
+    else if (column == kSelectedColumn) {
             gchar buff[kSelectedSymbols];
             simple_notes_print_boolean_value(buff, simple_notes_light_note_get_selected(window->_notes[row]));
             cell = simple_notes_table_window_create_cell(buff, SimpleNotesLabelTextAlignmentRight);
-            break;
         }
-        case kContentColumn: {
+    else if (column == kContentColumn) {
             GByteArray *content = simple_notes_light_note_get_copy_content(window->_notes[row]);
             gchar *text = (gchar *)content->data;
             cell = simple_notes_table_window_create_cell(text, SimpleNotesLabelTextAlignmentLeft);
             g_byte_array_unref(content);
-            break;
         }
-        case kFolderIdColumn: {
+    else if (column == kFolderIdColumn) {
             gchar buff[kLongLongSymbols];
             simple_notes_print_guint64_value(buff, simple_notes_light_note_get_folder_id(window->_notes[row]));
             cell = simple_notes_table_window_create_cell(buff, SimpleNotesLabelTextAlignmentRight);
-            break;
         }
-        case kLastEditedColumn: {
+    else if (column == kLastEditedColumn) {
             GDateTime *lastEdited = simple_notes_light_note_get_copy_last_edited(window->_notes[row]);
             gchar *date = g_date_time_format(lastEdited, "%c");
             cell = simple_notes_table_window_create_cell(date, SimpleNotesLabelTextAlignmentRight);
             g_free(date);
             g_date_time_unref(lastEdited);
-            break;
         }
-        default:
+    else {
             cell = NULL;
     }
     return SIMPLE_NOTES_TABLE_VIEW_CELL(cell);

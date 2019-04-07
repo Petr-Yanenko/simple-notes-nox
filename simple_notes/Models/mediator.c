@@ -8,11 +8,13 @@
 
 #include <string.h>
 #include "mediator.h"
+#include "folder.h"
+#include "note.h"
 
 struct _SimpleNotesMediator {
     GObject parent;
 
-    SimpleNotesContentModel *_contentModel;
+  // SimpleNotesContentModel *_contentModel;
     SimpleNotesNotesModel *_notesModel;
     SimpleNotesFoldersModel *_foldersModel;
 };
@@ -21,13 +23,13 @@ G_DEFINE_TYPE(SimpleNotesMediator, simple_notes_mediator, G_TYPE_OBJECT)
 
 static void simple_notes_mediator_handle_folders_model_changes (SimpleNotesMediator *object);
 static void simple_notes_mediator_handle_notes_model_changes (SimpleNotesMediator *object);
-static void simple_notes_mediator_handle_content_model_changes (SimpleNotesMediator *object);
+/*static void simple_notes_mediator_handle_content_model_changes (SimpleNotesMediator *object);*/
 
-static void simple_notes_mediator_check_content_model (SimpleNotesMediator *object);
+/*static void simple_notes_mediator_check_content_model (SimpleNotesMediator *object);*/
 
 static void simple_notes_mediator_dispose (GObject *object) {
     SimpleNotesMediator *self = SIMPLE_NOTES_MEDIATOR(object);
-    g_clear_object(&self->_contentModel);
+    //g_clear_object(&self->_contentModel);
     g_clear_object(&self->_notesModel);
     g_clear_object(&self->_foldersModel);
 
@@ -39,7 +41,7 @@ static void simple_notes_mediator_class_init (SimpleNotesMediatorClass *klass) {
 }
 
 static void simple_notes_mediator_init (SimpleNotesMediator *object) {
-    object->_contentModel = NULL;
+  //object->_contentModel = NULL;
     object->_notesModel = NULL;
     object->_foldersModel = NULL;
 }
@@ -54,9 +56,9 @@ void simple_notes_mediator_model_changed (SimpleNotesMediator *object, SimpleNot
         simple_notes_mediator_handle_folders_model_changes(object);
     } else if (model == SIMPLE_NOTES_BASE_MODEL(simple_notes_mediator_get_notes_model(object))) {
         simple_notes_mediator_handle_notes_model_changes(object);
-    } else if (model == SIMPLE_NOTES_BASE_MODEL(simple_notes_mediator_get_content_model(object))) {
+    }/* else if (model == SIMPLE_NOTES_BASE_MODEL(simple_notes_mediator_get_content_model(object))) {
         simple_notes_mediator_handle_content_model_changes(object);
-    } else {
+	}*/ else {
         g_warn_if_reached();
     }
 }
@@ -79,7 +81,7 @@ SimpleNotesNotesModel *simple_notes_mediator_get_notes_model (SimpleNotesMediato
     return object->_notesModel;
 }
 
-SimpleNotesContentModel *simple_notes_mediator_get_content_model (SimpleNotesMediator *object) {
+/*SimpleNotesContentModel *simple_notes_mediator_get_content_model (SimpleNotesMediator *object) {
     if (!(object->_contentModel)) {
         SimpleNotesNotesModel *notesModel = simple_notes_mediator_get_notes_model(object);
         guint64 selectedID = simple_notes_selected_list_model_get_selected_object_id(SIMPLE_NOTES_SELECTED_LIST_MODEL(notesModel));
@@ -87,7 +89,7 @@ SimpleNotesContentModel *simple_notes_mediator_get_content_model (SimpleNotesMed
         object->_contentModel = simple_notes_content_model_new(selectedID, folderID, object);
     }
     return object->_contentModel;
-}
+    }*/
 
 static void simple_notes_mediator_handle_folders_model_changes (SimpleNotesMediator *object) {
     SimpleNotesFoldersModel *foldersModel = simple_notes_mediator_get_folders_model(object);
@@ -102,7 +104,7 @@ static void simple_notes_mediator_handle_folders_model_changes (SimpleNotesMedia
         simple_notes_base_model_reset(baseNotesModel);
         simple_notes_base_model_load_data(baseNotesModel);
 
-        simple_notes_mediator_check_content_model(object);
+	// simple_notes_mediator_check_content_model(object);
     }
 }
 
@@ -122,7 +124,7 @@ static void simple_notes_mediator_update_notes_count (SimpleNotesMediator *objec
     if (count != selectedFolderNotesCount) {
         simple_notes_folder_assign_count(selectedFolder, count);
         glong const savedCount = 1;
-        SimpleNotesObject *items[savedCount] = { selectedObject };
+        SimpleNotesObject *items[1] = { selectedObject };
         simple_notes_selected_list_model_save_objects(selectedListFoldersModel, items, savedCount);
         simple_notes_base_model_assign_new_data(SIMPLE_NOTES_BASE_MODEL(foldersModel), TRUE);
     }
@@ -136,28 +138,28 @@ static guint64 simple_notes_mediator_get_selected_note_identifier (SimpleNotesMe
     return identifier;
 }
 
-static gboolean simple_notes_mediator_check_content_model_note_id (SimpleNotesMediator *object) {
+/*static gboolean simple_notes_mediator_check_content_model_note_id (SimpleNotesMediator *object) {
     SimpleNotesContentModel *contentModel = simple_notes_mediator_get_content_model(object);
     guint64 identifier = simple_notes_mediator_get_selected_note_identifier(object);
     guint64 contentNoteID = simple_notes_content_model_get_note_id(contentModel);
     return identifier == contentNoteID;
-}
+    }*/
 
-static void simple_notes_mediator_check_content_model (SimpleNotesMediator *object) {
+/*static void simple_notes_mediator_check_content_model (SimpleNotesMediator *object) {
     if (!simple_notes_mediator_check_content_model_note_id(object)) {
         guint64 identifier = simple_notes_mediator_get_selected_note_identifier(object);
         SimpleNotesNotesModel *notesModel = simple_notes_mediator_get_notes_model(object);
         guint64 folderID = simple_notes_notes_model_get_folder_id(notesModel);
         simple_notes_content_model_change_note_id(object->_contentModel, identifier, folderID);
     }
-}
+    }*/
 
 static void simple_notes_mediator_handle_notes_model_changes (SimpleNotesMediator *object) {
     simple_notes_mediator_update_notes_count(object);
-    simple_notes_mediator_check_content_model(object);
+    //simple_notes_mediator_check_content_model(object);
 }
 
-static void simple_notes_mediator_handle_content_model_changes (SimpleNotesMediator *object) {
+/*static void simple_notes_mediator_handle_content_model_changes (SimpleNotesMediator *object) {
     g_return_if_fail(simple_notes_mediator_check_content_model_note_id(object));
     SimpleNotesNotesModel *notesModel = simple_notes_mediator_get_notes_model(object);
     SimpleNotesContentModel *contentModel = simple_notes_mediator_get_content_model(object);
@@ -189,4 +191,4 @@ static void simple_notes_mediator_handle_content_model_changes (SimpleNotesMedia
                                                  buff,
                                                  len + 1
                                                  );
-}
+						 }*/

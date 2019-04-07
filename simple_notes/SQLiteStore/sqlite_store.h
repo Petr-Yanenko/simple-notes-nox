@@ -21,12 +21,12 @@ gboolean simple_notes_sqlite_store_register_prepared_statement (
         gchar *const key,
         gchar *const statement
 );
-gboolean simple_notes_sqlite_store_execute_prepared_statement (
+/*gboolean simple_notes_sqlite_store_execute_prepared_statement (
         SimpleNotesSQLiteStore *object,
         gchar *const name,
         void (^callback) (sqlite3_stmt *),
         glong paramCount,
         ...
-);
+	);*/
 
 #endif

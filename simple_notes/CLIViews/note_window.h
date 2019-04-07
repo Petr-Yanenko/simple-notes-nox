@@ -10,7 +10,6 @@
 #define simple_notes_note_window____FILEEXTENSION___
 
 #include "table_window.h"
-#include "mediator.h"
 
 #define SIMPLE_NOTES_TYPE_NOTE_WINDOW simple_notes_note_window_get_type ()
 G_DECLARE_FINAL_TYPE(SimpleNotesNoteWindow, simple_notes_note_window, SIMPLE_NOTES, NOTE_WINDOW, SimpleNotesTableWindow)

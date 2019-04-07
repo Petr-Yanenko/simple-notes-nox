@@ -9,10 +9,10 @@
 #ifndef simple_notes_mediator____FILEEXTENSION___
 #define simple_notes_mediator____FILEEXTENSION___
 
-#include "PrefixHeader.pch"
+#include "simple_notes.h"
 #include "folders_model.h"
 #include "notes_model.h"
-#include "content_model.h"
+/*#include "content_model.h"*/
 
 #define SIMPLE_NOTES_TYPE_MEDIATOR simple_notes_mediator_get_type ()
 G_DECLARE_FINAL_TYPE(SimpleNotesMediator, simple_notes_mediator, SIMPLE_NOTES, MEDIATOR, GObject)
@@ -23,6 +23,6 @@ void simple_notes_mediator_model_changed (SimpleNotesMediator *object, SimpleNot
 
 SimpleNotesFoldersModel *simple_notes_mediator_get_folders_model (SimpleNotesMediator *object);
 SimpleNotesNotesModel *simple_notes_mediator_get_notes_model (SimpleNotesMediator *object);
-SimpleNotesContentModel *simple_notes_mediator_get_content_model (SimpleNotesMediator *object);
+/*SimpleNotesContentModel *simple_notes_mediator_get_content_model (SimpleNotesMediator *object);*/
 
 #endif

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include "../simple_notes/SQLiteController/sqlite_controller.h"
 
 #ifdef TESTING
 gchar *const kFile = "test_simple_notes.data";

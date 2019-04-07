@@ -9,6 +9,8 @@
 #include "folders_model.h"
 #include "model_utility.h"
 #include "mediator.h"
+#include "folder.h"
+#include "sqlite_controller.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -61,13 +63,13 @@ SimpleNotesLightFolder **simple_notes_folders_model_copy_folders (SimpleNotesFol
 }
 
 void simple_notes_folders_model_delete_folder (SimpleNotesFoldersModel *object, guint64 identifier) {
-    simple_notes_delete_object(SIMPLE_NOTES_SELECTED_LIST_MODEL(object), identifier, ^(SimpleNotesObject *deletedObject) {
+  /* simple_notes_delete_object(SIMPLE_NOTES_SELECTED_LIST_MODEL(object), identifier, ^(SimpleNotesObject *deletedObject) {
         simple_notes_sqlite_controller_delete_folder(SIMPLE_NOTES_FOLDER(deletedObject));
         gchar path[kFolderPathSymbols + 1];
         sprintf(path, kFolderPathFormat, kNoteFolder, identifier);
         simple_notes_trash_file(path);
         
-    });
+	});*/
     simple_notes_folders_model_changed(object);
 }
 
@@ -108,10 +110,10 @@ static void simple_notes_folders_model_real_save_objects (
         SimpleNotesObject *items[],
         glong count
                                                           ) {
-    simple_notes_save_objects(object, items, count, ^(SimpleNotesObject *item) {
+  /*simple_notes_save_objects(object, items, count, ^(SimpleNotesObject *item) {
         SimpleNotesFolder *folder = SIMPLE_NOTES_FOLDER(item);
         simple_notes_sqlite_controller_save_folder(folder);
-    });
+	});*/
 }
 
 static GList *simple_notes_folders_model_real_create_items (SimpleNotesListModel *object) {

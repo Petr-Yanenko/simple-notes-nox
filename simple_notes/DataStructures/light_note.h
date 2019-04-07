@@ -9,7 +9,7 @@
 #ifndef simple_notes_light_note____FILEEXTENSION___
 #define simple_notes_light_note____FILEEXTENSION___
 
-#include <glib-object.h>
+#include "simple_notes.h"
 
 #define SIMPLE_NOTES_TYPE_LIGHT_NOTE simple_notes_light_note_get_type ()
 G_DECLARE_INTERFACE(SimpleNotesLightNote, simple_notes_light_note, SIMPLE_NOTES, LIGHT_NOTE, GObject)
