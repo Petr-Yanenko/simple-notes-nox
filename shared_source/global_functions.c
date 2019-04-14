@@ -10,7 +10,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
-#include "../simple_notes/SQLiteController/sqlite_controller.h"
 
 #ifdef TESTING
 gchar *const kFile = "test_simple_notes.data";
@@ -29,12 +28,6 @@ gchar *const kNotePathFormat = "%s/folder_%llu/note_%llu.txt";
 glong const kFolderPathSymbols = 39;
 glong const kNotePathSymbols = 70;
 
-void simple_notes_delete_test_db (void) {
-    simple_notes_sqlite_controller_testing_unref_instance();
-    if (simple_notes_trash_file(kFile)) {
-        g_message("\n\nTest db deleted");
-    }
-}
 
 gboolean simple_notes_trash_file(gchar *fileName) {
     GFile *file = g_file_new_for_path(fileName);
@@ -54,13 +47,13 @@ void simple_notes_print_byte_array (GByteArray *array, GString *string, gchar *t
     }
 }
 
-/*void simple_notes_copy (GType type, void (^setter)(GValue *value), void (^getter)(GValue *value)) {
+void simple_notes_copy (GType type, void (setter)(GValue *value), void (getter)(GValue *value)) {
     GValue value = G_VALUE_INIT;
     g_value_init(&value, type);
     setter(&value);
     getter(&value);
     g_value_unset(&value);
-    }*/
+}
 
 void simple_notes_set_copy_byte_array (GByteArray *array, GByteArray **variable) {
     if (*variable) {

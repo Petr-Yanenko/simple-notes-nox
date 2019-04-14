@@ -108,10 +108,9 @@ object, outKlass, func_name, ModuleObjectName, MODULE, OBJECT_NAME, returnVal\
 SIMPLE_NOTES_CHECK_VIRTUAL_FUNC_WITH_RETURN_VAL(object, outKlass, func_name, ModuleObjectName, MODULE, OBJECT_NAME, IFACE, returnVal)\
 }
 
-void simple_notes_delete_test_db (void);
 gboolean simple_notes_trash_file(gchar *fileName);
 void simple_notes_print_byte_array (GByteArray *array, GString *string, gchar *title);
-//void simple_notes_copy (GType type, void (^setter)(GValue *value), void (^getter)(GValue *value));
+void simple_notes_copy (GType type, void (setter)(GValue *value), void (getter)(GValue *value));
 void simple_notes_set_copy_byte_array (GByteArray *array, GByteArray **variable);
 GByteArray *simple_notes_get_copy_byte_array (GByteArray *variable);
 guint simple_notes_gulong_guint_cast (gulong value);

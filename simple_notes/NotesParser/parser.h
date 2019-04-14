@@ -9,7 +9,7 @@
 #ifndef simple_notes_parser____FILEEXTENSION___
 #define simple_notes_parser____FILEEXTENSION___
 
-#include "PrefixHeader.pch"
+#include "simple_notes.h"
 
 #define SIMPLE_NOTES_TYPE_PARSER simple_notes_parser_get_type ()
 G_DECLARE_FINAL_TYPE(SimpleNotesParser, simple_notes_parser, SIMPLE_NOTES, PARSER, GObject)

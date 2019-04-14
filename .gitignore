@@ -1,9 +1,12 @@
-CMakeCache.txt
+*.txt
 CMakeFiles
-cmake_install.cmake
+*.cmake
 compile_commands.json
 Makefile
 *.a
+GTAGS
+GPATH
+GRTAGS
 simple_notes
 simple_notes_tests
 simple_notes.data

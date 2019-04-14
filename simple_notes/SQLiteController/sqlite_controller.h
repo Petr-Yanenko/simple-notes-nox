@@ -9,8 +9,8 @@
 #ifndef simple_notes_sqlite_controller____FILEEXTENSION___
 #define simple_notes_sqlite_controller____FILEEXTENSION___
 
-#include "../DataStructures/folder.h"
-#include "../DataStructures/note.h"
+#include "folder.h"
+#include "note.h"
 
 #define SIMPLE_NOTES_TYPE_SQLITE_CONTROLLER  simple_notes_sqlite_controller_get_type ()
 G_DECLARE_FINAL_TYPE (SimpleNotesSQLiteController, simple_notes_sqlite_controller, SIMPLE_NOTES, SQLITE_CONTROLLER, GObject)
@@ -32,5 +32,6 @@ void simple_notes_sqlite_controller_commit_transaction (void);
 
 //For testing only
 void simple_notes_sqlite_controller_testing_unref_instance (void);
+void simple_notes_sqlite_controller_delete_test_db (void);
 
 #endif

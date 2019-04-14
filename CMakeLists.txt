@@ -7,7 +7,7 @@ include_directories (
   /usr/include
   /usr/include/glib-2.0
   /usr/include/glib-2.0/gio
-  /usr/lib/i386-linux-gnu/glib-2.0/include
+  /usr/lib/x86_64-linux-gnu/glib-2.0/include
   )
 
 add_subdirectory (shared_source)

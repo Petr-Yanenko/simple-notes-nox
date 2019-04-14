@@ -7,7 +7,7 @@
 //
 
 #include "folder.h"
-#import "light_folder.h"
+#include "light_folder.h"
 
 struct _SimpleNotesFolder {
     SimpleNotesObject parent;

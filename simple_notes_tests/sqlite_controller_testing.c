@@ -18,7 +18,7 @@ typedef struct {
 
 static void
 simple_notes_sqlite_controller_fixture_set_up (SimpleNotesSQLiteControllerFixture *fixture, gconstpointer user_data) {
-    simple_notes_delete_test_db();
+    simple_notes_sqlite_controller_delete_test_db();
 }
 
 static void

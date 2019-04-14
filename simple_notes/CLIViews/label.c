@@ -11,7 +11,6 @@
 #include "label.h"
 #include <string.h>
 
-//typedef gulong (^LineBreakModeStrategy) (GString *text, gulong start, gulong end);
 
 typedef struct _SimpleNotesLabelPrivate {
     GString *_text;
@@ -108,31 +107,33 @@ static gulong simple_notes_label_check_end (GString *text, gulong end) {
     return end < text->len ? end : text->len;
 }
 
-/*static LineBreakModeStrategy simple_notes_label_create_strategy (SimpleNotesLabel *object) {
+static gulong simple_notes_label_find_line_end (
+                                                SimpleNotesLabel *object,
+                                                GString *text,
+                                                gulong start,
+                                                gulong end
+                                               ) {
     SimpleNotesLabelPrivate *private = simple_notes_label_get_instance_private(object);
     if (private->_mode == SimpleNotesLabelLineBreakModeCharacter) {
-        return _Block_copy(^(GString *text, gulong start, gulong end) {
-            return simple_notes_label_check_end(text, end);
-        });
-    } else if (private->_mode == SimpleNotesLabelLineBreakModeWord) {
-        return _Block_copy(^(GString *text, gulong start, gulong end) {
-            gulong realEnd = simple_notes_label_check_end(text, end);
-            gulong index = realEnd - 1;
-            if (realEnd == text->len || isspace(text->str[realEnd])) {
-                return realEnd;
-            }
-            while (index > start) {
-                if (isspace(text->str[index])) {
-                    return index + 1;
-                }
-                index--;
-            }
-            return realEnd;
-        });
-    } else {
-        g_return_val_if_reached(NULL);
+        return simple_notes_label_check_end(text, end);
     }
-    }*/
+    else if (private->_mode == SimpleNotesLabelLineBreakModeWord) {
+        gulong realEnd = simple_notes_label_check_end(text, end);
+        gulong index = realEnd - 1;
+        if (realEnd == text->len || isspace(text->str[realEnd])) {
+            return realEnd;
+        }
+        while (index > start) {
+            if (isspace(text->str[index])) {
+                return index + 1;
+            }
+            index--;
+        }
+        return realEnd;
+    } else {
+        g_return_val_if_reached(0);
+    }
+}
 
 static void simple_notes_label_real_draw_rect (SimpleNotesView *object, SimpleNotesRect rect) {
     SimpleNotesLabelPrivate *private = simple_notes_label_get_instance_private(SIMPLE_NOTES_LABEL(object));
@@ -172,18 +173,16 @@ static GString **simple_notes_label_create_split_text (SimpleNotesLabel *object,
         }
     }
     GString **lines = (GString **)calloc(1, sizeof(GString *));
-    /* gulong (^lineBreakStrategy) (GString *splitText, gulong start, gulong end) = simple_notes_label_create_strategy(object);*/
     for (gulong i = 0; i < bounds.size.height && index < text->len; i++) {
         lines = realloc(lines, sizeof(GString *) * (i + 2));
         memset(lines + (i + 1), 0, sizeof(GString *));
         gulong newIndex = index + bounds.size.width;
-	// newIndex = lineBreakStrategy(text, index, newIndex);
+	    newIndex = simple_notes_label_find_line_end(object, text, index, newIndex);
         gsize lineLen = newIndex - index;
         lines[i] = g_string_new(NULL);
         g_string_overwrite_len(lines[i], 0, text->str + index, lineLen);
         index = newIndex;
     }
-    //_Block_release(lineBreakStrategy);
     return lines;
 }
 

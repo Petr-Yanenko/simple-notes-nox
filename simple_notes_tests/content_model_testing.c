@@ -9,6 +9,7 @@
 #include <string.h>
 #include "mediator.h"
 #include "model_utility.h"
+#include "sqlite_controller.h"
 
 #define CONTENT_MODEL_TESTING
 
@@ -32,7 +33,7 @@ simple_notes_content_model_fixture_set_up (SimpleNotesContentModelFixture *fixtu
     g_object_unref(noteFolder);
 
     fixture->_folderName = "Test Folder\0";
-    simple_notes_delete_test_db();
+    simple_notes_sqlite_controller_delete_test_db();
     fixture->_model = simple_notes_mediator_new();
 
     guint count = 0;

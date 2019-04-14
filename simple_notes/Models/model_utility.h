@@ -27,13 +27,13 @@
     *out_count = len;\
 }
 
-/*void simple_notes_delete_object (SimpleNotesSelectedListModel *object, guint64 identifier, void (^)(SimpleNotesObject *));
+void simple_notes_delete_object (SimpleNotesSelectedListModel *object, guint64 identifier, void (handler)(SimpleNotesObject *));
 void simple_notes_save_objects (
         SimpleNotesSelectedListModel *object,
         SimpleNotesObject *items[],
         glong count,
-        void (^handler) (SimpleNotesObject *item)
-	);*/
+        void (handler) (SimpleNotesObject *item)
+);
 void simple_notes_model_changed (SimpleNotesBaseModel *object);
 
 #endif

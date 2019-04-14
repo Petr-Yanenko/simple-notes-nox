@@ -19,12 +19,12 @@ struct _SimpleNotesSQLiteStore {
 static void simple_notes_sqlite_store_dispose_sqlite (SimpleNotesSQLiteStore *object);
 static gboolean simple_notes_sqlite_store_check_result (SimpleNotesSQLiteStore *object, gint result);
 static void simple_notes_sqlite_store_finalize_statement (gpointer statement);
-/*static gboolean simple_notes_sqlite_store_execute (
+static gboolean simple_notes_sqlite_store_execute (
         sqlite3_stmt *statement,
         gchar *parameters[],
         glong count,
-        void (^callback)(sqlite3_stmt *stmt)
-	);*/
+        void (callback)(sqlite3_stmt *stmt)
+	);
 
 G_DEFINE_TYPE (SimpleNotesSQLiteStore, simple_notes_sqlite_store, G_TYPE_OBJECT)
 
@@ -77,10 +77,10 @@ gboolean simple_notes_sqlite_store_register_prepared_statement (
     return TRUE;
 }
 
-/*gboolean simple_notes_sqlite_store_execute_prepared_statement (
+gboolean simple_notes_sqlite_store_execute_prepared_statement (
         SimpleNotesSQLiteStore *object,
         gchar *const name,
-        void (^callback) (sqlite3_stmt *),
+        void (callback) (sqlite3_stmt *),
         glong paramCount,
         ...
 ) {
@@ -97,7 +97,7 @@ gboolean simple_notes_sqlite_store_register_prepared_statement (
     }
     va_end(a_list);
     return simple_notes_sqlite_store_execute(statement, parameters, paramCount, callback);
-    }*/
+}
 
 SimpleNotesSQLiteStore *simple_notes_sqlite_store_new (void) {
     return g_object_new(SIMPLE_NOTES_TYPE_SQLITE_STORE, NULL);
@@ -129,11 +129,11 @@ static void simple_notes_sqlite_store_dispose_sqlite (SimpleNotesSQLiteStore *ob
     }
 }
 
-/*static gboolean simple_notes_sqlite_store_execute (
+static gboolean simple_notes_sqlite_store_execute (
         sqlite3_stmt *statement,
         gchar *parameters[],
         glong count,
-        void (^callback)(sqlite3_stmt *stmt)
+        void (callback)(sqlite3_stmt *stmt)
 ) {
     g_return_val_if_fail(statement, FALSE);
 
@@ -148,4 +148,4 @@ static void simple_notes_sqlite_store_dispose_sqlite (SimpleNotesSQLiteStore *ob
     }
     g_return_val_if_fail(result == SQLITE_DONE, FALSE);
     return TRUE;
-    }*/
+}

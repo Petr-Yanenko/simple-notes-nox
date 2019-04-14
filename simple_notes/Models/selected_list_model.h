@@ -10,7 +10,7 @@
 #define simple_notes_selected_list_model____FILEEXTENSION___
 
 #include "list_model.h"
-#include "../DataStructures/object.h"
+#include "object.h"
 
 static gchar *const kSelectedObjectID = "selected-object-id\0";
 

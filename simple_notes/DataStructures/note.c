@@ -125,14 +125,20 @@ void simple_notes_note_assign_folder_id (SimpleNotesNote *object, guint64 folder
 }
 
 GDateTime *simple_notes_note_get_copy_last_edited (SimpleNotesNote *object) {
-  /* __block*/ GDateTime *copy = NULL;
-    /*    simple_notes_copy(G_TYPE_DATE_TIME, ^(GValue *value) {
-        g_value_set_boxed(value, object->_lastEdited);
-    }, ^(GValue *value) {
-        if (g_value_get_boxed(value)) {
-            copy = g_value_dup_boxed(value);
-        }
-	});*/
+    GDateTime *copy = NULL;
+
+    void setter (GValue *value) {
+      g_value_set_boxed(value, object->_lastEdited);
+    }
+
+    void getter (GValue *value) {
+      if (g_value_get_boxed(value)) {
+        copy = g_value_dup_boxed(value);
+      }
+	}
+
+    simple_notes_copy(G_TYPE_DATE_TIME, setter, getter);
+
     return copy;
 }
 
@@ -142,11 +148,15 @@ void simple_notes_note_copy_last_edited (SimpleNotesNote *object, GDateTime *tim
         object->_lastEdited = NULL;
     }
     if (time) {
-      /* simple_notes_copy(G_TYPE_DATE_TIME, ^(GValue *value) {
-            g_value_set_boxed(value, time);
-        }, ^(GValue *value) {
-            object->_lastEdited = g_value_dup_boxed(value);
-	    });*/
+      void setter (GValue *value) {
+        g_value_set_boxed(value, time);
+      }
+
+      void getter (GValue *value) {
+        object->_lastEdited = g_value_dup_boxed(value);
+      }
+
+      simple_notes_copy(G_TYPE_DATE_TIME, setter, getter);
     }
 }
 

@@ -9,8 +9,8 @@
 #ifndef simple_notes_base_controller____FILEEXTENSION___
 #define simple_notes_base_controller____FILEEXTENSION___
 
-#include "../Event/event.h"
-#include "../Models/mediator.h"
+#include "event.h"
+#include "mediator.h"
 
 typedef enum _SimpleNotesBaseControllerEventResult {
   SimpleNotesBaseControllerEventResultError = -1,

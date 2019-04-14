@@ -68,12 +68,11 @@ static void simple_notes_sqlite_controller_delete_statements (GString **statemen
 static void simple_notes_sqlite_controller_check_identifier (SimpleNotesSQLiteController *object, gint64 identifier);
 static void simple_notes_sqlite_controller_delete_entity (SimpleNotesObject *entity, glong statementIndex);
 static GByteArray *simple_notes_sqlite_controller_create_byte_array_for_column (gint column, sqlite3_stmt *statement);
-/*static GList *simple_notes_sqlite_controller_copy_entities (
-        SimpleNotesObject * (^create_entity)(void),
-        void (^process_new_entity)(SimpleNotesObject *newEntity, sqlite3_stmt *statement),
-        gboolean (^execute_prepared_statement) (SimpleNotesSQLiteStore *object, void (^callback)(sqlite3_stmt *)),
-        gint selectedColumnIndex
-	);*/
+static GList *simple_notes_sqlite_controller_copy_entities (
+        SimpleNotesObject * (create_entity)(void),
+        void (process_new_entity)(SimpleNotesObject *newEntity, sqlite3_stmt *statement),
+        gboolean (execute_prepared_statement) (SimpleNotesSQLiteStore *object, void (callback)(sqlite3_stmt *)),
+        gint selectedColumnIndex);
 static void simple_notes_sqlite_controller_print_identifier (gchar *buff, guint64 identifier);
 static void simple_notes_sqlite_controller_print_unix_time (gchar *buff, time_t time);
 
@@ -115,13 +114,13 @@ static void simple_notes_sqlite_controller_init (SimpleNotesSQLiteController *ob
                 statements[i]->str
         );
         if (i == CREATE_FOLDERS_TABLE_INDEX || i == CREATE_NOTES_TABLE_INDEX) {
-	  /* ok &= simple_notes_sqlite_store_execute_prepared_statement(
+	        ok &= simple_notes_sqlite_store_execute_prepared_statement(
                     object->_store,
                     kStatementNames[i],
                     NULL,
                     0,
                     NULL
-		    );*/
+		    );
         }
         g_warn_if_fail(ok);
         if (!ok) {
@@ -133,29 +132,35 @@ static void simple_notes_sqlite_controller_init (SimpleNotesSQLiteController *ob
 
 GList *simple_notes_sqlite_controller_copy_folders(void) {
     gint selectedColumnIndex = 3;
-    /* return simple_notes_sqlite_controller_copy_entities(^SimpleNotesObject * {
-        SimpleNotesFolder *newFolder = simple_notes_folder_new();
-        return SIMPLE_NOTES_OBJECT(newFolder);
-    }, ^(SimpleNotesObject *newEntity, sqlite3_stmt *statement) {
-        SimpleNotesFolder *newFolder = SIMPLE_NOTES_FOLDER(newEntity);
-        GByteArray *title = simple_notes_sqlite_controller_create_byte_array_for_column(1, statement);
-        if (title) {
-            simple_notes_folder_copy_title(newFolder, title);
-            g_byte_array_unref(title);
-        }
-        glong count = sqlite3_column_int(statement, 2);
-        simple_notes_folder_assign_count(newFolder, count);
-    }, ^gboolean (SimpleNotesSQLiteStore *object, void (^callback) (sqlite3_stmt *)) {
-        return simple_notes_sqlite_store_execute_prepared_statement(object, kStatementNames[SELECT_FOLDERS_INDEX], callback, 0, NULL);
-	}, selectedColumnIndex);*/
-    return NULL;
+
+    SimpleNotesObject *create () {
+      SimpleNotesFolder *newFolder = simple_notes_folder_new();
+      return SIMPLE_NOTES_OBJECT(newFolder);
+    }
+
+    void process (SimpleNotesObject *newEntity, sqlite3_stmt *statement) {
+      SimpleNotesFolder *newFolder = SIMPLE_NOTES_FOLDER(newEntity);
+      GByteArray *title = simple_notes_sqlite_controller_create_byte_array_for_column(1, statement);
+      if (title) {
+        simple_notes_folder_copy_title(newFolder, title);
+        g_byte_array_unref(title);
+      }
+      glong count = sqlite3_column_int(statement, 2);
+      simple_notes_folder_assign_count(newFolder, count);
+    }
+
+    gboolean execute (SimpleNotesSQLiteStore *object, void (callback) (sqlite3_stmt *)) {
+      return simple_notes_sqlite_store_execute_prepared_statement(object, kStatementNames[SELECT_FOLDERS_INDEX], callback, 0, NULL);
+	}
+
+    return simple_notes_sqlite_controller_copy_entities(create, process, execute, selectedColumnIndex);
 }
 
 void simple_notes_sqlite_controller_insert_folder (guint8 *const title) {
     SimpleNotesSQLiteController *object = simple_notes_sqlite_controller_get_instance();
     long parametersCount = 3;
 
-    gboolean result = FALSE/*simple_notes_sqlite_store_execute_prepared_statement(
+    gboolean result = simple_notes_sqlite_store_execute_prepared_statement(
             object->_store,
             kStatementNames[INSERT_FOLDER_INDEX],
             NULL,
@@ -164,7 +169,7 @@ void simple_notes_sqlite_controller_insert_folder (guint8 *const title) {
             "0\0",
             "0\0",
             NULL
-	    )*/;
+	    );
     g_return_if_fail(result);
 }
 
@@ -180,7 +185,7 @@ void simple_notes_sqlite_controller_save_folder (SimpleNotesFolder *folder) {
     simple_notes_sqlite_controller_print_object_selected(folderParent, selected);
     gchar identifier[kLongLongSymbols];
     simple_notes_sqlite_controller_print_object_id(folderParent, identifier);
-    gboolean result = FALSE/*simple_notes_sqlite_store_execute_prepared_statement(
+    gboolean result = simple_notes_sqlite_store_execute_prepared_statement(
             object->_store,
             kStatementNames[UPDATE_FOLDER_INDEX],
             NULL,
@@ -190,7 +195,7 @@ void simple_notes_sqlite_controller_save_folder (SimpleNotesFolder *folder) {
             selected,
             identifier,
             NULL
-	    )*/;
+	    );
     if (title) {
         g_byte_array_unref(title);
     }
@@ -206,27 +211,33 @@ GList *simple_notes_sqlite_controller_copy_notes (guint64 folderID) {
     gchar buff[kLongLongSymbols];
     gchar *printedFolderID = buff;
     simple_notes_sqlite_controller_print_identifier(buff, folderID);
-    /* return simple_notes_sqlite_controller_copy_entities(^SimpleNotesObject * {
-        SimpleNotesNote *newNote = simple_notes_note_new();
-        return SIMPLE_NOTES_OBJECT(newNote);
-    }, ^(SimpleNotesObject *newEntity, sqlite3_stmt *statement) {
-        SimpleNotesNote *newNote = SIMPLE_NOTES_NOTE(newEntity);
-        gint64 folderID = sqlite3_column_int64(statement, 1);
-        simple_notes_sqlite_controller_check_identifier(simple_notes_sqlite_controller_get_instance(), folderID);
-        simple_notes_note_assign_folder_id(newNote, (guint64)folderID);
-        GByteArray *content = simple_notes_sqlite_controller_create_byte_array_for_column(2, statement);
-        if (content) {
-            simple_notes_note_copy_content(newNote, content);
-            g_byte_array_unref(content);
-        }
-        gint64 unixTime = sqlite3_column_int64(statement, 3);
-        GDateTime *lastEdited = g_date_time_new_from_unix_utc(unixTime);
-        simple_notes_note_copy_last_edited(newNote, lastEdited);
-        g_date_time_unref(lastEdited);
-    }, ^gboolean (SimpleNotesSQLiteStore *object, void (^callback) (sqlite3_stmt *)) {
-        return simple_notes_sqlite_store_execute_prepared_statement(object, kStatementNames[SELECT_NOTES_INDEX], callback, 1, printedFolderID);
-	}, selectedColumnIndex);*/
-    return NULL;
+
+    SimpleNotesObject *create () {
+      SimpleNotesNote *newNote = simple_notes_note_new();
+      return SIMPLE_NOTES_OBJECT(newNote);
+    }
+
+    void process (SimpleNotesObject *newEntity, sqlite3_stmt *statement) {
+      SimpleNotesNote *newNote = SIMPLE_NOTES_NOTE(newEntity);
+      gint64 folderID = sqlite3_column_int64(statement, 1);
+      simple_notes_sqlite_controller_check_identifier(simple_notes_sqlite_controller_get_instance(), folderID);
+      simple_notes_note_assign_folder_id(newNote, (guint64)folderID);
+      GByteArray *content = simple_notes_sqlite_controller_create_byte_array_for_column(2, statement);
+      if (content) {
+        simple_notes_note_copy_content(newNote, content);
+        g_byte_array_unref(content);
+      }
+      gint64 unixTime = sqlite3_column_int64(statement, 3);
+      GDateTime *lastEdited = g_date_time_new_from_unix_utc(unixTime);
+      simple_notes_note_copy_last_edited(newNote, lastEdited);
+      g_date_time_unref(lastEdited);
+    }
+
+    gboolean execute (SimpleNotesSQLiteStore *object, void (callback) (sqlite3_stmt *)) {
+      return simple_notes_sqlite_store_execute_prepared_statement(object, kStatementNames[SELECT_NOTES_INDEX], callback, 1, printedFolderID);
+	}
+
+    return simple_notes_sqlite_controller_copy_entities(create, process, execute, selectedColumnIndex);
 }
 
 void simple_notes_sqlite_controller_insert_note (guint8 *const content, guint64 folderID, time_t lastEdited) {
@@ -239,7 +250,7 @@ void simple_notes_sqlite_controller_insert_note (guint8 *const content, guint64 
     gchar lastEditedString[kLongLongSymbols];
     simple_notes_sqlite_controller_print_unix_time(lastEditedString, lastEdited);
 
-    gboolean result = FALSE/*simple_notes_sqlite_store_execute_prepared_statement(
+    gboolean result = simple_notes_sqlite_store_execute_prepared_statement(
             object->_store,
             kStatementNames[INSERT_NOTE_INDEX],
             NULL,
@@ -249,7 +260,7 @@ void simple_notes_sqlite_controller_insert_note (guint8 *const content, guint64 
             lastEditedString,
             "0\0",
             NULL
-	    )*/;
+	    );
     g_return_if_fail(result);
 }
 
@@ -267,7 +278,7 @@ void simple_notes_sqlite_controller_save_note (SimpleNotesNote *note) {
     simple_notes_sqlite_controller_print_object_id(noteParent, identifier);
     gchar lastEdited[kLongLongSymbols];
     simple_notes_sqlite_controller_print_note_date(note, lastEdited);
-    gboolean result = FALSE/*simple_notes_sqlite_store_execute_prepared_statement(
+    gboolean result = simple_notes_sqlite_store_execute_prepared_statement(
             object->_store,
             kStatementNames[UPDATE_NOTE_INDEX],
             NULL,
@@ -278,7 +289,7 @@ void simple_notes_sqlite_controller_save_note (SimpleNotesNote *note) {
             selected,
             identifier,
             NULL
-	    )*/;
+	    );
     if (content) {
         g_byte_array_unref(content);
     }
@@ -293,39 +304,46 @@ void simple_notes_sqlite_controller_testing_unref_instance (void) {
     g_clear_object(&_instance);
 }
 
+void simple_notes_sqlite_controller_delete_test_db (void) {
+  simple_notes_sqlite_controller_testing_unref_instance();
+  if (simple_notes_trash_file(kFile)) {
+    g_message("\n\nTest db deleted");
+  }
+}
+
 void simple_notes_sqlite_controller_begin_transaction (void) {
-  /*simple_notes_sqlite_store_execute_prepared_statement(
+  simple_notes_sqlite_store_execute_prepared_statement(
             simple_notes_sqlite_controller_get_instance()->_store,
             kStatementNames[BEGIN_TRANSACTION_INDEX],
             NULL,
             0,
             NULL
-	    );*/
+	    );
 }
 
 void simple_notes_sqlite_controller_commit_transaction (void) {
-  /*simple_notes_sqlite_store_execute_prepared_statement(
+  simple_notes_sqlite_store_execute_prepared_statement(
             simple_notes_sqlite_controller_get_instance()->_store,
             kStatementNames[COMMIT_TRANSACTION_INDEX],
             NULL,
             0,
             NULL
-	    );*/
+	    );
 }
 
 static SimpleNotesSQLiteController *simple_notes_sqlite_controller_new (void) {
     return g_object_new(SIMPLE_NOTES_TYPE_SQLITE_CONTROLLER, NULL);
 }
 
-/*static GList *simple_notes_sqlite_controller_copy_entities (
-        SimpleNotesObject * (^create_entity)(void),
-        void (^process_new_entity)(SimpleNotesObject *newEntity, sqlite3_stmt *statement),
-        gboolean (^execute_prepared_statement) (SimpleNotesSQLiteStore *object, void (^callback) (sqlite3_stmt *)),
+static GList *simple_notes_sqlite_controller_copy_entities (
+        SimpleNotesObject * (create_entity)(void),
+        void (process_new_entity)(SimpleNotesObject *newEntity, sqlite3_stmt *statement),
+        gboolean (execute_prepared_statement) (SimpleNotesSQLiteStore *object, void (callback) (sqlite3_stmt *)),
         gint selectedColumnIndex
 ) {
     SimpleNotesSQLiteController *object = simple_notes_sqlite_controller_get_instance();
-    __block GList *entities = NULL;
-    void (^callback)(sqlite3_stmt *statement) = ^(sqlite3_stmt *statement) {
+    GList *entities = NULL;
+    void callback (sqlite3_stmt *statement) {
         SimpleNotesObject *newEntity = create_entity();
         gint64 identifier = sqlite3_column_int64(statement, 0);
         simple_notes_sqlite_controller_check_identifier(object, identifier);
@@ -334,7 +352,7 @@ static SimpleNotesSQLiteController *simple_notes_sqlite_controller_new (void) {
         gboolean selected = sqlite3_column_int(statement, selectedColumnIndex);
         simple_notes_object_assign_selected(newEntity, selected);
         entities = g_list_append(entities, newEntity);
-    };
+    }
     gboolean result = execute_prepared_statement(object->_store, callback);
     g_warn_if_fail(result);
     if (!result) {
@@ -345,7 +363,7 @@ static SimpleNotesSQLiteController *simple_notes_sqlite_controller_new (void) {
     }
 
     return entities;
-    }*/
+}
 
 static GByteArray *simple_notes_sqlite_controller_create_byte_array_for_column (gint column, sqlite3_stmt *statement) {
     guchar const *buff = sqlite3_column_text(statement, column);
@@ -365,14 +383,14 @@ static void simple_notes_sqlite_controller_delete_entity (SimpleNotesObject *ent
     gchar id[kLongLongSymbols];
     simple_notes_sqlite_controller_print_object_id(entity, id);
 
-    gboolean result = FALSE/*simple_notes_sqlite_store_execute_prepared_statement(
+    gboolean result = simple_notes_sqlite_store_execute_prepared_statement(
             object->_store,
             kStatementNames[statementIndex],
             NULL,
             parametersCount,
             id,
             NULL
-	    )*/;
+	    );
     g_return_if_fail(result);
 }
 

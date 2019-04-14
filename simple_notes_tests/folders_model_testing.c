@@ -7,6 +7,7 @@
 //
 
 #include "mediator.h"
+#include "sqlite_controller.h"
 #include <string.h>
 
 #define FOLDERS_MODEL_TESTING
@@ -17,7 +18,7 @@ typedef struct {
 
 static void
 simple_notes_folders_model_fixture_set_up (SimpleNotesFoldersModelFixture *fixture, gconstpointer user_data) {
-    simple_notes_delete_test_db();
+    simple_notes_sqlite_controller_delete_test_db();
     fixture->_model = simple_notes_mediator_new();
 }
 

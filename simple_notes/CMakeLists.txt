@@ -15,7 +15,6 @@ target_link_libraries (simple_notes
   gobject-2.0
   gio-2.0
   sqlite3
-  shared
   model
   application
   view

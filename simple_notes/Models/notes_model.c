@@ -62,12 +62,15 @@ SimpleNotesLightNote **simple_notes_notes_model_copy_notes (SimpleNotesNotesMode
 }
 
 void simple_notes_notes_model_delete_note (SimpleNotesNotesModel *object, guint64 identifier) {
-  /*simple_notes_delete_object(SIMPLE_NOTES_SELECTED_LIST_MODEL(object), identifier, ^(SimpleNotesObject *deletedObject) {
-        simple_notes_sqlite_controller_delete_note(SIMPLE_NOTES_NOTE(deletedObject));
-        gchar path[kNotePathSymbols + 1];
-        sprintf(path, kNotePathFormat, kNoteFolder, object->_folderID, identifier);
-        simple_notes_trash_file(path);
-	});*/
+
+  void handler (SimpleNotesObject *deletedObject) {
+    simple_notes_sqlite_controller_delete_note(SIMPLE_NOTES_NOTE(deletedObject));
+    gchar path[kNotePathSymbols + 1];
+    sprintf(path, kNotePathFormat, kNoteFolder, object->_folderID, identifier);
+    simple_notes_trash_file(path);
+  }
+
+    simple_notes_delete_object(SIMPLE_NOTES_SELECTED_LIST_MODEL(object), identifier, handler);
     simple_notes_notes_model_changed(object);
 }
 
@@ -107,10 +110,13 @@ static void simple_notes_notes_model_real_save_objects (
         SimpleNotesObject *items[],
         glong count
 ) {
-  /*simple_notes_save_objects(object, items, count, ^(SimpleNotesObject *item) {
-        SimpleNotesNote *note = SIMPLE_NOTES_NOTE(item);
-        simple_notes_sqlite_controller_save_note(note);
-	});*/
+
+  void handler (SimpleNotesObject *item) {
+    SimpleNotesNote *note = SIMPLE_NOTES_NOTE(item);
+    simple_notes_sqlite_controller_save_note(note);
+  }
+
+    simple_notes_save_objects(object, items, count, handler);
 }
 
 static GList *simple_notes_notes_model_real_create_items (SimpleNotesListModel *object) {
