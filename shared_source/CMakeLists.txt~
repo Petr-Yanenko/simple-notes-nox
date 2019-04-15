@@ -1,3 +1,0 @@
-add_library (shared STATIC global_functions.c commands.c)
-
-target_include_directories (shared PUBLIC ./)

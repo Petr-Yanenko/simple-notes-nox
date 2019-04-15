@@ -1,3 +1,0 @@
-add_executable (simple_notes_tests main.c)
-
-add_dependencies (simple_notes_tests simple_notes)

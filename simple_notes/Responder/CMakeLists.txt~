@@ -1,5 +1,0 @@
-add_library (responder responder.c)
-
-target_include_directories (responder PUBLIC ./)
-
-add_subdirectory (ResponderStub)

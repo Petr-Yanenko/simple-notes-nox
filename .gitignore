@@ -4,6 +4,8 @@ CMakeFiles
 compile_commands.json
 Makefile
 *.a
+*~
+*#
 GTAGS
 GPATH
 GRTAGS
