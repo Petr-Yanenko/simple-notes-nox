@@ -8,16 +8,17 @@
 
 #include "commands.h"
 
-gchar *const kExitCommand = "exit\0";
-gchar *const kHelpCommand = "help\0";
-gchar *const kOptionKey = "--\0";
+
+gchar *const kExitCommand = "exit";
+gchar *const kHelpCommand = "help";
+gchar *const kOptionKey = "--";
 
 //folder
-gchar *const kAllOption = "--all\0";
-gchar *const kInsertOption = "--insert\0";
-gchar *const kDeleteOption = "--delete\0";
-gchar *const kSelectOption = "--select\0";
+gchar *const kAllOption = "--all";
+gchar *const kInsertOption = "--insert";
+gchar *const kDeleteOption = "--delete";
+gchar *const kSelectOption = "--select";
 //glong const kMaxTitleLen = 100;
 
 //note
-gchar *const kEditOption = "--edit\0";
+gchar *const kEditOption = "--edit";

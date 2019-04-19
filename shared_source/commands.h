@@ -11,6 +11,7 @@
 
 #include "simple_notes.h"
 
+
 extern gchar *const kExitCommand;
 extern gchar *const kHelpCommand;
 extern gchar *const kOptionKey;
