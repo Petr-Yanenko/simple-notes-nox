@@ -63,38 +63,39 @@ extern glong const kNotePathSymbols;
       }                                         \
   }
 
-#define SIMPLE_NOTES_TRY(expression, error)     \
+#define SN_HANDLE_ERROR(error)                  \
+  {                                             \
+    if (error)                                  \
+      {                                         \
+        g_warning("\nError with code %d\n", *error);    \
+      }                                                 \
+  }
+
+#define SN_RETURN_IF_FAIL(expression, error)    \
   {                                             \
     if (!expression)                            \
       {                                         \
-        SIMPLE_NOTES_PRINT_ERROR (error);       \
-        return 0;                               \
+        SN_HANDLE_ERROR(error);                 \
+        return;                                 \
       }                                         \
   }
 
-#define SIMPLE_NOTES_TRY_AND_CLEAR_ERROR(expression, error) \
-  {                                                         \
-    if (!expression)                                        \
-      {                                                     \
-        SIMPLE_NOTES_PRINT_ERROR (error);                   \
-        SIMPLE_NOTES_CLEAR_ERROR (error);                   \
-        return 0;                                           \
-      }                                                     \
+#define SN_RETURN_VAL_IF_FAIL(expression, val, error)   \
+  {                                                     \
+    if (!expression)                                    \
+      {                                                 \
+        SN_HANDLE_ERROR(error);                         \
+        return val;                                     \
+      }                                                 \
   }
 
-#define SIMPLE_NOTES_TRY_WITHOUT_ERROR(expression)  \
-  {                                                 \
-    if (!expression)                                \
-      return 0;                                     \
-  }
-
-#define SIMPLE_NOTES_CHECK_VIRTUAL_FUNC(object,                         \
-                                        outKlass,                       \
-                                        func_name,                      \
-                                        ModuleObjectName,               \
-                                        MODULE,                         \
-                                        OBJECT_NAME,                    \
-                                        CLASS_OR_IFACE)                 \
+#define SN_GET_CLASS_OR_IFACE(object,                                   \
+                              outKlass,                                 \
+                              func_name,                                \
+                              ModuleObjectName,                         \
+                              MODULE,                                   \
+                              OBJECT_NAME,                              \
+                              CLASS_OR_IFACE)                           \
   {                                                                     \
     g_return_if_fail (MODULE##_IS_##OBJECT_NAME (object));              \
     g_return_if_fail (outKlass);                                        \
@@ -108,46 +109,46 @@ extern glong const kNotePathSymbols;
     g_return_if_fail ((*outKlass)->func_name != NULL);                  \
   }
 
-#define SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC(object,           \
-                                              outKlass,         \
-                                              func_name,        \
-                                              ModuleObjectName, \
-                                              MODULE,           \
-                                              OBJECT_NAME)      \
+#define SN_GET_CLASS(object,                                    \
+                     outKlass,                                  \
+                     func_name,                                 \
+                     ModuleObjectName,                          \
+                     MODULE,                                    \
+                     OBJECT_NAME)                               \
   {                                                             \
-    SIMPLE_NOTES_CHECK_VIRTUAL_FUNC (object,                    \
-                                     outKlass,                  \
-                                     func_name,                 \
-                                     ModuleObjectName,          \
-                                     MODULE,                    \
-                                     OBJECT_NAME,               \
-                                     CLASS);                    \
+    SN_GET_CLASS_OR_IFACE(object,                               \
+                          outKlass,                             \
+                          func_name,                            \
+                          ModuleObjectName,                     \
+                          MODULE,                               \
+                          OBJECT_NAME,                          \
+                          CLASS);                               \
   }
 
-#define SIMPLE_NOTES_CHECK_VIRTUAL_IFACE_FUNC(object,           \
-                                              outKlass,         \
-                                              func_name,        \
-                                              ModuleObjectName, \
-                                              MODULE,           \
-                                              OBJECT_NAME)      \
+#define SN_GET_IFACE(object,                                    \
+                     outIface,                                  \
+                     func_name,                                 \
+                     ModuleObjectName,                          \
+                     MODULE,                                    \
+                     OBJECT_NAME)                               \
   {                                                             \
-    SIMPLE_NOTES_CHECK_VIRTUAL_FUNC (object,                    \
-                                     outKlass,                  \
-                                     func_name,                 \
-                                     ModuleObjectName,          \
-                                     MODULE,                    \
-                                     OBJECT_NAME,               \
-                                     IFACE);                    \
+    SN_GET_CLASS_OR_IFACE(object,                                       \
+                          outKlass,                                     \
+                          func_name,                                    \
+                          ModuleObjectName,                             \
+                          MODULE,                                       \
+                          OBJECT_NAME,                                  \
+                            IFACE);                                     \
   }
 
-#define SIMPLE_NOTES_CHECK_VIRTUAL_FUNC_WITH_RETURN_VAL(object,         \
-                                                        outKlass,       \
-                                                        func_name,      \
-                                                        ModuleObjectName, \
-                                                        MODULE,         \
-                                                        OBJECT_NAME,    \
-                                                        CLASS_OR_IFACE, \
-                                                        returnVal)      \
+#define SN_GET_CLASS_OR_IFACE_WITH_RETURN_VAL(object,                   \
+                                              outKlass,                 \
+                                              func_name,                \
+                                              ModuleObjectName,         \
+                                              MODULE,                   \
+                                              OBJECT_NAME,              \
+                                              CLASS_OR_IFACE,           \
+                                              returnVal)                \
   {                                                                     \
     g_return_val_if_fail (MODULE##_IS_##OBJECT_NAME (object), returnVal); \
     g_return_val_if_fail (outKlass, returnVal);                         \
@@ -156,41 +157,47 @@ extern glong const kNotePathSymbols;
     g_return_val_if_fail ((*outKlass)->func_name != NULL, returnVal);   \
   }
 
-#define SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object,   \
-                                                              outKlass, \
-                                                              func_name, \
-                                                              ModuleObjectName, \
-                                                              MODULE,   \
-                                                              OBJECT_NAME, \
-                                                              returnVal) \
+#define SN_GET_CLASS_OR_RETURN_VAL(object,                              \
+                                   outKlass,                            \
+                                   func_name,                           \
+                                   ModuleObjectName,                    \
+                                   MODULE,                              \
+                                   OBJECT_NAME,                         \
+                                   returnVal)                           \
   {                                                                     \
-    SIMPLE_NOTES_CHECK_VIRTUAL_FUNC_WITH_RETURN_VAL (object,            \
-                                                     outKlass,          \
-                                                     func_name,         \
-                                                     ModuleObjectName,  \
-                                                     MODULE,            \
-                                                     OBJECT_NAME,       \
-                                                     CLASS,             \
-                                                     returnVal);        \
+    SN_GET_CLASS_OR_IFACE_WITH_RETURN_VAL(object,                       \
+                                          outKlass,                     \
+                                          func_name,                    \
+                                          ModuleObjectName,             \
+                                          MODULE,                       \
+                                          OBJECT_NAME,                  \
+                                          CLASS,                        \
+                                          returnVal);                   \
   }
 
-#define SIMPLE_NOTES_CHECK_VIRTUAL_IFACE_FUNC_WITH_RETURN_VAL(object,   \
-                                                              outKlass, \
-                                                              func_name, \
-                                                              ModuleObjectName, \
-                                                              MODULE,   \
-                                                              OBJECT_NAME, \
-                                                              returnVal) \
+#define SN_GET_IFACE_OR_RETURN_VAL(object,                              \
+                                   outIface,                            \
+                                   func_name,                           \
+                                   ModuleObjectName,                    \
+                                   MODULE,                              \
+                                   OBJECT_NAME,                         \
+                                   returnVal)                           \
   {                                                                     \
-    SIMPLE_NOTES_CHECK_VIRTUAL_FUNC_WITH_RETURN_VAL (object,            \
-                                                     outKlass,          \
-                                                     func_name,         \
-                                                     ModuleObjectName,  \
-                                                     MODULE,            \
-                                                     OBJECT_NAME,       \
-                                                     IFACE,             \
-                                                     returnVal);        \
+    SN_GET_CLASS_OR_IFACE_WITH_RETURN_VAL(object,                       \
+                                          outKlass,                     \
+                                          func_name,                    \
+                                          ModuleObjectName,             \
+                                          MODULE,                       \
+                                          OBJECT_NAME,                  \
+                                          IFACE,                        \
+                                          returnVal);                   \
   }
+
+
+typedef enum {
+              SNErrorNotError = 0,
+              SNErrorGeneric = 1,
+} SNError;
 
 
 gboolean

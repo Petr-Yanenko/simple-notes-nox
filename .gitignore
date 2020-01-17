@@ -1,14 +1,7 @@
-*.txt
-CMakeFiles
-*.cmake
-compile_commands.json
-Makefile
-*.a
 *~
 *#
+.#*
 GTAGS
 GPATH
 GRTAGS
-simple_notes
-simple_notes_tests
-simple_notes.data
+build
