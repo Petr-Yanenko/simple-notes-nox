@@ -131,19 +131,19 @@ simple_notes_create_string (gchar *const string)
 }
 
 void
-simple_notes_print_guint64_value (gchar * buff, guint64 value)
+sn_print_guint64_value(gchar * buff, guint64 value)
 {
   sprintf (buff, "%llu", value);
 }
 
 void
-simple_notes_print_boolean_value (gchar *buff, gboolean value)
+sn_print_boolean_value(gchar *buff, gboolean value)
 {
   sprintf (buff, "%i", value);
 }
 
 void
-simple_notes_print_long_value (gchar *buff, glong value)
+sn_print_long_value(gchar *buff, glong value)
 {
   sprintf (buff, "%ld", value);
 }

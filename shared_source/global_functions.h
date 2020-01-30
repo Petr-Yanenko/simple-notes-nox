@@ -63,12 +63,9 @@ extern glong const kNotePathSymbols;
       }                                         \
   }
 
-#define SN_HANDLE_ERROR(error)                  \
-  {                                             \
-    if (error)                                  \
-      {                                         \
-        g_warning("\nError with code %d\n", *error);    \
-      }                                                 \
+#define SN_HANDLE_ERROR(error)                                          \
+  {                                                                     \
+    g_warning("\nError with code %d\n", error ? *error : SNErrorUnknown); \
   }
 
 #define SN_RETURN_IF_FAIL(expression, error)    \
@@ -195,8 +192,9 @@ extern glong const kNotePathSymbols;
 
 
 typedef enum {
-              SNErrorNotError = 0,
-              SNErrorGeneric = 1,
+              SNErrorUnknown = 0,
+              SNErrorStatementStore = 1,
+              SNErrorStore = 2
 } SNError;
 
 
@@ -233,13 +231,13 @@ gchar *
 simple_notes_create_string (gchar *const string);
 
 void
-simple_notes_print_guint64_value (gchar *buff, guint64 value);
+sn_print_guint64_value(gchar *buff, guint64 value);
 
 void
-simple_notes_print_boolean_value (gchar *buff, gboolean value);
+sn_print_boolean_value(gchar *buff, gboolean value);
 
 void
-simple_notes_print_long_value (gchar *buff, glong value);
+sn_print_long_value(gchar *buff, glong value);
 
 void
 simple_notes_free_objects_array (gpointer *array, gulong count);
