@@ -193,8 +193,9 @@ extern glong const kNotePathSymbols;
 
 typedef enum {
               SNErrorUnknown = 0,
-              SNErrorStatementStore = 1,
-              SNErrorStore = 2
+              SNErrorDataBase = 1,
+              SNErrorStore = 2,
+	      SNErrorStatement = 3
 } SNError;
 
 
@@ -228,7 +229,7 @@ simple_notes_create_error (GError **pError,
                            ...);
 
 gchar *
-simple_notes_create_string (gchar *const string);
+sn_copy_string(gchar *const string);
 
 void
 sn_print_guint64_value(gchar *buff, guint64 value);

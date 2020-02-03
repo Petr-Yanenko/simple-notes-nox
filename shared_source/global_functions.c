@@ -123,7 +123,7 @@ simple_notes_create_error (GError **pError,
 }
 
 gchar *
-simple_notes_create_string (gchar *const string)
+sn_copy_string(gchar *const string)
 {
   gchar *mallocString = g_malloc (sizeof (gchar) * (strlen (string) + 1));
   strcpy (mallocString, string);
