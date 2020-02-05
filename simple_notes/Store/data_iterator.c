@@ -7,12 +7,15 @@
 
 typedef struct {
 
-  gint _result;
   sqlite3_stmt *_stmt;
 
 } SNDataIteratorPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(SNDataIterator, sn_data_iterator,G_TYPE_OBJECT);
+
+
+static SNError const kError = SNErrorDataIterator;
+
 
 static SNIteratorResult
 sn_data_iterator_real_first(SNDataIterator *self);
@@ -20,16 +23,25 @@ sn_data_iterator_real_first(SNDataIterator *self);
 static SNIteratorResult
 sn_data_iterator_real_next(SNDataIterator *self);
 
-static gint
-sn_data_iterator_real_error(SNDataIterator *self);
 
+static void
+sn_data_iterator_dispose(GObject *self)
+{
+  SNDataIteratorPrivate *private = sn_data_iterator_get_instance_private(self);
+  g_clear_object(&private->_stmt);
+  
+  G_OBJECT_CLASS(sn_data_iterator_parent_class)->dispose(self);
+}
 
 static void
 sn_data_iterator_class_init(SNDataIteratorClass *class)
 {
+  GObjectClass *gClass = G_OBJECT_CLASS(class);
+
+  gClass->dispose = sn_data_iterator_dispose;
+  
   class->first = sn_data_iterator_real_first;
   class->next = sn_data_iterator_real_next;
-  class->error = sn_data_iterator_real_error;
 
   g_type_add_instance_private(SN_TYPE_DATA_ITERATOR, sizeof(SNDataIteratorPrivate));
 }
@@ -40,18 +52,17 @@ sn_data_iterator_init(SNDataIterator *self)
   SNDataIteratorPrivate *private = sn_data_iterator_get_instance_private(self);
 
   private->_stmt = NULL;
-  private->_result = SQLITE_OK;
 }
 
 SNDataIterator *
-sn_data_iterator_new(sqlite3_stmt *stmt)
+sn_data_iterator_new(SNStatement *stmt)
 {
-  g_return_val_if_fail(stmt != NULL, NULL);
+  SN_RETURN_VAL_IF_FAIL(stmt, NULL, NULL);
 
   SNDataIterator *instance = g_object_new(SN_TYPE_DATA_ITERATOR, NULL);
   SNDataIteratorPrivate *private = sn_data_itarator_get_instance_private(instance);
 
-  private->_stmt = stmt;
+  private->_stmt = g_object_ref(stmt);
 
   return instance;
 }
@@ -84,20 +95,6 @@ sn_data_iterator_next(SNDataIterator *self)
   return class->next(self);
 }
 
-gint
-sn_data_iterator_error(SNDataIterator *self)
-{
-  SNDataIteratorClass *class = NULL;
-  SN_GET_CLASS_OR_RETURN_VAL(self,
-                             &class,
-                             error,
-                             SNDataIterator,
-                             SN,
-                             DATA_ITERATOR,
-                             -1);
-  return class->error(self);
-}
-
 static SNIteratorResult
 sn_data_iterator_get_result(gint code)
 {
@@ -116,35 +113,26 @@ sn_data_iterator_get_result(gint code)
 
 static SNIteratorResult
 sn_data_iterator_real_first(SNDataIterator *self)
-{
+{  
   SNDataIteratorPrivate *private = sn_data_iterator_get_instance_private(self);
+  SN_RETURN_VAL_IF_FAIL(sn_statement_is_valid(private->_stmt), SNIteratorResultError, &kError);
 
-  gint resetCode = sqlite3_reset(private->_stmt);
-  gint stepCode = resetCode;
-  if (resetCode == SQLITE_OK)
+  sn_statement_reset(private->_stmt);
+  if (sn_statement_get_result_code(private->_stmt)  == SQLITE_OK)
     {
-      stepCode = sqlite3_step(private->_stmt);
+      sn_statement_step(private->_stmt);
     }
-  private->_result = stepCode;
 
-  return sn_data_iterator_get_result(stepCode);
+  return sn_data_iterator_get_result(sn_statement_get_result_code(private->_stmt));
 }
 
 static SNIteratorResult
 sn_data_iterator_real_next(SNDataIterator *self)
 {
   SNDataIteratorPrivate *private = sn_data_iterator_get_instance_private(self);
+  SN_RETURN_VAL_IF_FAIL(sn_statement_is_valid(private->_stmt), SNIteratorResultError, &kError);
 
-  gint stepCode = sqlite3_step(private->_stmt);
-  private->_result = stepCode;
+  sn_statement_step(private->_stmt);
 
-  return sn_data_iterator_get_result(stepCode);
-}
-
-static gint
-sn_data_iterator_real_error(SNDataIterator *self)
-{
-  SNDataIteratorPrivate *private = sn_data_iterator_get_instance_private(self);
-
-  return private->_result;
+  return sn_data_iterator_get_result(sn_statement_get_result_code(private->_stmt));
 }

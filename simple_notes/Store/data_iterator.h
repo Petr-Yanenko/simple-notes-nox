@@ -5,8 +5,8 @@
 #ifndef sn_data_iterator____FILEEXTENTION___
 #define sn_data_iterator____FILEEXTENTION___
 
-#include <sqlite3.h>
 #include "simple_notes.h"
+#include "statement.h"
 
 
 typedef enum {
@@ -25,13 +25,11 @@ struct _SNDataIteratorClass {
 
   SNIteratorResult (*first)(SNDataIterator *self);
   SNIteratorResult (*next)(SNDataIterator *self);
-  SNError (*error)(SNDataIterator *self);
-
 };
 
 
 SNDataIterator *
-sn_data_iterator_new(sqlte3_stmt *stmt);
+sn_data_iterator_new(SNStatement *stmt);
 
 
 SNIteratorResult
@@ -40,7 +38,5 @@ sn_data_iterator_first(SNDataIterator *self);
 SNIteratorResult
 sn_data_iterator_next(SNDataIterator *self);
 
-gint
-sn_data_iterator_error(SNDataIterator *self);
 
 #endif
