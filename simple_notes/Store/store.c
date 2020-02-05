@@ -126,7 +126,7 @@ sn_store_update_folder(SNStore *self,
                        guint64 id,
                        gboolean selected,
                        glong count,
-                       guint8 *title)
+                       gchar *title)
 {
   gchar countString[kLongLongSymbols];
   sn_print_long_value(countString, count);
@@ -150,7 +150,7 @@ sn_store_update_folder(SNStore *self,
 }
 
 gboolean
-sn_store_insert_folder(SNStore *self, guint8 *title)
+sn_store_insert_folder(SNStore *self, gchar *title)
 {
   glong paramCount = 3;
 

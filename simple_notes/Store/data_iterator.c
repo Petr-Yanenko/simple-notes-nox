@@ -2,7 +2,7 @@
 //  data_iterator.c
 //
 
-#include "data_iterator.h"
+#include "data_iterator_private.h"
 
 
 typedef struct {
@@ -54,19 +54,6 @@ sn_data_iterator_init(SNDataIterator *self)
   private->_stmt = NULL;
 }
 
-SNDataIterator *
-sn_data_iterator_new(SNStatement *stmt)
-{
-  SN_RETURN_VAL_IF_FAIL(stmt, NULL, NULL);
-
-  SNDataIterator *instance = g_object_new(SN_TYPE_DATA_ITERATOR, NULL);
-  SNDataIteratorPrivate *private = sn_data_itarator_get_instance_private(instance);
-
-  private->_stmt = g_object_ref(stmt);
-
-  return instance;
-}
-
 SNIteratorResult
 sn_data_iterator_first(SNDataIterator *self)
 {
@@ -93,6 +80,27 @@ sn_data_iterator_next(SNDataIterator *self)
                              DATA_ITERATOR,
                              SNIteratorResultError);
   return class->next(self);
+}
+
+SNStatement *
+sn_data_iterator_private_get_statement(SNDataIterator *self)
+{
+  SNDataIteratorPrivate *private = sn_data_iterator_get_instance_private(self);
+
+  return private->_stmt;
+}
+
+void
+sn_data_iterator_private_set_statement(SNDataIterator *self, SNStatement *stmt)
+{
+  SNDataIteratorPrivate *private = sn_data_iterator_get_instance_private(self);
+
+  SN_RETURN_IF_FAIL(stmt, NULL);
+  if (private->_stmt != stmt)
+    {
+      if (private->_stmt) g_object_unref(private->_stmt);
+      private->_stmt = g_object_ref(stmt);
+    }
 }
 
 static SNIteratorResult

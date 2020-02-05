@@ -25,10 +25,10 @@ sn_store_update_folder(SNStore *self,
                        guint64 id,
                        gboolean selected,
                        glong count,
-                       guint8 *title);
+                       gchar *title);
 
 gboolean
-sn_store_insert_folder(SNStore *self, guint8 *title);
+sn_store_insert_folder(SNStore *self, gchar *title);
 
 gboolean
 sn_store_delete_folder(SNStore *self, guint64 id);

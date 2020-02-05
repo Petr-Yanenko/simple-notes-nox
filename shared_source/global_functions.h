@@ -196,7 +196,8 @@ typedef enum {
               SNErrorDataBase = 1,
               SNErrorStore = 2,
 	      SNErrorStatement = 3,
-	      SNErrorDataIterator = 4
+	      SNErrorDataIterator = 4,
+	      SNErrorFolderIterator = 5
 } SNError;
 
 

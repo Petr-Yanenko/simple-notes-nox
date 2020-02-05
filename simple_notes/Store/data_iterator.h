@@ -19,6 +19,7 @@ typedef enum {
 #define SN_TYPE_DATA_ITERATOR sn_data_iterator_get_type()
 G_DECLARE_DERIVABLE_TYPE(SNDataIterator, sn_data_iterator, SN, DATA_ITERATOR, GObject);
 
+
 struct _SNDataIteratorClass {
 
   GObjectClass parent;
@@ -26,10 +27,6 @@ struct _SNDataIteratorClass {
   SNIteratorResult (*first)(SNDataIterator *self);
   SNIteratorResult (*next)(SNDataIterator *self);
 };
-
-
-SNDataIterator *
-sn_data_iterator_new(SNStatement *stmt);
 
 
 SNIteratorResult
