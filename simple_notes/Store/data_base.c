@@ -22,8 +22,11 @@ struct _SNDataBase {
 G_DEFINE_TYPE(SNDataBase, sn_data_base, G_TYPE_OBJECT)
 
 
+static SNError const kError = SNErrorDataBase;
+  
+  
 static sqlite3_stmt *
-sn_data_base_bind(SNDataBase *self, gchar *const key, glong paramCount, ...);
+sn_data_base_sqlite_bind(SNDataBase *self, gchar *const key, glong paramCount, ...);
 
 static void
 sn_data_base_dispose_sqlite(SNDataBase *self);
@@ -73,25 +76,23 @@ sn_data_base_init(SNDataBase *self)
 						g_free,
 						sn_data_base_unref);
 
-    SNError error = SNErrorDataBase;
     gint result = sqlite3_open(kFile, &self->_db);
-    SN_RETURN_IF_FAIL(sn_data_base_check_result(self, result), &error);
+    SN_RETURN_IF_FAIL(sn_data_base_check_result(self, result), &kError);
 }
 
 gboolean
 sn_data_base_add(SNDataBase *self, gchar *const key, gchar *const stmt)
 {
-  SNError error = SNErrorDataBase;
   SN_RETURN_VAL_IF_FAIL(key, FALSE, NULL);
   SN_RETURN_VAL_IF_FAIL(stmt, FALSE, NULL);
-  SN_RETURN_VAL_IF_FAIL(self->_db, FALSE, &error);
-  SN_RETURN_VAL_IF_FAIL(self->_stmts, FALSE, &error);
+  SN_RETURN_VAL_IF_FAIL(self->_db, FALSE, &kError);
+  SN_RETURN_VAL_IF_FAIL(self->_stmts, FALSE, &kError);
 
   sqlite3_stmt *preparedStmt = NULL;
   gint stmtResult = sqlite3_prepare_v2(self->_db, stmt, -1, &preparedStmt, NULL);
 
   gboolean ok = sn_data_base_check_result(self, stmtResult);
-  SN_RETURN_VAL_IF_FAIL(ok, FALSE, &error);
+  SN_RETURN_VAL_IF_FAIL(ok, FALSE, &kError);
 
   gchar *keyCopy = sn_copy_string(key);
   g_hash_table_insert(self->_stmts, keyCopy, preparedStmt);
@@ -100,14 +101,13 @@ sn_data_base_add(SNDataBase *self, gchar *const key, gchar *const stmt)
 }
 
 SNStatement *
-sn_data_base_create_bind(SNDataBase *self, gchar *const key, glong paramCount, ...)
+sn_data_base_bind(SNDataBase *self, gchar *const key, glong paramCount, ...)
 {
-  SNError error = SNErrorDataBase;
   SN_RETURN_VAL_IF_FAIL(key, NULL, NULL);
-  SN_RETURN_VAL_IF_FAIL(self->_bindingStmts, NULL, &error);
+  SN_RETURN_VAL_IF_FAIL(self->_bindingStmts, NULL, &kError);
   
   va_list args;
-  sqlite3_stmt *stmt = sn_data_base_bind(self, key, paramCount, args);
+  sqlite3_stmt *stmt = sn_data_base_sqlite_bind(self, key, paramCount, args);
   if (!stmt) return NULL;
   
   SNStatement *bindingStmt = sn_statement_new(stmt);
@@ -119,16 +119,14 @@ sn_data_base_create_bind(SNDataBase *self, gchar *const key, glong paramCount, .
 
 gboolean
 sn_data_base_execute(SNDataBase *self, gchar *const key, glong paramCount, ...)
-{
-  SNError error = SNErrorDataBase;
-  
+{  
   SN_RETURN_VAL_IF_FAIL(key, FALSE, NULL);
   
   va_list args;
-  sqlite3_stmt *stmt = sn_data_base_bind(self, key, paramCount, args);
+  sqlite3_stmt *stmt = sn_data_base_sqlite_bind(self, key, paramCount, args);
   if (!stmt) return FALSE;
 
-  SN_RETURN_VAL_IF_FAIL(sqlite3_step(stmt) == SQLITE_DONE, FALSE, &error);
+  SN_RETURN_VAL_IF_FAIL(sqlite3_step(stmt) == SQLITE_DONE, FALSE, &kError);
 
   return TRUE;
 }
@@ -140,17 +138,18 @@ sn_data_base_new(void)
 }
 
 static sqlite3_stmt *
-sn_data_base_bind(SNDataBase *self, gchar *const key, glong paramCount, ...)
+sn_data_base_sqlite_bind(SNDataBase *self, gchar *const key, glong paramCount, ...)
 {
-  SNError error = SNErrorDataBase;
-  SN_RETURN_VAL_IF_FAIL(self->_stmts, NULL, &error);
-  SN_RETURN_VAL_IF_FAIL(self->_bindingStmts, NULL, &error)
+  SN_RETURN_VAL_IF_FAIL(self->_stmts, NULL, &kError);
+  SN_RETURN_VAL_IF_FAIL(self->_bindingStmts, NULL, &kError)
   SN_RETURN_VAL_IF_FAIL(key, NULL, NULL);
 
+  g_hash_table_remove(self->_bindingStmts, key);
+  
   sqlite3_stmt *stmt = g_hash_table_lookup(self->_stmts, key);
-  SN_RETURN_VAL_IF_FAIL(stmt, NULL, &error);
+  SN_RETURN_VAL_IF_FAIL(stmt, NULL, &kError);
 
-  SN_RETURN_VAL_IF_FAIL(sqlite3_reset(stmt) == SQLITE_OK, NULL, &error);
+  SN_RETURN_VAL_IF_FAIL(sqlite3_reset(stmt) == SQLITE_OK, NULL, &kError);
 
   gint result = SQLITE_OK;
   va_list args;
@@ -162,7 +161,7 @@ sn_data_base_bind(SNDataBase *self, gchar *const key, glong paramCount, ...)
     }
   va_end(args);
 
-  SN_RETURN_VAL_IF_FAIL(result == SQLITE_OK, NULL, &error);
+  SN_RETURN_VAL_IF_FAIL(result == SQLITE_OK, NULL, &kError);
 
   return stmt;
 }
@@ -181,9 +180,8 @@ sn_data_base_check_result(SNDataBase *self, gint result)
 static void
 sn_data_base_finalize_statement(gpointer statement)
 {
-  SNError error = SNErrorDataBase;
-  SN_RETURN_IF_FAIL(statement, &error);
-  SN_RETURN_IF_FAIL(sqlite3_finalize(statement) == SQLITE_OK, &error);
+  SN_RETURN_IF_FAIL(statement, &kError);
+  SN_RETURN_IF_FAIL(sqlite3_finalize(statement) == SQLITE_OK, &kError);
 }
 
 static void
@@ -197,8 +195,6 @@ sn_data_base_unref(gpointer bindingStmt)
 static void
 sn_data_base_dispose_sqlite(SNDataBase *self)
 {
-  SNError error = SNErrorDataBase;
-
   if (self->_bindingStmts)
     {
       g_hash_table_unref(self->_bindingStmts);
@@ -211,7 +207,7 @@ sn_data_base_dispose_sqlite(SNDataBase *self)
     }
   if (self->_db)
     {
-      SN_RETURN_IF_FAIL(sqlite3_close(self->_db) == SQLITE_OK, &error);
+      SN_RETURN_IF_FAIL(sqlite3_close(self->_db) == SQLITE_OK, &kError);
       self->_db = NULL;
     }
 }

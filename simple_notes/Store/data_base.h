@@ -25,7 +25,7 @@ gboolean
 sn_data_base_add(SNDataBase *self, gchar *const key, gchar *const stmt);
 
 SNStatement *
-sn_data_base_create_bind(SNDataBase *self, gchar *const key, glong paramCount, ...);
+sn_data_base_bind(SNDataBase *self, gchar *const key, glong paramCount, ...);
 
 gboolean
 sn_data_base_execute(SNDataBase *self, gchar *const key, glong paramCount, ...);

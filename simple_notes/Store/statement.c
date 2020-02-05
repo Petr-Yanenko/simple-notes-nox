@@ -15,10 +15,16 @@ struct _SNStatement {
 
 G_DEFINE_TYPE(SNStatement, sn_statement, G_TYPE_OBJECT)
 
+
+static SNError const kError = SNErrorStatement;
+  
   
 static gboolean
 sn_statement_perform(SNStatement *self, gint (*operation)(SNStatement *), gboolean (*check)(gint));
-  
+
+static gboolean
+sn_statement_is_row(SNStatement *self);
+
 
 static void
 sn_statement_init(SNStatement *self)
@@ -91,7 +97,7 @@ sn_statement_get_result_code(SNStatement *self)
 gdouble
 sn_statement_column_double(SNStatement *self, gint col)
 {
-  if (sn_statement_is_valid(self))
+  if (sn_statement_is_row(self))
     {
       return sqlite3_column_double(self->_stmt, col);
     }
@@ -102,7 +108,7 @@ sn_statement_column_double(SNStatement *self, gint col)
 gint
 sn_statement_column_int(SNStatement *self, gint col)
 {
-  if (sn_statement_is_valid(self))
+  if (sn_statement_is_row(self))
     {
       return sqlite3_column_int(self->_stmt, col);
     }
@@ -113,7 +119,7 @@ sn_statement_column_int(SNStatement *self, gint col)
 gint64
 sn_statement_column_int64(SNStatement *self, gint col)
 {
-  if (sn_statement_is_valid(self))
+  if (sn_statement_is_row(self))
     {
       return sqlite3_column_int64(self->_stmt, col);
     }
@@ -124,7 +130,7 @@ sn_statement_column_int64(SNStatement *self, gint col)
 const guchar *
 sn_statement_column_text(SNStatement *self, gint col)
 {
-  if (sn_statement_is_valid(self))
+  if (sn_statement_is_row(self))
     {
       return sqlite3_column_text(self->_stmt, col);
     }
@@ -135,7 +141,7 @@ sn_statement_column_text(SNStatement *self, gint col)
 gint
 sn_statement_column_bytes(SNStatement *self, gint col)
 {
-  if (sn_statement_is_valid(self))
+  if (sn_statement_is_row(self))
     {
       return sqlite3_column_bytes(self->_stmt, col);
     }
@@ -146,15 +152,19 @@ sn_statement_column_bytes(SNStatement *self, gint col)
 static gboolean
 sn_statement_perform(SNStatement *self, gint (*operation)(SNStatement *), gboolean (*check)(gint))
 {
-  SNError error = SNErrorStatement;
-
   if (sn_statement_is_valid(self))
     {
       self->_code = operation(self);
-      SN_RETURN_VAL_IF_FAIL(check(self->_code), FALSE, &error);
+      SN_RETURN_VAL_IF_FAIL(check(self->_code), FALSE, &kError);
       
       return TRUE;
     }
 
   return FALSE;
+}
+
+static gboolean
+sn_statement_is_row(SNStatement *self)
+{
+  return sn_statement_is_valid(self) && self->_code == SQLITE_ROW;
 }
