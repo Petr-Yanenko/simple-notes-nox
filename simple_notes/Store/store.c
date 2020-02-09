@@ -69,6 +69,9 @@ static SNError const kError = SNErrorStore;
 static void
 sn_store_assign_folder_changed(SNStore *self, guint64 folderChanged);
 
+static gboolean
+sn_store_execute(SNStore *self, guint64 changedFolder, glong stmtIndex, glong paramCount, ...);
+
 
 static void
 sn_store_set_property(GObject *self, guint propID, const GValue *value, GParamSpec *pSpec)
