@@ -11,6 +11,8 @@ struct _SNStore {
   GObject _parent;
 
   SNDataBase *_db;
+
+  guint64 _folderChanged;
 };
 
 
@@ -48,8 +50,61 @@ static gchar *const kStmtKeys[] = {
 				   "commit-transaction"
 };
 
+
+enum {
+      PROP_FOLDER_CHANGED = 1,
+      N_PROPERTIES
+};
+
+
+static GParamSpec *objProperties[N_PROPERTIES] = { NULL, };
+
+
+gchar *const kFolderChanged = "folder-changed";
+guint64 const kFolderInserted = 0;
+
 static SNError const kError = SNErrorStore;
 
+
+static void
+sn_store_assign_folder_changed(SNStore *self, guint64 folderChanged);
+
+
+static void
+sn_store_set_property(GObject *self, guint propID, const GValue *value, GParamSpec *pSpec)
+{
+  SNStore *store = SN_STORE(self);
+
+  switch (propID)
+    {
+    case PROP_FOLDER_CHANGED:
+      store->_folderChanged = g_value_get_uint64(value);
+      break;
+
+    default:
+      /* We don't have any other property... */
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(self, propID, pSpec);
+      break;
+    }
+}
+
+static void
+sn_store_get_property(GObject *self, guint propID, GValue *value, GParamSpec *pSpec)
+{
+  SNStore *store = SN_STORE(self);
+
+  switch (propID)
+    {
+    case PROP_FOLDER_CHANGED:
+      g_value_set_uint64(value, store->_folderChanged);
+      break;
+
+    default:
+      /* We don't have any other property... */
+      G_OBJECT_WARN_INVALID_PROPERTY_ID(self, propID, pSpec);
+      break;
+    }
+}
 
 static void
 sn_store_dispose(GObject *self)
@@ -65,6 +120,15 @@ sn_store_class_init(SNStoreClass *class)
 {
   GObjectClass *gClass = G_OBJECT_CLASS(class);
   gClass->dispose = sn_store_dispose;
+  gClass->set_property = sn_store_set_property;
+  gClass->get_property = sn_store_get_property;
+
+  objProperties[PROP_FOLDER_CHANGED] = g_param_spec_uint64(kFolderChanged,
+							   "Changed folder id",
+							   "This is set when folder is changed",
+							   0, /* default value */
+							   G_PARAM_READWRITE);
+  g_object_class_install_properties(gClass, N_PROPERTIES, objProperties);
 }
 
 static void
@@ -83,7 +147,8 @@ sn_store_init(SNStore *self)
 		    "BEGIN TRANSACTION",
 		    "COMMIT TRANSACTION"
   };
-  
+
+  self->_folderChanged = 0;
   self->_db = sn_data_base_new();
 
   for (glong i = 0; i < INDEXES_NUMBER; i++)
@@ -139,14 +204,15 @@ sn_store_update_folder(SNStore *self,
 
   glong paramCount = 4;
 
-  return sn_data_base_execute(self->_db,
-			      kStmtKeys[UPDATE_FOLDER_INDEX],
-			      paramCount,
-			      title,
-			      countString,
-			      selectedSting,
-			      idString,
-			      NULL);
+  return sn_store_execute(self,
+			  id,
+			  UPDATE_FOLDER_INDEX,
+			  paramCount,
+			  title,
+			  countString,
+			  selectedSting,
+			  idString,
+			  NULL);
 }
 
 gboolean
@@ -154,13 +220,14 @@ sn_store_insert_folder(SNStore *self, gchar *title)
 {
   glong paramCount = 3;
 
-  return sn_data_base_execute(self->_db,
-			      kStmtKeys[INSERT_FOLDER_INDEX],
-			      paramCount,
-			      title,
-			      "0",
-			      "0",
-			      NULL);
+  return sn_store_execute(self,
+			  kFolderInserted,
+			  INSERT_FOLDER_INDEX,
+			  paramCount,
+			  title,
+			  "0",
+			  "0",
+			  NULL);
 }
 
 gboolean
@@ -171,5 +238,36 @@ sn_store_delete_folder(SNStore *self, guint64 id)
   gchar idString[kLongLongSymbols];
   sn_print_guint64_value(idString, id);
 
-  return sn_data_base_execute(self->_db, kStmtKeys[DELETE_FOLDER_INDEX], paramCount, idString, NULL);
+  return sn_store_execute(self, id, DELETE_FOLDER_INDEX, paramCount, idString, NULL);
+}
+
+guintt64
+sn_store_get_folder_changed(SNStore *self)
+{
+  guint64 value;
+  g_object_get(G_OBJECT(self), kFolderChanged, &value, NULL);
+
+  return value;
+}
+
+static void
+sn_store_assign_folder_changed(SNStore *self, guint64 folderChanged)
+{
+  g_object_set(G_OBJECT(self), kFolderChanged, folderChanged, NULL);
+}
+
+static gboolean
+sn_store_execute(SNStore *self, guint64 changedFolder,  glong stmtIndex, glong count, ...)
+{
+  va_list args;
+  gbooelan success = sn_data_base_execute(self->_db
+					  kStmtKeys[stmtIndex],
+					  count,
+					  args);
+  if (success && stmtIndex >= UPDATE_FOLDER_INDEX && stmtIndex <= DELETE_FOLDER_INDEX)
+    {
+      sn_store_assign_folder_changed(self, changedFolder);
+    }
+
+  return success;
 }

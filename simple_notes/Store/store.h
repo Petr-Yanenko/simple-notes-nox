@@ -9,6 +9,10 @@
 #include "simple_notes.h"
 
 
+extern gchar *const kFolderChanged;
+extern guint64 const kFolderInserted; // Equal 0
+
+
 #define SN_TYPE_STORE sn_store_get_type()
 G_DECLARE_FINAL_TYPE(SNStore, sn_store, SN, STORE, GObject)
 
@@ -32,6 +36,10 @@ sn_store_insert_folder(SNStore *self, gchar *title);
 
 gboolean
 sn_store_delete_folder(SNStore *self, guint64 id);
+
+
+guint64
+sn_store_get_folder_changed(SNStore *self);
 
 
 #endif
