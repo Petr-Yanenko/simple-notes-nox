@@ -63,16 +63,18 @@ extern glong const kNotePathSymbols;
       }                                         \
   }
 
-#define SN_HANDLE_ERROR(error)                                          \
-  {                                                                     \
-    g_warning("\nError with code %d\n", error ? *error : SNErrorUnknown); \
+#define SN_HANDLE_ERROR(error)			\
+  {							\
+    SNError *pError = (SNError *)error;			\
+    SNError code = pError ? *pError : SNErrorUnknown;	\
+    g_warning("\nError with code %d\n", code);		\
   }
 
 #define SN_RETURN_IF_FAIL(expression, error)    \
   {                                             \
     if (!expression)                            \
       {                                         \
-        SN_HANDLE_ERROR(error);                 \
+	SN_HANDLE_ERROR(error);			\
         return;                                 \
       }                                         \
   }
@@ -81,7 +83,7 @@ extern glong const kNotePathSymbols;
   {                                                     \
     if (!expression)                                    \
       {                                                 \
-        SN_HANDLE_ERROR(error);                         \
+	SN_HANDLE_ERROR(error);				\
         return val;                                     \
       }                                                 \
   }

@@ -8,17 +8,18 @@
 
 #include <locale.h>
 #include <stdio.h>
+#include <gio.h>
 
-#include "sqlite_controller_testing.c"
+/*#include "sqlite_controller_testing.c"
 #include "folders_model_testing.c"
-#include "notes_model_testing.c"
+#include "notes_model_testing.c"*/
 //#include "content_model_testing.c"
 
 
 int
-main (int argc, char **argv)
+main(int argc, char **argv)
 {
-  setlocale (LC_ALL, "");
+  setlocale(LC_ALL, "");
 
   //    for (glong i = 0; i < 1000; i++) {
   //
@@ -94,5 +95,5 @@ main (int argc, char **argv)
               simple_notes_content_model_fixture_tear_down);
 #endif
 
-  return g_test_run ();
+  return g_test_run();
 }

@@ -15,7 +15,7 @@ struct _SNDataBase {
 
   sqlite3 *_db;
   GHashTable *_stmts;
-  GHashTable *_bindingStmts
+  GHashTable *_bindingStmts;
 };
 
 
@@ -44,8 +44,8 @@ sn_data_base_unref(gpointer bindingStmt);
 static void
 sn_data_base_dispose(GObject *self)
 {
-    SNDataBase *db = SN_STATEMENT_STORE(self);
-    sn_statement_store_dispose_sqlite(db);
+    SNDataBase *db = SN_DATA_BASE(self);
+    sn_data_base_dispose_sqlite(db);
 
     G_OBJECT_CLASS(sn_data_base_parent_class)->dispose(self);
 }

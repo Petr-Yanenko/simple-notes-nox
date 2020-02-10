@@ -7,6 +7,7 @@
 #define sn_store____FILEEXTENTION___
 
 #include "simple_notes.h"
+#include "folder_iterator.h"
 
 
 extern gchar *const kFolderChanged;

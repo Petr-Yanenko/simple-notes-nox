@@ -4,7 +4,6 @@
 
 #include "store.h"
 #include "data_base.h"
-#include "folder_iterator.h"
 
 
 struct _SNStore {
@@ -129,6 +128,8 @@ sn_store_class_init(SNStoreClass *class)
   objProperties[PROP_FOLDER_CHANGED] = g_param_spec_uint64(kFolderChanged,
 							   "Changed folder id",
 							   "This is set when folder is changed",
+							   0, /* min value */
+							   G_MAXUINT64,
 							   0, /* default value */
 							   G_PARAM_READWRITE);
   g_object_class_install_properties(gClass, N_PROPERTIES, objProperties);
@@ -160,8 +161,8 @@ sn_store_init(SNStore *self)
       SN_RETURN_IF_FAIL(success, &kError);
     }
 
-  gboolean folders = sn_data_base_execute(self->_db, kStmtKeys[CREATE_FOLDERS], 0, NULL);
-  gboolean notes = sn_data_base_execute(self->_db, kStmtKeys[CREATE_NOTES], 0, NULL);
+  gboolean folders = sn_data_base_execute(self->_db, kStmtKeys[CREATE_FOLDERS_INDEX], 0, NULL);
+  gboolean notes = sn_data_base_execute(self->_db, kStmtKeys[CREATE_NOTES_INDEX], 0, NULL);
   SN_RETURN_IF_FAIL(folders && notes, &kError);
 }
 
@@ -213,7 +214,7 @@ sn_store_update_folder(SNStore *self,
 			  paramCount,
 			  title,
 			  countString,
-			  selectedSting,
+			  selectedString,
 			  idString,
 			  NULL);
 }
@@ -244,7 +245,7 @@ sn_store_delete_folder(SNStore *self, guint64 id)
   return sn_store_execute(self, id, DELETE_FOLDER_INDEX, paramCount, idString, NULL);
 }
 
-guintt64
+guint64
 sn_store_get_folder_changed(SNStore *self)
 {
   guint64 value;
@@ -263,7 +264,7 @@ static gboolean
 sn_store_execute(SNStore *self, guint64 changedFolder,  glong stmtIndex, glong count, ...)
 {
   va_list args;
-  gbooelan success = sn_data_base_execute(self->_db
+  gboolean success = sn_data_base_execute(self->_db,
 					  kStmtKeys[stmtIndex],
 					  count,
 					  args);
