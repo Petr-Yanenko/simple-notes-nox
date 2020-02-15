@@ -19,12 +19,17 @@ static SNError kError = SNErrorFolderIterator;
 
 #define GET_STATEMENT(self, stmtPointer)		\
   {\
-    SN_RETURN_VAL_IF_FAIL(stmtPointer, NULL, &kError);\
+    SN_RETURN_VAL_IF_FAIL(stmtPointer, 0, &kError);\
     SNStatement *stmt = sn_data_iterator_private_get_statement(SN_DATA_ITERATOR(self));\
-    SN_RETURN_VAL_IF_FAIL(sn_statement_is_valid(stmt), NULL, &kError);\
+    SN_RETURN_VAL_IF_FAIL(sn_statement_is_valid(stmt), 0, &kError);\
     *stmtPointer = stmt;\
   }
 
+
+static void
+sn_folder_iterator_class_init(SNFolderIteratorClass *class)
+{
+}
 
 static void
 sn_folder_iterator_init(SNFolderIterator *self)

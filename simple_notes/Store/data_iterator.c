@@ -7,7 +7,7 @@
 
 typedef struct {
 
-  sqlite3_stmt *_stmt;
+  SNStatement *_stmt;
 
 } SNDataIteratorPrivate;
 
@@ -27,7 +27,7 @@ sn_data_iterator_real_next(SNDataIterator *self);
 static void
 sn_data_iterator_dispose(GObject *self)
 {
-  SNDataIteratorPrivate *private = sn_data_iterator_get_instance_private(self);
+  SNDataIteratorPrivate *private = sn_data_iterator_get_instance_private(SN_DATA_ITERATOR(self));
   g_clear_object(&private->_stmt);
   
   G_OBJECT_CLASS(sn_data_iterator_parent_class)->dispose(self);

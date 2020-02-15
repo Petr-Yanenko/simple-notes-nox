@@ -27,6 +27,11 @@ sn_statement_is_row(SNStatement *self);
 
 
 static void
+sn_statement_class_init(SNStatementClass *class)
+{
+}
+
+static void
 sn_statement_init(SNStatement *self)
 {
   self->_stmt = NULL;
@@ -47,7 +52,7 @@ sn_statement_new(sqlite3_stmt *stmt)
 gboolean
 sn_statement_is_valid(SNStatement *self)
 {
-  return self->_stmt;
+  return self->_stmt != NULL;
 }
 
 void
