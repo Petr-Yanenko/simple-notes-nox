@@ -11,19 +11,10 @@ struct _SNFolderIterator {
 };
 
 
-G_DEFINE_TYPE(SNFolderIterator, sn_folder_iterator, SN_TYPE_DATA_ITERATOR)
+G_DEFINE_TYPE(SNFolderIterator, sn_folder_iterator, SN_TYPE_ENTITY_ITERATOR)
 
 
 static SNError kError = SNErrorFolderIterator;
-
-
-#define GET_STATEMENT(self, stmtPointer)		\
-  {\
-    SN_RETURN_VAL_IF_FAIL(stmtPointer, 0, &kError);\
-    SNStatement *stmt = sn_data_iterator_private_get_statement(SN_DATA_ITERATOR(self));\
-    SN_RETURN_VAL_IF_FAIL(sn_statement_is_valid(stmt), 0, &kError);\
-    *stmtPointer = stmt;\
-  }
 
 
 static void
@@ -38,22 +29,14 @@ sn_folder_iterator_init(SNFolderIterator *self)
 
 SNFolderIterator *
 sn_folder_iterator_new(SNStatement *stmt)
-{
-  SNFolderIterator *instance = g_object_new(SN_TYPE_FOLDER_ITERATOR, NULL);
-  sn_data_iterator_private_set_statement(SN_DATA_ITERATOR(instance), stmt);
-  
-  return instance;
+{  
+  return SN_FOLDER_ITERATOR(sn_entity_iterator_new(stmt, SN_TYPE_FOLDER_ITERATOR));
 }
 
 guint64
 sn_folder_iterator_item_id(SNFolderIterator *self)
 {
-  glong idColumn = 0;
-  
-  SNStatement *stmt = NULL;
-  GET_STATEMENT(self, &stmt);
-  
-  return (guint64)sn_statement_column_int64(stmt, idColumn);
+  return sn_entity_iterator_item_id(SN_ENTITY_ITERATOR(self));
 }
 
 gchar *
@@ -62,7 +45,7 @@ sn_folder_iterator_item_title(SNFolderIterator *self)
   glong titleColumn = 1;
 
   SNStatement *stmt = NULL;
-  GET_STATEMENT(self, &stmt);
+  GET_STATEMENT(self, &stmt, &kError);
 
   return (gchar *)sn_statement_column_text(stmt, titleColumn);
 }
@@ -73,7 +56,7 @@ sn_folder_iterator_item_count(SNFolderIterator *self)
   glong countColumn = 2;
 
   SNStatement *stmt = NULL;
-  GET_STATEMENT(self, &stmt);
+  GET_STATEMENT(self, &stmt, &kError);
 
   return sn_statement_column_int(stmt, countColumn);
 }
@@ -83,8 +66,5 @@ sn_folder_iterator_item_selected(SNFolderIterator *self)
 {
   glong selectedColumn = 3;
 
-  SNStatement *stmt = NULL;
-  GET_STATEMENT(self, &stmt);
-
-  return sn_statement_column_int(stmt, selectedColumn);
+  return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self), selectedColumn);
 }

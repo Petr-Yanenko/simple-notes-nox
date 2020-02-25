@@ -11,7 +11,7 @@ typedef struct {
 
 } SNDataIteratorPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE(SNDataIterator, sn_data_iterator,G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE(SNDataIterator, sn_data_iterator,G_TYPE_OBJECT)
 
 
 static SNError const kError = SNErrorDataIterator;

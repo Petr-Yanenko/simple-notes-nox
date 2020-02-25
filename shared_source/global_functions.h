@@ -22,8 +22,6 @@ extern long const kSelectedSymbols;
 
 extern gchar *const kFolderPathFormat;
 extern gchar *const kNotePathFormat;
-extern glong const kFolderPathSymbols;
-extern glong const kNotePathSymbols;
 
 
 #define SIMPLE_NOTES_CREATE_ERROR(error,                        \
@@ -199,7 +197,10 @@ typedef enum {
               SNErrorStore = 2,
 	      SNErrorStatement = 3,
 	      SNErrorDataIterator = 4,
-	      SNErrorFolderIterator = 5
+	      SNErrorEntityIterator = 5,
+	      SNErrorFolderIterator = 6,
+	      SNErrorNoteIterator = 7,
+	      SNErrorSQLController = 8
 } SNError;
 
 
@@ -237,6 +238,9 @@ sn_copy_string(gchar *const string);
 
 void
 sn_print_guint64_value(gchar *buff, guint64 value);
+
+void
+sn_print_gint64_value(gchar *buff, gint64 value);
 
 void
 sn_print_boolean_value(gchar *buff, gboolean value);

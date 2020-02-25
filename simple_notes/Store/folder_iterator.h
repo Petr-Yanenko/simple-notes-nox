@@ -5,11 +5,11 @@
 #ifndef sn_folder_iterator____FILEEXTENSION___
 #define sn_folder_iterator____FILEEXTENSION___
 
-#include "data_iterator.h"
+#include "entity_iterator.h"
 
 
 #define SN_TYPE_FOLDER_ITERATOR sn_folder_iterator_get_type()
-G_DECLARE_FINAL_TYPE(SNFolderIterator, sn_folder_iterator, SN, FOLDER_ITERATOR, SNDataIterator)
+G_DECLARE_FINAL_TYPE(SNFolderIterator, sn_folder_iterator, SN, FOLDER_ITERATOR, SNEntityIterator)
 
 
 SNFolderIterator *

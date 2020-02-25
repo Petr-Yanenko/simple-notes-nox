@@ -21,8 +21,7 @@ G_DECLARE_DERIVABLE_TYPE(SNDataIterator, sn_data_iterator, SN, DATA_ITERATOR, GO
 
 
 struct _SNDataIteratorClass {
-
-  GObjectClass parent;
+  GObjectClass _parent;
 
   SNIteratorResult (*first)(SNDataIterator *self);
   SNIteratorResult (*next)(SNDataIterator *self);
