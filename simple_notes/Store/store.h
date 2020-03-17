@@ -60,9 +60,6 @@ gboolean
 sn_store_update_note(SNStore *self, guint64 id, guint64 folderID);
 
 gboolean
-sn_store_update_note_last_edited(SNStore *self, guint64 id);
-
-gboolean
 sn_store_insert_note(SNStore *self);
 
 gboolean
@@ -77,6 +74,16 @@ sn_store_get_note_changed(SNStore *self);
 
 guint64
 sn_store_get_note_selected(SNStore *self);
+
+
+GFile *
+sn_store_create_note_for_editing(SNStore *self);
+
+gboolean
+sn_store_end_editing(SNStore *self);
+
+gboolean
+sn_store_save_note(SNStore *self);
 
 
 #endif

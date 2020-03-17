@@ -369,7 +369,7 @@ sn_sql_controller_delete_note(SNSQLController *self, guint64 id, guint64 folderI
 					   folderIDStr);
     SN_RETURN_VAL_IF_FAIL(delete, FALSE, &kError);
 
-    gboolean update = sn_sql_controller_update_folder_count(self, idStr, -1);
+    gboolean update = sn_sql_controller_update_folder_count(self, folderIDStr, -1);
     SN_RETURN_VAL_IF_FAIL(update, FALSE, &kError);
 
     return TRUE;
