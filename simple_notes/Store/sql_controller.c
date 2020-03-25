@@ -82,7 +82,8 @@ sn_sql_controller_update_folder_count(SNSQLController *self,
 static gboolean
 sn_sql_controller_execute(SNSQLController *self,
 			  gchar *stmt,
-			  glong paramCount, ...);
+			  glong paramCount,
+			  ...);
 
 
 static void
@@ -501,7 +502,8 @@ sn_sql_controller_update_folder_count(SNSQLController *self,
 static gboolean
 sn_sql_controller_execute(SNSQLController *self,
 			  gchar *stmt,
-			  glong paramCount, ...)
+			  glong paramCount,
+			  ...)
 {
   va_list args;
   gboolean success = sn_data_base_execute(self->_db, stmt, paramCount, args);

@@ -250,7 +250,6 @@ sn_store_create_folder_iterator(SNStore *self)
   SNDataIterator *itr = sn_store_create_iterator(self, stmt, constructor);
   SNFolderIterator *folders = SN_FOLDER_ITERATOR(itr);
   self->_folderSelected = sn_store_get_selected_folder(self, folders);
-  sn_data_iterator_reset(itr);
 
   return folders;
 }
@@ -286,6 +285,7 @@ sn_store_delete_folder(SNStore *self, guint64 id)
 						     G_FILE_QUERY_INFO_NONE,
 						     NULL,
 						     &enumErr);
+  g_object_unref(folder);
   SN_RETURN_VAL_IF_FAIL(notes, FALSE, &kError);
 
   GError *infoErr = NULL;
@@ -315,7 +315,9 @@ sn_store_delete_folder(SNStore *self, guint64 id)
   SN_RETURN_VAL_IF_FAIL(delete, FALSE, &kError);
   SN_RETURN_VAL_IF_FAIL(infoErr == NULL, FALSE, &kError);
 
-  delete = g_file_delete(folder, NULL, &deleteErr);
+  GFile *deletedFolder = g_file_new_for_path(buff);
+  delete = g_file_delete(deletedFolder, NULL, &deleteErr);
+  g_object_unref(deletedFolder);
   SN_RETURN_VAL_IF_FAIL(delete, FALSE, &kError);
 
   gboolean success = sn_sql_controller_delete_folder(self->_sql, id);
@@ -369,7 +371,6 @@ sn_store_create_note_iterator(SNStore *self)
   SNDataIterator *itr = sn_store_create_iterator(self, stmt, constructor);
   SNNoteIterator *notes = SN_NOTE_ITERATOR(itr);
   self->_noteSelected = sn_store_get_selected_note(self, notes);
-  sn_data_iterator_reset(itr);
 
   return notes;
 }
@@ -705,6 +706,9 @@ sn_store_iterate(SNStore *self,
       if (handler(itr)) break;
       result = sn_data_iterator_next(itr);
     }
+
+  gboolean reset = sn_data_iterator_reset(itr);
+  SN_RETURN_IF_FAIL(reset, &kError);
 
   SN_RETURN_IF_FAIL(result != SNIteratorResultError, &kError);
 }
