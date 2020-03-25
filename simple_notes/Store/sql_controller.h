@@ -11,7 +11,11 @@
 
 
 #define SN_TYPE_SQL_CONTROLLER sn_sql_controller_get_type()
-G_DECLARE_FINAL_TYPE(SNSQLController, sn_sql_controller, SN, SQL_CONTROLLER, GObject)
+G_DECLARE_FINAL_TYPE(SNSQLController,
+		     sn_sql_controller,
+		     SN,
+		     SQL_CONTROLLER,
+		     GObject)
 
 
 SNSQLController *
@@ -21,10 +25,14 @@ SNStatement *
 sn_sql_controller_select_folders(SNSQLController *self);
 
 gboolean
-sn_sql_controller_update_folder_title(SNSQLController *self, guint64 id, gchar *title);
+sn_sql_controller_update_folder_title(SNSQLController *self,
+				      guint64 id,
+				      gchar *title);
 
 gboolean
-sn_sql_controller_update_folder_selected(SNSQLController *self, guint64 id, gboolean selected);
+sn_sql_controller_update_folder_selected(SNSQLController *self,
+					 guint64 id,
+					 gboolean selected);
 
 gboolean
 sn_sql_controller_insert_folder(SNSQLController *self,
@@ -39,10 +47,16 @@ SNStatement *
 sn_sql_controller_select_notes(SNSQLController *self, guint64 folderID);
 
 gboolean
-sn_sql_controller_update_note_folder_id(SNSQLController *self, guint64 id, guint64 folderID);
+sn_sql_controller_update_note_folder_id(SNSQLController *self,
+					guint64 id,
+					guint64 folderID,
+					guint64 newFolderID);
 
 gboolean
-sn_sql_controller_update_note_last_edited(SNSQLController *self, guint64 id, gint64 lastEdited);
+sn_sql_controller_update_note_last_edited(SNSQLController *self,
+					  guint64 id,
+					  guint64 folderID,
+					  gint64 lastEdited);
 
 gboolean
 sn_sql_controller_update_note_selected(SNSQLController *self,
@@ -58,7 +72,9 @@ sn_sql_controller_insert_note(SNSQLController *self,
 			      gboolean selected);
 
 gboolean
-sn_sql_controller_delete_note(SNSQLController *self, guint64 id, guint64 folderID);
+sn_sql_controller_delete_note(SNSQLController *self,
+			      guint64 id,
+			      guint64 folderID);
 
 
 #endif

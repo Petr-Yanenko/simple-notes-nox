@@ -71,13 +71,18 @@ sn_sql_controller_select(SNSQLController *self,
 			 gboolean (*deselect)(void));
 
 static gboolean
-sn_sql_controller_perform_transaction(SNSQLController *self, gboolean (*operation)(void));
+sn_sql_controller_perform_transaction(SNSQLController *self,
+				      gboolean (*operation)(void));
 
 static gboolean
-sn_sql_controller_update_folder_count(SNSQLController *self, gchar *id, glong increment);
+sn_sql_controller_update_folder_count(SNSQLController *self,
+				      gchar *id,
+				      glong increment);
 
 static gboolean
-sn_sql_controller_execute(SNSQLController *self, gchar *stmt, glong paramCount, ...);
+sn_sql_controller_execute(SNSQLController *self,
+			  gchar *stmt,
+			  glong paramCount, ...);
 
 
 static void
@@ -110,10 +115,10 @@ sn_sql_controller_init(SNSQLController *self)
 		    "DELETE FROM folders WHERE id == $ID",
 		    "CREATE TABLE IF NOT EXIST notes (id INTEGER PRIMARY KEY AUTOINCREMENT, folder_id INT REFERENCES folders (id) ON DELETE CASCADE, content TEXT, last_edited INT, selected INT)",
 		    "SELECT * FROM notes WHERE folder_id == $FOLDER_ID",
-		    "UPDATE notes SET folder_id = $FOLDER_ID selected = 0 WHERE id == $NOTE_ID",
-		    "UPDATE notes SET last_edited = $LAST_EDITED WHERE id == $NOTE_ID",
+		    "UPDATE notes SET folder_id = $NEW_FOLDER_ID selected = 0 WHERE id == $NOTE_ID AND folder_id == $FOLDER_ID",
+		    "UPDATE notes SET last_edited = $LAST_EDITED WHERE id == $NOTE_ID AND folder_id == $FOLDER_ID",
 		    "UPDATE notes SET selected = 0 WHERE folder_id == $FOLDER_ID",
-		    "UPDATE notes SET selected = $SELECTED WHERE id == $NOTE_ID AND folder_id == FOLDER_ID",
+		    "UPDATE notes SET selected = $SELECTED WHERE id == $NOTE_ID AND folder_id == $FOLDER_ID",
 		    "INSERT INTO notes (folder_id, content, last_edited, selected) VALUES ($FOLDER_ID, $CONTENT, $LAST_EDITED, $SELECTED)",
 		    "DELETE FROM notes WHERE id == $NOTE_ID AND folder_id == $FOLDER_ID",
 		    "BEGIN TRANSACTION",
@@ -128,8 +133,14 @@ sn_sql_controller_init(SNSQLController *self)
       SN_RETURN_IF_FAIL(success, &kError);
     }
 
-  gboolean folders = sn_data_base_execute(self->_db, kStmtKeys[CREATE_FOLDERS_INDEX], 0, NULL);
-  gboolean notes = sn_data_base_execute(self->_db, kStmtKeys[CREATE_NOTES_INDEX], 0, NULL);
+  gboolean folders = sn_data_base_execute(self->_db,
+					  kStmtKeys[CREATE_FOLDERS_INDEX],
+					  0,
+					  NULL);
+  gboolean notes = sn_data_base_execute(self->_db,
+					kStmtKeys[CREATE_NOTES_INDEX],
+					0,
+					NULL);
   SN_RETURN_IF_FAIL(folders && notes, &kError);
 }
 
@@ -141,15 +152,20 @@ sn_sql_controller_new(void)
 
 SNStatement *
 sn_sql_controller_select_folders(SNSQLController *self)
-{  
-  SNStatement *stmt = sn_data_base_bind(self->_db, kStmtKeys[SELECT_FOLDERS_INDEX], 0, NULL);
+{
+  SNStatement *stmt = sn_data_base_bind(self->_db,
+					kStmtKeys[SELECT_FOLDERS_INDEX],
+					0,
+					NULL);
   SN_RETURN_VAL_IF_FAIL(stmt, NULL, &kError);
-  
+
   return stmt;
 }
 
 gboolean
-sn_sql_controller_update_folder_title(SNSQLController *self, guint64 id, gchar *title)
+sn_sql_controller_update_folder_title(SNSQLController *self,
+				      guint64 id,
+				      gchar *title)
 {
   gchar idString[kLongLongSymbols];
   sn_print_guint64_value(idString, id);
@@ -165,12 +181,14 @@ sn_sql_controller_update_folder_title(SNSQLController *self, guint64 id, gchar *
 }
 
 gboolean
-sn_sql_controller_update_folder_selected(SNSQLController *self, guint64 id, gboolean selected)
+sn_sql_controller_update_folder_selected(SNSQLController *self,
+					 guint64 id,
+					 gboolean selected)
 {
   gboolean select(gchar *idStr, gchar *selectedStr)
   {
     glong paramCount = 2;
-    
+
     return sn_data_base_execute(self->_db,
 				kStmtKeys[UPDATE_FOLDER_SELECTED_INDEX],
 				paramCount,
@@ -178,7 +196,7 @@ sn_sql_controller_update_folder_selected(SNSQLController *self, guint64 id, gboo
 				idStr,
 				NULL);
   }
-  
+
   gboolean deselect(void)
   {
     glong deselectParams = 0;
@@ -192,11 +210,13 @@ sn_sql_controller_update_folder_selected(SNSQLController *self, guint64 id, gboo
 }
 
 gboolean
-sn_sql_controller_insert_folder(SNSQLController *self, gchar *title, gboolean selected)
+sn_sql_controller_insert_folder(SNSQLController *self,
+				gchar *title,
+				gboolean selected)
 {
   gchar selectedString[kSelectedSymbols];
   sn_print_boolean_value(selectedString, selected);
-  
+
   glong paramCount = 2;
 
   return sn_sql_controller_execute(self,
@@ -215,7 +235,11 @@ sn_sql_controller_delete_folder(SNSQLController *self, guint64 id)
   gchar idString[kLongLongSymbols];
   sn_print_guint64_value(idString, id);
 
-  return sn_sql_controller_execute(self, kStmtKeys[DELETE_FOLDER_INDEX], paramCount, idString, NULL);
+  return sn_sql_controller_execute(self,
+				   kStmtKeys[DELETE_FOLDER_INDEX],
+				   paramCount,
+				   idString,
+				   NULL);
 }
 
 SNStatement *
@@ -225,22 +249,25 @@ sn_sql_controller_select_notes(SNSQLController *self, guint64 folderID)
   gchar idString[kLongLongSymbols];
 
   sn_print_guint64_value(idString, folderID);
-  
+
   SNStatement *stmt = sn_data_base_bind(self->_db,
 					kStmtKeys[SELECT_NOTES_INDEX],
 					paramsNumber,
 					idString,
 					NULL);
-  
+
   SN_RETURN_VAL_IF_FAIL(stmt, NULL, &kError);
 
   return stmt;
 }
 
 gboolean
-sn_sql_controller_update_note_folder_id(SNSQLController *self, guint64 id, guint64 folderID)
+sn_sql_controller_update_note_folder_id(SNSQLController *self,
+					guint64 id,
+					guint64 folderID,
+					guint64 newFolderID)
 {
-  glong paramCount = 2;
+  glong paramCount = 3;
 
   gchar idString[kLongLongSymbols];
   sn_print_guint64_value(idString, id);
@@ -248,21 +275,31 @@ sn_sql_controller_update_note_folder_id(SNSQLController *self, guint64 id, guint
   gchar folderIDString[kLongLongSymbols];
   sn_print_guint64_value(folderIDString, folderID);
 
+  gchar newFolderStr[kLongLongSymbols];
+  sn_print_guint64_value(newFolderStr, newFolderID);
+
   return sn_sql_controller_execute(self,
 				   kStmtKeys[UPDATE_NOTE_FOLDER_INDEX],
 				   paramCount,
-				   folderIDString,
+				   newFolderStr,
 				   idString,
+				   folderIDString,
 				   NULL);
 }
 
 gboolean
-sn_sql_controller_update_note_last_edited(SNSQLController *self, guint64 id, gint64 lastEdited)
+sn_sql_controller_update_note_last_edited(SNSQLController *self,
+					  guint64 id,
+					  guint64 folderID,
+					  gint64 lastEdited)
 {
-  glong paramCount = 2;
+  glong paramCount = 3;
 
   gchar idString[kLongLongSymbols];
   sn_print_guint64_value(idString, id);
+
+  gchar folderStr[kLongLongSymbols];
+  sn_print_guint64_value(folderStr, folderID);
 
   gchar lastEditedString[kLongLongSymbols];
   sn_print_gint64_value(lastEditedString, lastEdited);
@@ -272,6 +309,7 @@ sn_sql_controller_update_note_last_edited(SNSQLController *self, guint64 id, gin
 				   paramCount,
 				   lastEditedString,
 				   idString,
+				   folderStr,
 				   NULL);
 }
 
@@ -339,7 +377,9 @@ sn_sql_controller_insert_note(SNSQLController *self,
 					   NULL);
     SN_RETURN_VAL_IF_FAIL(insert, FALSE, &kError);
 
-    gboolean update = sn_sql_controller_update_folder_count(self, folderIDString, 1);
+    gboolean update = sn_sql_controller_update_folder_count(self,
+							    folderIDString,
+							    1);
     SN_RETURN_VAL_IF_FAIL(update, FALSE, &kError);
 
     return TRUE;
@@ -349,11 +389,13 @@ sn_sql_controller_insert_note(SNSQLController *self,
 }
 
 gboolean
-sn_sql_controller_delete_note(SNSQLController *self, guint64 id, guint64 folderID)
+sn_sql_controller_delete_note(SNSQLController *self,
+			      guint64 id,
+			      guint64 folderID)
 {
   glong deleteCount = 2;
   glong updateCount = 2;
-  
+
   gchar idStr[kLongLongSymbols];
   sn_print_guint64_value(idStr, id);
 
@@ -369,7 +411,9 @@ sn_sql_controller_delete_note(SNSQLController *self, guint64 id, guint64 folderI
 					   folderIDStr);
     SN_RETURN_VAL_IF_FAIL(delete, FALSE, &kError);
 
-    gboolean update = sn_sql_controller_update_folder_count(self, folderIDStr, -1);
+    gboolean update = sn_sql_controller_update_folder_count(self,
+							    folderIDStr,
+							    -1);
     SN_RETURN_VAL_IF_FAIL(update, FALSE, &kError);
 
     return TRUE;
@@ -390,7 +434,7 @@ sn_sql_controller_select(SNSQLController *self,
 
   gchar selectedString[kSelectedSymbols];
   sn_print_boolean_value(selectedString, selected);
-  
+
   if (!selected)
     {
       gboolean isSelected = select(idString, selectedString);
@@ -404,33 +448,42 @@ sn_sql_controller_select(SNSQLController *self,
       {
 	gboolean isDeselected = deselect();
 	SN_RETURN_VAL_IF_FAIL(isDeselected, FALSE, &kError);
-	
+
 	gboolean isSelected = select(idString, selectedString);
 	SN_RETURN_VAL_IF_FAIL(isSelected, FALSE, &kError);
 
 	return TRUE;
       }
-      
+
       return sn_sql_controller_perform_transaction(self, transaction);
     }
 }
 
 static gboolean
-sn_sql_controller_perform_transaction(SNSQLController *self, gboolean (*operation)(void))
+sn_sql_controller_perform_transaction(SNSQLController *self,
+				      gboolean (*operation)(void))
 {
-  gboolean begin = sn_data_base_execute(self->_db, kStmtKeys[BEGIN_TRANSACTION_INDEX], 0, NULL);
+  gboolean begin = sn_data_base_execute(self->_db,
+					kStmtKeys[BEGIN_TRANSACTION_INDEX],
+					0,
+					NULL);
   SN_RETURN_VAL_IF_FAIL(begin, FALSE, &kError);
 
   gboolean success = operation();
-      
-  gboolean commit = sn_data_base_execute(self->_db, kStmtKeys[COMMIT_TRANSACTION_INDEX], 0, NULL);
+
+  gboolean commit = sn_data_base_execute(self->_db,
+					 kStmtKeys[COMMIT_TRANSACTION_INDEX],
+					 0,
+					 NULL);
   SN_RETURN_VAL_IF_FAIL(commit, FALSE, &kError);
 
   return success;
 }
 
 static gboolean
-sn_sql_controller_update_folder_count(SNSQLController *self, gchar *id, glong increment)
+sn_sql_controller_update_folder_count(SNSQLController *self,
+				      gchar *id,
+				      glong increment)
 {
   glong paramsCount = 2;
 
@@ -446,7 +499,9 @@ sn_sql_controller_update_folder_count(SNSQLController *self, gchar *id, glong in
 }
 
 static gboolean
-sn_sql_controller_execute(SNSQLController *self, gchar *stmt, glong paramCount, ...)
+sn_sql_controller_execute(SNSQLController *self,
+			  gchar *stmt,
+			  glong paramCount, ...)
 {
   va_list args;
   gboolean success = sn_data_base_execute(self->_db, stmt, paramCount, args);

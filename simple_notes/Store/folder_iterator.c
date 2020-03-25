@@ -29,8 +29,9 @@ sn_folder_iterator_init(SNFolderIterator *self)
 
 SNFolderIterator *
 sn_folder_iterator_new(SNStatement *stmt)
-{  
-  return SN_FOLDER_ITERATOR(sn_entity_iterator_new(stmt, SN_TYPE_FOLDER_ITERATOR));
+{
+  return SN_FOLDER_ITERATOR(sn_entity_iterator_new(stmt,
+						   SN_TYPE_FOLDER_ITERATOR));
 }
 
 guint64
@@ -66,5 +67,6 @@ sn_folder_iterator_item_selected(SNFolderIterator *self)
 {
   glong selectedColumn = 3;
 
-  return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self), selectedColumn);
+  return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self),
+					  selectedColumn);
 }

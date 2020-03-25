@@ -80,5 +80,6 @@ sn_note_iterator_item_selected(SNNoteIterator *self)
 {
   glong selectedColumn = 4;
 
-  return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self), selectedColumn);
+  return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self),
+					  selectedColumn);
 }

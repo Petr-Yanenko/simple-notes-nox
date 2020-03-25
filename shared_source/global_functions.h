@@ -70,7 +70,7 @@ extern gchar *const kNotePathFormat;
 
 #define SN_RETURN_IF_FAIL(expression, error)    \
   {                                             \
-    if (!expression)                            \
+    if (!(expression))				\
       {                                         \
 	SN_HANDLE_ERROR(error);			\
         return;                                 \
@@ -79,7 +79,7 @@ extern gchar *const kNotePathFormat;
 
 #define SN_RETURN_VAL_IF_FAIL(expression, val, error)   \
   {                                                     \
-    if (!expression)                                    \
+    if (!(expression))					\
       {                                                 \
 	SN_HANDLE_ERROR(error);				\
         return val;                                     \
@@ -200,7 +200,8 @@ typedef enum {
 	      SNErrorEntityIterator = 5,
 	      SNErrorFolderIterator = 6,
 	      SNErrorNoteIterator = 7,
-	      SNErrorSQLController = 8
+	      SNErrorSQLController = 8,
+	      SNErrorNotFound = 9
 } SNError;
 
 

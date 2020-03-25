@@ -25,6 +25,7 @@ struct _SNDataIteratorClass {
 
   SNIteratorResult (*first)(SNDataIterator *self);
   SNIteratorResult (*next)(SNDataIterator *self);
+  gboolean (*reset)(SNDataIterator *self);
 };
 
 
@@ -33,6 +34,9 @@ sn_data_iterator_first(SNDataIterator *self);
 
 SNIteratorResult
 sn_data_iterator_next(SNDataIterator *self);
+
+gboolean
+sn_data_iterator_reset(SNDataIterator *self);
 
 
 #endif

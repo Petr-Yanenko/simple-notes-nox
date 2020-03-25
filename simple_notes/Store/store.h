@@ -25,7 +25,7 @@ extern gint64 const kNotEdited; // Equal 0
 #define SN_TYPE_STORE sn_store_get_type()
 G_DECLARE_FINAL_TYPE(SNStore, sn_store, SN, STORE, GObject)
 
-  
+
 SNStore *
 sn_store_get_instance(void);
 
@@ -57,7 +57,7 @@ SNNoteIterator *
 sn_store_create_note_iterator(SNStore *self);
 
 gboolean
-sn_store_update_note(SNStore *self, guint64 id, guint64 folderID);
+sn_store_update_note(SNStore *self, guint64 id, guint64 newFolderID);
 
 gboolean
 sn_store_insert_note(SNStore *self);
@@ -83,7 +83,7 @@ gboolean
 sn_store_end_editing(SNStore *self);
 
 gboolean
-sn_store_save_note(SNStore *self);
+sn_store_save_note(SNStore *self, SNError *error);
 
 
 #endif

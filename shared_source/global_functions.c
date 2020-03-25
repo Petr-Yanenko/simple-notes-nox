@@ -24,7 +24,7 @@ GQuark const kSimpleNotesDomain = 11111;
 long const kLongLongSymbols = 21;
 long const kSelectedSymbols = 2;
 
-gchar *const kFolderPathFormat ="~/simple_notes_nox/folder_%llu";
+gchar *const kFolderPathFormat ="~/simple_notes_nox/folder_%llu/";
 gchar *const kNotePathFormat = "~/simple_notes_nox/folder_%llu/note_%ld.txt";
 
 
