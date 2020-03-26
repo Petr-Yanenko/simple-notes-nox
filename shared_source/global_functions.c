@@ -24,10 +24,8 @@ GQuark const kSimpleNotesDomain = 11111;
 long const kLongLongSymbols = 21;
 long const kSelectedSymbols = 2;
 
-gchar *const kFolderPathFormat ="%s/folder_%llu";
-gchar *const kNotePathFormat = "%s/folder_%llu/note_%llu.txt";
-glong const kFolderPathSymbols = 39;
-glong const kNotePathSymbols = 70;
+gchar *const kFolderPathFormat ="~/simple_notes_nox/folder_%llu/";
+gchar *const kNotePathFormat = "~/simple_notes_nox/folder_%llu/note_%ld.txt";
 
 
 gboolean
@@ -123,29 +121,35 @@ simple_notes_create_error (GError **pError,
 }
 
 gchar *
-simple_notes_create_string (gchar *const string)
+sn_copy_string(gchar *const string)
 {
-  gchar *mallocString = g_malloc (sizeof (gchar) * (strlen (string) + 1));
-  strcpy (mallocString, string);
+  gchar *mallocString = g_malloc(sizeof(gchar) * (strlen(string) + 1));
+  strcpy(mallocString, string);
   return mallocString;
 }
 
 void
-simple_notes_print_guint64_value (gchar * buff, guint64 value)
+sn_print_guint64_value(gchar * buff, guint64 value)
 {
-  sprintf (buff, "%llu", value);
+  sprintf(buff, "%llu", value);
 }
 
 void
-simple_notes_print_boolean_value (gchar *buff, gboolean value)
+sn_print_gint64_value(gchar *buff, gint64 value)
 {
-  sprintf (buff, "%i", value);
+  sprintf(buff, "%lld", value);
 }
 
 void
-simple_notes_print_long_value (gchar *buff, glong value)
+sn_print_boolean_value(gchar *buff, gboolean value)
 {
-  sprintf (buff, "%ld", value);
+  sprintf(buff, "%i", value);
+}
+
+void
+sn_print_long_value(gchar *buff, glong value)
+{
+  sprintf(buff, "%ld", value);
 }
 
 void

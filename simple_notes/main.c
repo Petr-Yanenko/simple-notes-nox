@@ -8,19 +8,19 @@
 
 #include <locale.h>
 #include <string.h>
-#include "application.h"
+#include "simple_notes.h"
+/*#include "application.h"
 #include "responder_stub.h"
 #include "help.h"
 #include "folder_window.h"
 #include "note_window.h"
 #include "mediator.h"
-
+*/
 
 gint32
-simple_notes_command_line (GApplication *application,
-                           GApplicationCommandLine *cmdline)
+sn_command_line(GApplication *application, GApplicationCommandLine *cmdline)
 {
-  SimpleNotesResponderStub *stub = simple_notes_responder_stub_new ();
+  /*SimpleNotesResponderStub *stub = simple_notes_responder_stub_new ();
   SimpleNotesMediator *mediator = simple_notes_mediator_new ();
   SimpleNotesNoteWindow *notesWindow
     = simple_notes_note_window_new (SIMPLE_NOTES_RESPONDER (stub), mediator);
@@ -48,12 +48,12 @@ simple_notes_command_line (GApplication *application,
                                           buff,
                                           symbolsMax,
                                           NULL,
-                                          &error);
+                                          &error);*/
       /*buff[0] = 'f';buff[1] = 'o';buff[2] = 'l';buff[3] = 'd';buff[4] = 'e';buff[5] = 'r';buff[6] = ' ';buff[7] = '-';buff[8] = '-';buff[9] = 'i';buff[10] = 'n';buff[11] = 's';buff[12] = 'e';buff[13] = 'r';buff[14] = 't';buff[15] = ' ';
         for (; count < buffSize; count++) {
         buff[count] = 't';
         }*/
-      gboolean success = count > -1;
+  /* gboolean success = count > -1;
       if (success)
         {
           if (!count)
@@ -84,27 +84,28 @@ simple_notes_command_line (GApplication *application,
   g_object_unref (help);
   g_object_unref (foldersWindow);
   g_object_unref (notesWindow);
-  g_object_unref (mediator);
+  g_object_unref (mediator);*/
 
   return 0;
 }
 
 gint32
-main (int argc, char **argv)
+main(int argc, char **argv)
 {
-  setlocale (LC_ALL, "");
+  setlocale(LC_ALL, "");
 
   GApplication *app;
   int status;
 
-  app = g_application_new ("org.simple-notes.example",
-                           G_APPLICATION_HANDLES_COMMAND_LINE);
-  g_signal_connect (app,
-                    "command-line",
-                    G_CALLBACK (simple_notes_command_line),
-                    NULL);
-  status = g_application_run (G_APPLICATION (app), argc, argv);
-  g_object_unref (app);
+  app = g_application_new("org.simple-notes.example",
+			  G_APPLICATION_HANDLES_COMMAND_LINE);
+  g_signal_connect(app,
+		   "command-line",
+		   G_CALLBACK(sn_command_line),
+		   NULL);
+  
+  status = g_application_run(G_APPLICATION(app), argc, argv);
+  g_object_unref(app);
 
   return status;
 }
