@@ -1,5 +1,5 @@
 //
-//  store.h
+// store.h
 //
 
 
@@ -11,12 +11,14 @@
 #include "note_iterator.h"
 
 
+//signals
 extern gchar *const kFolderChanged;
 extern gchar *const kFolderSelected;
 
 extern gchar *const kNoteChanged;
 extern gchar *const kNoteSelected;
 
+//constants
 extern guint64 const kItemInserted; // Equal 0
 extern guint64 const kItemDeselected; // Equal 0
 extern gint64 const kNotEdited; // Equal 0
