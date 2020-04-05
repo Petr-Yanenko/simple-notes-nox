@@ -25,20 +25,20 @@ extern gchar *const kNotePathFormat;
 
 
 #define SIMPLE_NOTES_CREATE_ERROR(error,                        \
-                                  errorCode,                    \
-                                  format,                       \
-                                  argsNumber,                   \
-                                  args)                         \
+				  errorCode,                    \
+				  format,                       \
+				  argsNumber,                   \
+				  args)                         \
   {                                                             \
     if (error)                                                  \
       {                                                         \
-        GString *description = g_string_new ("\0");             \
-        g_string_append_vprintf (description, format, args);    \
-        *error = g_error_new (kSimpleNotesDomain,               \
-                              errorCode,                        \
-                              description->str,                 \
-                              NULL);                            \
-        g_string_free (description, TRUE);                      \
+	GString *description = g_string_new ("\0");             \
+	g_string_append_vprintf (description, format, args);    \
+	*error = g_error_new (kSimpleNotesDomain,               \
+			      errorCode,                        \
+			      description->str,                 \
+			      NULL);                            \
+	g_string_free (description, TRUE);                      \
       }                                                         \
   }
 
@@ -46,10 +46,10 @@ extern gchar *const kNotePathFormat;
   {                                             \
     if (error && (*error))                      \
       {                                         \
-        g_printerr ("\n%s %d %d\n",             \
-                    (*error)->message,          \
-                    (*error)->code,             \
-                    (*error)->domain);          \
+	g_printerr ("\n%s %d %d\n",             \
+		    (*error)->message,          \
+		    (*error)->code,             \
+		    (*error)->domain);          \
       }                                         \
   }
 
@@ -57,13 +57,13 @@ extern gchar *const kNotePathFormat;
   {                                             \
     if (error)                                  \
       {                                         \
-        g_clear_error (error);                  \
+	g_clear_error (error);                  \
       }                                         \
   }
 
-#define SN_HANDLE_ERROR(error)			\
+#define SN_HANDLE_ERROR(error)				\
   {							\
-    SNError *pError = (SNError *)error;			\
+    SNError *pError = (SNError *)error;		\
     SNError code = pError ? *pError : SNErrorUnknown;	\
     g_warning("\nError with code %d\n", code);		\
   }
@@ -72,8 +72,8 @@ extern gchar *const kNotePathFormat;
   {                                             \
     if (!(expression))				\
       {                                         \
-	SN_HANDLE_ERROR(error);			\
-        return;                                 \
+	SN_HANDLE_ERROR(error);		\
+	return;				\
       }                                         \
   }
 
@@ -81,18 +81,18 @@ extern gchar *const kNotePathFormat;
   {                                                     \
     if (!(expression))					\
       {                                                 \
-	SN_HANDLE_ERROR(error);				\
-        return val;                                     \
+	SN_HANDLE_ERROR(error);			\
+	return val;					\
       }                                                 \
   }
 
 #define SN_GET_CLASS_OR_IFACE(object,                                   \
-                              outKlass,                                 \
-                              func_name,                                \
-                              ModuleObjectName,                         \
-                              MODULE,                                   \
-                              OBJECT_NAME,                              \
-                              CLASS_OR_IFACE)                           \
+			      outKlass,                                 \
+			      func_name,                                \
+			      ModuleObjectName,                         \
+			      MODULE,                                   \
+			      OBJECT_NAME,                              \
+			      CLASS_OR_IFACE)                           \
   {                                                                     \
     g_return_if_fail (MODULE##_IS_##OBJECT_NAME (object));              \
     g_return_if_fail (outKlass);                                        \
@@ -107,47 +107,47 @@ extern gchar *const kNotePathFormat;
   }
 
 #define SN_GET_CLASS(object,                                    \
-                     outKlass,                                  \
-                     func_name,                                 \
-                     ModuleObjectName,                          \
-                     MODULE,                                    \
-                     OBJECT_NAME)                               \
+		     outKlass,                                  \
+		     func_name,                                 \
+		     ModuleObjectName,                          \
+		     MODULE,                                    \
+		     OBJECT_NAME)                               \
   {                                                             \
     SN_GET_CLASS_OR_IFACE(object,                               \
-                          outKlass,                             \
-                          func_name,                            \
-                          ModuleObjectName,                     \
-                          MODULE,                               \
-                          OBJECT_NAME,                          \
-                          CLASS);                               \
+			  outKlass,                             \
+			  func_name,                            \
+			  ModuleObjectName,                     \
+			  MODULE,                               \
+			  OBJECT_NAME,                          \
+			  CLASS);                               \
   }
 
 #define SN_GET_IFACE(object,                                    \
-                     outIface,                                  \
-                     func_name,                                 \
-                     ModuleObjectName,                          \
-                     MODULE,                                    \
-                     OBJECT_NAME)                               \
+		     outIface,                                  \
+		     func_name,                                 \
+		     ModuleObjectName,                          \
+		     MODULE,                                    \
+		     OBJECT_NAME)                               \
   {                                                             \
     SN_GET_CLASS_OR_IFACE(object,                                       \
-                          outKlass,                                     \
-                          func_name,                                    \
-                          ModuleObjectName,                             \
-                          MODULE,                                       \
-                          OBJECT_NAME,                                  \
-                            IFACE);                                     \
+			  outKlass,                                     \
+			  func_name,                                    \
+			  ModuleObjectName,                             \
+			  MODULE,                                       \
+			  OBJECT_NAME,                                  \
+			  IFACE);					\
   }
 
 #define SN_GET_CLASS_OR_IFACE_WITH_RETURN_VAL(object,                   \
-                                              outKlass,                 \
-                                              func_name,                \
-                                              ModuleObjectName,         \
-                                              MODULE,                   \
-                                              OBJECT_NAME,              \
-                                              CLASS_OR_IFACE,           \
-                                              returnVal)                \
+					      outKlass,                 \
+					      func_name,                \
+					      ModuleObjectName,         \
+					      MODULE,                   \
+					      OBJECT_NAME,              \
+					      CLASS_OR_IFACE,           \
+					      returnVal)                \
   {                                                                     \
-    g_return_val_if_fail (MODULE##_IS_##OBJECT_NAME (object), returnVal); \
+    g_return_val_if_fail (MODULE##_IS_##OBJECT_NAME (object), returnVal);\
     g_return_val_if_fail (outKlass, returnVal);                         \
     *outKlass = MODULE##_##OBJECT_NAME##_GET_##CLASS_OR_IFACE (object); \
     g_return_val_if_fail (*outKlass != NULL, returnVal);                \
@@ -155,53 +155,55 @@ extern gchar *const kNotePathFormat;
   }
 
 #define SN_GET_CLASS_OR_RETURN_VAL(object,                              \
-                                   outKlass,                            \
-                                   func_name,                           \
-                                   ModuleObjectName,                    \
-                                   MODULE,                              \
-                                   OBJECT_NAME,                         \
-                                   returnVal)                           \
+				   outKlass,                            \
+				   func_name,                           \
+				   ModuleObjectName,                    \
+				   MODULE,                              \
+				   OBJECT_NAME,                         \
+				   returnVal)                           \
   {                                                                     \
     SN_GET_CLASS_OR_IFACE_WITH_RETURN_VAL(object,                       \
-                                          outKlass,                     \
-                                          func_name,                    \
-                                          ModuleObjectName,             \
-                                          MODULE,                       \
-                                          OBJECT_NAME,                  \
-                                          CLASS,                        \
-                                          returnVal);                   \
+					  outKlass,                     \
+					  func_name,                    \
+					  ModuleObjectName,             \
+					  MODULE,                       \
+					  OBJECT_NAME,                  \
+					  CLASS,                        \
+					  returnVal);                   \
   }
 
 #define SN_GET_IFACE_OR_RETURN_VAL(object,                              \
-                                   outIface,                            \
-                                   func_name,                           \
-                                   ModuleObjectName,                    \
-                                   MODULE,                              \
-                                   OBJECT_NAME,                         \
-                                   returnVal)                           \
+				   outIface,                            \
+				   func_name,                           \
+				   ModuleObjectName,                    \
+				   MODULE,                              \
+				   OBJECT_NAME,                         \
+				   returnVal)                           \
   {                                                                     \
     SN_GET_CLASS_OR_IFACE_WITH_RETURN_VAL(object,                       \
-                                          outKlass,                     \
-                                          func_name,                    \
-                                          ModuleObjectName,             \
-                                          MODULE,                       \
-                                          OBJECT_NAME,                  \
-                                          IFACE,                        \
-                                          returnVal);                   \
+					  outKlass,                     \
+					  func_name,                    \
+					  ModuleObjectName,             \
+					  MODULE,                       \
+					  OBJECT_NAME,                  \
+					  IFACE,                        \
+					  returnVal);                   \
   }
 
 
 typedef enum {
-              SNErrorUnknown = 0,
-              SNErrorDataBase = 1,
-              SNErrorStore = 2,
+	      SNErrorUnknown = 0,
+	      SNErrorDataBase = 1,
+	      SNErrorStore = 2,
 	      SNErrorStatement = 3,
 	      SNErrorDataIterator = 4,
 	      SNErrorEntityIterator = 5,
 	      SNErrorFolderIterator = 6,
 	      SNErrorNoteIterator = 7,
 	      SNErrorSQLController = 8,
-	      SNErrorNotFound = 9
+	      SNErrorNotFound = 9,
+	      SNErrorFolderPresenter = 10,
+	      SNErrorEntityPresenter = 11
 } SNError;
 
 
@@ -210,13 +212,13 @@ simple_notes_trash_file (gchar *fileName);
 
 void
 simple_notes_print_byte_array (GByteArray *array,
-                               GString *string,
-                               gchar *title);
+			       GString *string,
+			       gchar *title);
 
 void
 simple_notes_copy (GType type,
-                   void (setter) (GValue *value),
-                   void (getter) (GValue *value));
+		   void (setter) (GValue *value),
+		   void (getter) (GValue *value));
 
 void
 simple_notes_set_copy_byte_array (GByteArray *array, GByteArray **variable);
@@ -229,10 +231,10 @@ simple_notes_gulong_guint_cast (gulong value);
 
 void
 simple_notes_create_error (GError **pError,
-                           gint code,
-                           gchar *const format,
-                           gint argsNumber,
-                           ...);
+			   gint code,
+			   gchar *const format,
+			   gint argsNumber,
+			   ...);
 
 gchar *
 sn_copy_string(gchar *const string);
