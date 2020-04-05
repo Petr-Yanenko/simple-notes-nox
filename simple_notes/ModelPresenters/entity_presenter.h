@@ -23,4 +23,16 @@ G_DECLARE_DERIVABLE_TYPE(SNEntityPresenter,
   };
 
 
+void
+sn_entity_presenter_assign_model(SNEntityPresenter *self, SNIModel *model);
+
+SNStore *
+sn_entity_presenter_get_store(SNEntityPresenter *self);
+
+GList *
+sn_entity_presenter_create_items(SNEntityPresenter *self,
+				 SNEntityIterator *itr,
+				 SNObject *(*create_item)(void));
+
+
 #endif
