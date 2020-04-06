@@ -22,7 +22,7 @@ static void
 sn_entity_presenter_dispose(GObject *self)
 {
   SNEntityPresenter *presenter = SN_ENTITY_PRESENTER(self);
-  SNEntityPresneterPrivate *prv =
+  SNEntityPresenterPrivate *prv =
     sn_entity_presenter_get_instance_private(presenter);
   g_clear_object(&prv->_store);
   prv->_unsafe_model = NULL;
@@ -31,7 +31,7 @@ sn_entity_presenter_dispose(GObject *self)
 }
 
 static void
-sn_entity_presenter_class_init(SNEntityPresenter *class)
+sn_entity_presenter_class_init(SNEntityPresenterClass *class)
 {
   GObjectClass *gClass = G_OBJECT_CLASS(class);
   gClass->dispose = sn_entity_presenter_dispose;

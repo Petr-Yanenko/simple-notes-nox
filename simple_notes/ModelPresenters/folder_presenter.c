@@ -27,7 +27,7 @@ sn_folder_presenter_class_init(SNFolderPresenterClass *class)
 static void
 sn_folder_presenter_init(SNFolderPresenter *self)
 {
-  self->_unsafe_store = sn_store_get_instance();
+  self->_unsafe_store = sn_entity_presenter_get_store(SN_ENTITY_PRESENTER(self));
 }
 
 SNFolderPresenter *
@@ -64,5 +64,7 @@ sn_folder_presenter_fetch(SNFolderPresenter *self)
   }
 
   GList *items = sn_entity_presenter_create_items(super, entities, create_item);
+
+  g_object_unref(itr);
 }
 
