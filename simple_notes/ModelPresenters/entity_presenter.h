@@ -23,6 +23,9 @@ G_DECLARE_DERIVABLE_TYPE(SNEntityPresenter,
   };
 
 
+SNIModel *
+sn_entity_presenter_get_model(SNEntityPresenter *self);
+
 void
 sn_entity_presenter_assign_model(SNEntityPresenter *self, SNIModel *model);
 
@@ -32,7 +35,8 @@ sn_entity_presenter_get_store(SNEntityPresenter *self);
 GList *
 sn_entity_presenter_create_items(SNEntityPresenter *self,
 				 SNEntityIterator *itr,
-				 SNObject *(*create_item)(void));
+				 SNObject *(*create_item)(void),
+				 SNError *error);
 
 
 #endif

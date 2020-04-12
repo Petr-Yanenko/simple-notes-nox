@@ -203,7 +203,8 @@ typedef enum {
 	      SNErrorSQLController = 8,
 	      SNErrorNotFound = 9,
 	      SNErrorFolderPresenter = 10,
-	      SNErrorEntityPresenter = 11
+	      SNErrorEntityPresenter = 11,
+	      SNErrorItemsFetch = 12
 } SNError;
 
 

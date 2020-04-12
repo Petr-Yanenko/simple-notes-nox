@@ -27,7 +27,8 @@ sn_folder_presenter_class_init(SNFolderPresenterClass *class)
 static void
 sn_folder_presenter_init(SNFolderPresenter *self)
 {
-  self->_unsafe_store = sn_entity_presenter_get_store(SN_ENTITY_PRESENTER(self));
+  SNEntityPresenter *entities = SN_ENTITY_PRESENTER(self);
+  self->_unsafe_store = sn_entity_presenter_get_store(entities);
 }
 
 SNFolderPresenter *
@@ -63,7 +64,21 @@ sn_folder_presenter_fetch(SNFolderPresenter *self)
     return SN_OBJECT(folder);
   }
 
-  GList *items = sn_entity_presenter_create_items(super, entities, create_item);
+  glong notError = -1;
+  SNError error = notError;
+  GList *items = sn_entity_presenter_create_items(super,
+						  entities,
+						  create_item,
+						  &error);
+  SNIModel *model = sn_entity_presenter_get_model(super);
+  if (!items && error != notError)
+    {
+      sn_imodel_error(model, error);
+    }
+  else
+    {
+      sn_imodel_new_data(model, (void *)items);
+    }
 
   g_object_unref(itr);
 }
