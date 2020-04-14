@@ -38,17 +38,17 @@ simple_notes_trash_file (gchar *fileName)
 }
 
 void
-simple_notes_print_byte_array (GByteArray *array,
-                               GString *string,
-                               gchar *title)
+sn_print_byte_array(GByteArray *array,
+		    GString *string,
+		    gchar *title)
 {
   if (array)
     {
       g_string_append_printf (string, "%s: 0x", title);
       for (glong i = 0; i < array->len; i++)
-        {
-          g_string_append_printf (string, "%x", array->data[i]);
-        }
+	{
+	  g_string_append_printf (string, "%x", array->data[i]);
+	}
     }
   else
     {
@@ -57,40 +57,40 @@ simple_notes_print_byte_array (GByteArray *array,
 }
 
 void
-simple_notes_copy (GType type,
-                   void (setter) (GValue *value),
-                   void (getter) (GValue *value))
+sn_copy(GType type,
+	void (setter)(GValue *value),
+	void (getter)(GValue *value))
 {
   GValue value = G_VALUE_INIT;
-  g_value_init (&value, type);
-  setter (&value);
-  getter (&value);
-  g_value_unset (&value);
+  g_value_init(&value, type);
+  setter(&value);
+  getter(&value);
+  g_value_unset(&value);
 }
 
 void
-simple_notes_set_copy_byte_array (GByteArray *array, GByteArray **variable)
+sn_set_copy_byte_array(GByteArray *array, GByteArray **variable)
 {
   if (*variable)
     {
-      g_byte_array_unref (*variable);
+      g_byte_array_unref(*variable);
       *variable = NULL;
     }
   if (array)
     {
-      *variable = g_byte_array_new ();
-      g_byte_array_append (*variable, array->data, array->len);
+      *variable = g_byte_array_new();
+      g_byte_array_append(*variable, array->data, array->len);
     }
 }
 
 GByteArray *
-simple_notes_get_copy_byte_array (GByteArray *variable)
+sn_get_copy_byte_array(GByteArray *variable)
 {
   GByteArray *copy = NULL;
   if (variable)
     {
-      copy = g_byte_array_new ();
-      g_byte_array_append (copy, variable->data, variable->len);
+      copy = g_byte_array_new();
+      g_byte_array_append(copy, variable->data, variable->len);
     }
   return copy;
 }

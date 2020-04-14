@@ -13,7 +13,7 @@ struct _SNFolderPresenter {
 };
 
 
-G_DEFINE_TYPE(SNFolderPresenter, sn_folder_presenter, SNEntityPresenter)
+G_DEFINE_TYPE(SNFolderPresenter, sn_folder_presenter, SN_TYPE_ENTITY_PRESENTER)
 
 
 static SNError kError = SNErrorFolderPresenter;

@@ -12,7 +12,9 @@ typedef struct {
 } SNEntityPresenterPrivate;
 
 
-G_DEFINE_TYPE_WITH_PRIVATE(SNEntityPresenter, sn_entity_presenter, GObject)
+G_DEFINE_TYPE_WITH_PRIVATE(SNEntityPresenter,
+			   sn_entity_presenter,
+			   G_TYPE_OBJECT)
 
 
 static SNError kError = SNErrorEntityPresenter;

@@ -6,31 +6,52 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
-#ifndef simple_notes_note____FILEEXTENSION___
-#define simple_notes_note____FILEEXTENSION___
+#ifndef sn_note____FILEEXTENSION___
+#define sn_note____FILEEXTENSION___
 
 #include "object.h"
 
-#define SIMPLE_NOTES_TYPE_NOTE simple_notes_note_get_type ()
-G_DECLARE_FINAL_TYPE(SimpleNotesNote, simple_notes_note, SIMPLE_NOTES, NOTE, SimpleNotesObject)
 
-SimpleNotesNote *simple_notes_note_new (void);
+#define SN_TYPE_NOTE sn_note_get_type()
+G_DECLARE_FINAL_TYPE(SNNote, sn_note, SN, NOTE, SNObject)
 
-GString *simple_notes_note_create_description (SimpleNotesNote *object);
 
-guint64 simple_notes_note_get_id (SimpleNotesNote *object);
-void simple_notes_note_assign_id (SimpleNotesNote *object, guint64 id);
+SNNote *
+sn_note_new(void);
 
-gboolean simple_notes_note_get_selected (SimpleNotesNote *object);
-void simple_notes_note_assign_selected (SimpleNotesNote *object, gboolean selected);
 
-GByteArray *simple_notes_note_get_copy_content (SimpleNotesNote *object);
-void simple_notes_note_copy_content (SimpleNotesNote *object, GByteArray *content);
+GString *
+sn_note_create_description(SNNote *object);
 
-guint64 simple_notes_note_get_folder_id (SimpleNotesNote *object);
-void simple_notes_note_assign_folder_id (SimpleNotesNote *object, guint64 folderID);
+guint64
+sn_note_get_id(SNNote *object);
 
-GDateTime *simple_notes_note_get_copy_last_edited (SimpleNotesNote *object);
-void simple_notes_note_copy_last_edited (SimpleNotesNote *object, GDateTime *time);
+void
+sn_note_assign_id(SNNote *object, guint64 id);
+
+gboolean
+sn_note_get_selected(SNNote *object);
+
+void
+sn_note_assign_selected(SNNote *object, gboolean selected);
+
+GByteArray *
+sn_note_get_copy_content(SNNote *object);
+
+void
+sn_note_copy_content(SNNote *object, GByteArray *content);
+
+guint64
+sn_note_get_folder_id(SNNote *object);
+
+void
+sn_note_assign_folder_id(SNNote *object, guint64 folderID);
+
+GDateTime *
+sn_note_get_copy_last_edited(SNNote *object);
+
+void
+sn_note_copy_last_edited(SNNote *object, GDateTime *time);
+
 
 #endif

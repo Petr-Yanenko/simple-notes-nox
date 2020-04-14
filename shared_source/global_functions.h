@@ -212,20 +212,20 @@ gboolean
 simple_notes_trash_file (gchar *fileName);
 
 void
-simple_notes_print_byte_array (GByteArray *array,
-			       GString *string,
-			       gchar *title);
+sn_print_byte_array(GByteArray *array,
+		    GString *string,
+		    gchar *title);
 
 void
-simple_notes_copy (GType type,
-		   void (setter) (GValue *value),
-		   void (getter) (GValue *value));
+sn_copy(GType type,
+	void (setter)(GValue *value),
+	void (getter)(GValue *value));
 
 void
-simple_notes_set_copy_byte_array (GByteArray *array, GByteArray **variable);
+sn_set_copy_byte_array(GByteArray *array, GByteArray **variable);
 
 GByteArray *
-simple_notes_get_copy_byte_array (GByteArray *variable);
+sn_get_copy_byte_array(GByteArray *variable);
 
 guint
 simple_notes_gulong_guint_cast (gulong value);
