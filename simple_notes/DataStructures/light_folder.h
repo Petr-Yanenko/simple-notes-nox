@@ -6,32 +6,38 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
-#ifndef simple_notes_folder_iface____FILEEXTENSION___
-#define simple_notes_folder_iface____FILEEXTENSION___
+#ifndef sn_folder_iface____FILEEXTENSION___
+#define sn_folder_iface____FILEEXTENSION___
 
 #include "simple_notes.h"
 
-#define SIMPLE_NOTES_TYPE_LIGHT_FOLDER simple_notes_light_folder_get_type ()
-G_DECLARE_INTERFACE(SimpleNotesLightFolder, simple_notes_light_folder, SIMPLE_NOTES, LIGHT_FOLDER, GObject)
 
-struct _SimpleNotesLightFolderInterface {
-    GTypeInterface parent;
+#define SN_TYPE_LIGHT_FOLDER sn_light_folder_get_type()
+G_DECLARE_INTERFACE(SNLightFolder, sn_light_folder, SN, LIGHT_FOLDER, GObject)
 
-    GString * (*create_description) (SimpleNotesLightFolder *object);
-    guint64 (*get_id) (SimpleNotesLightFolder *object);
-    gboolean (*get_selected) (SimpleNotesLightFolder *object);
-    GByteArray * (*get_copy_title) (SimpleNotesLightFolder *object);
-    glong (*get_count) (SimpleNotesLightFolder *object);
+struct _SNLightFolderInterface {
+  GTypeInterface _parent;
+
+  GString * (*create_description)(SNLightFolder *object);
+  guint64 (*get_id)(SNLightFolder *object);
+  gboolean (*get_selected)(SNLightFolder *object);
+  GByteArray * (*get_copy_title)(SNLightFolder *object);
+  glong (*get_count)(SNLightFolder *object);
 };
 
-GString *simple_notes_light_folder_create_description (SimpleNotesLightFolder *object);
+GString *
+sn_light_folder_create_description(SNLightFolder *object);
 
-guint64 simple_notes_light_folder_get_id (SimpleNotesLightFolder *object);
+guint64
+sn_light_folder_get_id(SNLightFolder *object);
 
-gboolean simple_notes_light_folder_get_selected (SimpleNotesLightFolder *object);
+gboolean
+sn_light_folder_get_selected(SNLightFolder *object);
 
-GByteArray *simple_notes_light_folder_get_copy_title (SimpleNotesLightFolder *object);
+GByteArray *
+sn_light_folder_get_copy_title(SNLightFolder *object);
 
-glong simple_notes_light_folder_get_count (SimpleNotesLightFolder *object);
+glong
+sn_light_folder_get_count(SNLightFolder *object);
 
 #endif

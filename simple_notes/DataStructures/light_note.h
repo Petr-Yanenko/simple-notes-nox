@@ -6,35 +6,43 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
-#ifndef simple_notes_light_note____FILEEXTENSION___
-#define simple_notes_light_note____FILEEXTENSION___
+#ifndef sn_light_note____FILEEXTENSION___
+#define sn_light_note____FILEEXTENSION___
 
 #include "simple_notes.h"
 
-#define SIMPLE_NOTES_TYPE_LIGHT_NOTE simple_notes_light_note_get_type ()
-G_DECLARE_INTERFACE(SimpleNotesLightNote, simple_notes_light_note, SIMPLE_NOTES, LIGHT_NOTE, GObject)
 
-struct _SimpleNotesLightNoteInterface {
-    GTypeInterface parent;
+#define SN_TYPE_LIGHT_NOTE sn_light_note_get_type()
+G_DECLARE_INTERFACE(SNLightNote, sn_light_note, SN, LIGHT_NOTE, GObject)
 
-    GString * (*create_description) (SimpleNotesLightNote *object);
-    guint64 (*get_id) (SimpleNotesLightNote *object);
-    gboolean (*get_selected) (SimpleNotesLightNote *object);
-    GByteArray * (*get_copy_content) (SimpleNotesLightNote *object);
-    guint64 (*get_folder_id) (SimpleNotesLightNote *object);
-    GDateTime * (*get_copy_last_edited) (SimpleNotesLightNote *object);
+
+struct _SNLightNoteInterface {
+  GTypeInterface _parent;
+
+  GString * (*create_description)(SNLightNote *object);
+  guint64 (*get_id)(SNLightNote *object);
+  gboolean (*get_selected)(SNLightNote *object);
+  GByteArray * (*get_copy_content)(SNLightNote *object);
+  guint64 (*get_folder_id)(SNLightNote *object);
+  GDateTime * (*get_copy_last_edited)(SNLightNote *object);
 };
 
-GString *simple_notes_light_note_create_description (SimpleNotesLightNote *object);
+GString *
+sn_light_note_create_description(SNLightNote *object);
 
-guint64 simple_notes_light_note_get_id (SimpleNotesLightNote *object);
+guint64
+sn_light_note_get_id(SNLightNote *object);
 
-gboolean simple_notes_light_note_get_selected (SimpleNotesLightNote *object);
+gboolean
+sn_light_note_get_selected(SNLightNote *object);
 
-GByteArray *simple_notes_light_note_get_copy_content (SimpleNotesLightNote *object);
+GByteArray *
+sn_light_note_get_copy_content(SNLightNote *object);
 
-guint64 simple_notes_light_note_get_folder_id (SimpleNotesLightNote *object);
+guint64
+sn_light_note_get_folder_id(SNLightNote *object);
 
-GDateTime *simple_notes_light_note_get_copy_last_edited (SimpleNotesLightNote *object);
+GDateTime *
+sn_light_note_get_copy_last_edited(SNLightNote *object);
 
 #endif
