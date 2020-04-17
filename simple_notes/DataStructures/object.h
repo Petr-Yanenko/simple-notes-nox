@@ -6,6 +6,7 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
+
 #ifndef sn_object____FILEEXTENSION___
 #define sn_object____FILEEXTENSION___
 

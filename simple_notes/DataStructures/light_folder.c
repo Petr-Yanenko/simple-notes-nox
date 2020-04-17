@@ -6,6 +6,7 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
+
 #include "light_folder.h"
 
 
@@ -62,7 +63,7 @@ sn_light_folder_get_selected(SNLightFolder *object)
   return iface->get_selected(object);
 }
 
-GByteArray *
+GString *
 sn_light_folder_get_copy_title(SNLightFolder *object)
 {
   SNLightFolderInterface *iface;

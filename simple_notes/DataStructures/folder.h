@@ -6,6 +6,7 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
+
 #ifndef sn_folder____FILEEXTENSION___
 #define sn_folder____FILEEXTENSION___
 
@@ -39,11 +40,14 @@ sn_folder_get_selected(SNFolder *object);
 void
 sn_folder_assign_selected(SNFolder *object, gboolean selected);
 
-GByteArray *
+GString *
 sn_folder_get_copy_title(SNFolder *object);
 
 void
-sn_folder_copy_title(SNFolder *object, GByteArray *title);
+sn_folder_copy_title(SNFolder *object, GString *title);
+
+void
+sn_folder_copy_c_title(SNFolder *object, gchar *title);
 
 glong
 sn_folder_get_count(SNFolder *object);

@@ -6,6 +6,7 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
+
 #ifndef sn_light_note____FILEEXTENSION___
 #define sn_light_note____FILEEXTENSION___
 
@@ -44,5 +45,6 @@ sn_light_note_get_folder_id(SNLightNote *object);
 
 GDateTime *
 sn_light_note_get_copy_last_edited(SNLightNote *object);
+
 
 #endif

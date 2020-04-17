@@ -204,7 +204,7 @@ typedef enum {
 	      SNErrorNotFound = 9,
 	      SNErrorFolderPresenter = 10,
 	      SNErrorEntityPresenter = 11,
-	      SNErrorItemsFetch = 12
+	      SNErrorEntityFetch = 12
 } SNError;
 
 
@@ -220,12 +220,6 @@ void
 sn_copy(GType type,
 	void (setter)(GValue *value),
 	void (getter)(GValue *value));
-
-void
-sn_set_copy_byte_array(GByteArray *array, GByteArray **variable);
-
-GByteArray *
-sn_get_copy_byte_array(GByteArray *variable);
 
 guint
 simple_notes_gulong_guint_cast (gulong value);
@@ -254,5 +248,6 @@ sn_print_long_value(gchar *buff, glong value);
 
 void
 simple_notes_free_objects_array (gpointer *array, gulong count);
+
 
 #endif

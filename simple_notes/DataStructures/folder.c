@@ -6,6 +6,7 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
+
 #include "folder.h"
 #include "light_folder.h"
 
@@ -13,7 +14,7 @@
 struct _SNFolder {
   SNObject _parent;
 
-  GByteArray *_title;
+  GString *_title;
   glong _count;
 };
 
@@ -60,7 +61,7 @@ sn_folder_dispose(GObject *object)
   SNFolder *folder = SN_FOLDER(object);
   if (folder->_title)
     {
-      g_byte_array_unref(folder->_title);
+      g_string_free(folder->_title, TRUE);
     }
 
   G_OBJECT_CLASS(sn_folder_parent_class)->dispose(object);
@@ -88,7 +89,7 @@ sn_folder_class_init(SNFolderClass *classObject)
 static void
 sn_folder_init(SNFolder *object)
 {
-  object->_title = NULL;
+  object->_title = g_string_new(NULL);
   object->_count = 0;
 }
 
@@ -121,16 +122,22 @@ sn_folder_assign_selected(SNFolder *object, gboolean selected)
   sn_object_assign_selected(SN_OBJECT(object), selected);
 }
 
-GByteArray *
+GString *
 sn_folder_get_copy_title(SNFolder *object)
 {
-  return sn_get_copy_byte_array(object->_title);
+  return g_string_new(object->_title->str);
 }
 
 void
-sn_folder_copy_title(SNFolder *object, GByteArray *title)
+sn_folder_copy_title(SNFolder *object, GString *title)
 {
-  sn_set_copy_byte_array(title, &object->_title);
+  g_string_assign(object->_title, title->str);
+}
+
+void
+sn_folder_copy_c_title(SNFolder *object, gchar *title)
+{
+  g_string_assign(object->_title, title);
 }
 
 glong
@@ -173,7 +180,7 @@ sn_light_folder_real_get_selected(SNLightFolder *object)
   return sn_folder_get_selected(SN_FOLDER(object));
 }
 
-static GByteArray *
+static GString *
 sn_light_folder_real_get_copy_title(SNLightFolder *object)
 {
   return sn_folder_get_copy_title(SN_FOLDER(object));

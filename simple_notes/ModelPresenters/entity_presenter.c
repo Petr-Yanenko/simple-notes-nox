@@ -74,11 +74,10 @@ sn_entity_presenter_get_store(SNEntityPresenter *self)
   return prv->_store;
 }
 
-GList *
-sn_entity_presenter_create_items(SNEntityPresenter *self,
-				 SNEntityIterator *itr,
-				 SNObject *(*create_item)(void)
-				 SNError *error)
+void
+sn_entity_presenter_fetch(SNEntityPresenter *self,
+			  SNEntityIterator *itr,
+			  SNObject *(*create_item)(void))
 {
   SNDataIterator *data = SN_DATA_ITERATOR(itr);
   GList *items = NULL;
@@ -95,12 +94,16 @@ sn_entity_presenter_create_items(SNEntityPresenter *self,
     }
 
   gboolean success = result == SNIteratorResultDone;
+  SNError error = SNErrorEntityFetch;
   if (!success)
     {
       if (items) g_list_free_full(g_steal_pointer(&items), g_object_unref);
-      if (error) *error = SNErrorItemsFetch;
+      sn_imodel_error(self->_unsafe_model, error, NULL);
     }
-  SN_RETURN_VAL_IF_FAIL(success, NULL, error);
+  else
+    {
+      sn_imodel_new_data(self->_unsafe_model, (void *)items);
+    }
 
-  return items;
+  SN_RETURN_IF_FAIL(success, &error);
 }

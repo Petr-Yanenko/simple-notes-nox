@@ -6,6 +6,7 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
+
 #ifndef sn_note____FILEEXTENSION___
 #define sn_note____FILEEXTENSION___
 

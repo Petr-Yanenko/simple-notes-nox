@@ -6,6 +6,7 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
+
 #include "global_functions.h"
 #include <string.h>
 #include <stdio.h>
@@ -44,15 +45,15 @@ sn_print_byte_array(GByteArray *array,
 {
   if (array)
     {
-      g_string_append_printf (string, "%s: 0x", title);
+      g_string_append_printf(string, "%s: 0x", title);
       for (glong i = 0; i < array->len; i++)
 	{
-	  g_string_append_printf (string, "%x", array->data[i]);
+	  g_string_append_printf(string, "%x", array->data[i]);
 	}
     }
   else
     {
-      g_string_append_printf (string, "%s: 0x0", title);
+      g_string_append_printf(string, "%s: 0x0", title);
     }
 }
 
@@ -66,33 +67,6 @@ sn_copy(GType type,
   setter(&value);
   getter(&value);
   g_value_unset(&value);
-}
-
-void
-sn_set_copy_byte_array(GByteArray *array, GByteArray **variable)
-{
-  if (*variable)
-    {
-      g_byte_array_unref(*variable);
-      *variable = NULL;
-    }
-  if (array)
-    {
-      *variable = g_byte_array_new();
-      g_byte_array_append(*variable, array->data, array->len);
-    }
-}
-
-GByteArray *
-sn_get_copy_byte_array(GByteArray *variable)
-{
-  GByteArray *copy = NULL;
-  if (variable)
-    {
-      copy = g_byte_array_new();
-      g_byte_array_append(copy, variable->data, variable->len);
-    }
-  return copy;
 }
 
 guint
