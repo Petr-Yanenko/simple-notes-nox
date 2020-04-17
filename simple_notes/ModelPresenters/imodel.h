@@ -17,7 +17,7 @@ G_DECLARE_INTERFACE(SNIModel, sn_imodel, SN, IMODEL, GObject)
     GTypeInterface _parent;
 
     void (*new_data)(SNIModel *self, void *data);
-    void (*error)(SNIModel *self, SNError error, void *userData);
+    void (*error)(SNIModel *self, SNError error, void *data);
   };
 
 
@@ -25,7 +25,7 @@ void
 sn_imodel_new_data(SNIModel *self, void *data);
 
 void
-sn_imodel_error(SNIModel *self, SNError error, void *userData);
+sn_imodel_error(SNIModel *self, SNError error, void *data);
 
 
 #endif

@@ -1,7 +1,7 @@
 add_executable(simple_notes main.c)
 
 #add_subdirectory(SQLiteStore)
-#add_subdirectory(DataStructures)
+add_subdirectory(DataStructures)
 #add_subdirectory(SQLiteController)
 #add_subdirectory(Models)
 #add_subdirectory(Event)
@@ -10,6 +10,7 @@ add_executable(simple_notes main.c)
 #add_subdirectory(CLIViews)
 #add_subdirectory(Application)
 add_subdirectory(Store)
+add_subdirectory(ModelPresenters)
 
 target_link_libraries(simple_notes
   glib-2.0
