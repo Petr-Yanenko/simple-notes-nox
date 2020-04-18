@@ -22,6 +22,12 @@ struct _SNFolder {
 static void
 sn_light_folder_interface_init(SNLightFolderInterface *iface);
 
+
+G_DEFINE_TYPE_WITH_CODE(SNFolder, sn_folder, SN_TYPE_OBJECT,
+			G_IMPLEMENT_INTERFACE(SN_TYPE_LIGHT_FOLDER,
+					      sn_light_folder_interface_init))
+
+
 static GString *
 sn_light_folder_real_create_description(SNLightFolder *object);
 
@@ -31,16 +37,11 @@ sn_light_folder_real_get_id(SNLightFolder *object);
 static gboolean
 sn_light_folder_real_get_selected(SNLightFolder *object);
 
-static GByteArray *
+static GString *
 sn_light_folder_real_get_copy_title(SNLightFolder *object);
 
 static glong
 sn_light_folder_real_get_count(SNLightFolder *object);
-
-
-G_DEFINE_TYPE_WITH_CODE(SNFolder, sn_folder, SN_TYPE_OBJECT,
-			G_IMPLEMENT_INTERFACE(SN_TYPE_LIGHT_FOLDER,
-					      sn_light_folder_interface_init));
 
 
 static GString *
@@ -49,7 +50,7 @@ sn_folder_real_create_description(SNObject *object)
   SNFolder *folder = SN_FOLDER(object);
   SNObjectClass *parentClass = SN_OBJECT_CLASS(sn_folder_parent_class);
   GString *description = parentClass->create_description(object);
-  sn_print_byte_array(folder->_title, description, "Title\0");
+  sn_print_ustring(folder->_title, description, "Title\0");
   g_string_append_printf(description, "\nCount: %ld\n", folder->_count);
 
   return description;
@@ -99,7 +100,7 @@ SNFolder *sn_folder_new(void)
 }
 
 guint64
-sn_folder_get_id(SimpleNotesFolder *object)
+sn_folder_get_id(SNFolder *object)
 {
   return sn_object_get_id(SN_OBJECT(object));
 }
@@ -129,13 +130,7 @@ sn_folder_get_copy_title(SNFolder *object)
 }
 
 void
-sn_folder_copy_title(SNFolder *object, GString *title)
-{
-  g_string_assign(object->_title, title->str);
-}
-
-void
-sn_folder_copy_c_title(SNFolder *object, gchar *title)
+sn_folder_copy_title(SNFolder *object, gchar *title)
 {
   g_string_assign(object->_title, title);
 }
@@ -165,7 +160,7 @@ sn_folder_create_description(SNFolder *object)
 static GString *
 sn_light_folder_real_create_description(SNLightFolder *object)
 {
-  return simple_notes_folder_create_description(SIMPLE_NOTES_FOLDER(object));
+  return sn_folder_create_description(SN_FOLDER(object));
 }
 
 static guint64

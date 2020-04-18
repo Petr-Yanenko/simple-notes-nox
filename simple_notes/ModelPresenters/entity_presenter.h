@@ -8,7 +8,8 @@
 
 #include "simple_notes.h"
 #include "store.h"
-#include "SNIModel.h"
+#include "imodel.h"
+#include "object.h"
 
 
 #define SN_TYPE_ENTITY_PRESENTER sn_entity_presenter_get_type()

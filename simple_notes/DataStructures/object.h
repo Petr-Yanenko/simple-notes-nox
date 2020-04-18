@@ -45,7 +45,7 @@ gboolean
 sn_object_get_selected(SNObject *object);
 
 void
-sn_object_assign_selected(SimpleNotesObject *object, gboolean selected);
+sn_object_assign_selected(SNObject *object, gboolean selected);
 
 
 #endif

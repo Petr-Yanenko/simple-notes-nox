@@ -36,11 +36,11 @@ sn_note_get_selected(SNNote *object);
 void
 sn_note_assign_selected(SNNote *object, gboolean selected);
 
-GByteArray *
+GString *
 sn_note_get_copy_content(SNNote *object);
 
 void
-sn_note_copy_content(SNNote *object, GByteArray *content);
+sn_note_copy_content(SNNote *object, gchar *content);
 
 guint64
 sn_note_get_folder_id(SNNote *object);

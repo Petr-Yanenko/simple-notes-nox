@@ -13,7 +13,7 @@
 G_DECLARE_INTERFACE(SNIModel, sn_imodel, SN, IMODEL, GObject)
 
 
-  struct _SNIModel {
+  struct _SNIModelInterface {
     GTypeInterface _parent;
 
     void (*new_data)(SNIModel *self, void *data);

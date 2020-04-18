@@ -7,6 +7,7 @@
 #define sn_folder_presenter____FILEEXTENSION___
 
 #include "entity_presenter.h"
+#include "ientity_model.h"
 
 
 #define SN_TYPE_FOLDER_PRESENTER sn_folder_presenter_get_type()
@@ -18,7 +19,7 @@ G_DECLARE_FINAL_TYPE(SNFolderPresenter,
 
 
 SNFolderPresenter *
-sn_folder_presenter_new(SNIModel *model);
+sn_folder_presenter_new(SNIEntityModel *model);
 
 
 void

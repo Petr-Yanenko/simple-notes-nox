@@ -44,10 +44,7 @@ GString *
 sn_folder_get_copy_title(SNFolder *object);
 
 void
-sn_folder_copy_title(SNFolder *object, GString *title);
-
-void
-sn_folder_copy_c_title(SNFolder *object, gchar *title);
+sn_folder_copy_title(SNFolder *object, gchar *title);
 
 glong
 sn_folder_get_count(SNFolder *object);

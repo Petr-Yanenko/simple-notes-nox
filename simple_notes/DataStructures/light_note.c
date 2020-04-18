@@ -22,13 +22,13 @@ GString *
 sn_light_note_create_description(SNLightNote *object)
 {
   SNLightNoteInterface *iface;
-  SN_CHECK_VIRTUAL_IFACE_FUNC_WITH_RETURN_VAL(object,
-					      &iface,
-					      create_description,
-					      SNLightNote,
-					      SN,
-					      LIGHT_NOTE,
-					      NULL);
+  SN_GET_IFACE_OR_RETURN_VAL(object,
+			     &iface,
+			     create_description,
+			     SNLightNote,
+			     SN,
+			     LIGHT_NOTE,
+			     NULL);
 
   return iface->create_description(object);
 }
@@ -37,13 +37,13 @@ guint64
 sn_light_note_get_id(SNLightNote *object)
 {
   SNLightNoteInterface *iface;
-  SN_CHECK_VIRTUAL_IFACE_FUNC_WITH_RETURN_VAL(object,
-					      &iface,
-					      get_id,
-					      SNLightNote,
-					      SN,
-					      LIGHT_NOTE,
-					      0);
+  SN_GET_IFACE_OR_RETURN_VAL(object,
+			     &iface,
+			     get_id,
+			     SNLightNote,
+			     SN,
+			     LIGHT_NOTE,
+			     0);
 
   return iface->get_id(object);
 }
@@ -52,28 +52,28 @@ gboolean
 sn_light_note_get_selected(SNLightNote *object)
 {
   SNLightNoteInterface *iface;
-  SN_CHECK_VIRTUAL_IFACE_FUNC_WITH_RETURN_VAL(object,
-					      &iface,
-					      get_selected,
-					      SNLightNote,
-					      SN,
-					      LIGHT_NOTE,
-					      FALSE);
+  SN_GET_IFACE_OR_RETURN_VAL(object,
+			     &iface,
+			     get_selected,
+			     SNLightNote,
+			     SN,
+			     LIGHT_NOTE,
+			     FALSE);
 
   return iface->get_selected(object);
 }
 
-GByteArray *
+GString *
 sn_light_note_get_copy_content(SNLightNote *object)
 {
   SNLightNoteInterface *iface;
-  SN_CHECK_VIRTUAL_IFACE_FUNC_WITH_RETURN_VAL(object,
-					      &iface,
-					      get_copy_content,
-					      SNLightNote,
-					      SN,
-					      LIGHT_NOTE,
-					      NULL);
+  SN_GET_IFACE_OR_RETURN_VAL(object,
+			     &iface,
+			     get_copy_content,
+			     SNLightNote,
+			     SN,
+			     LIGHT_NOTE,
+			     NULL);
 
   return iface->get_copy_content(object);
 }
@@ -82,13 +82,13 @@ guint64
 sn_light_note_get_folder_id(SNLightNote *object)
 {
   SNLightNoteInterface *iface;
-  SN_CHECK_VIRTUAL_IFACE_FUNC_WITH_RETURN_VAL(object,
-					      &iface,
-					      get_folder_id,
-					      SNLightNote,
-					      SN,
-					      LIGHT_NOTE,
-					      0);
+  SN_GET_IFACE_OR_RETURN_VAL(object,
+			     &iface,
+			     get_folder_id,
+			     SNLightNote,
+			     SN,
+			     LIGHT_NOTE,
+			     0);
 
   return iface->get_folder_id(object);
 }
@@ -97,13 +97,13 @@ GDateTime *
 sn_light_note_get_copy_last_edited(SNLightNote *object)
 {
   SNLightNoteInterface *iface;
-  SN_CHECK_VIRTUAL_IFACE_FUNC_WITH_RETURN_VAL(object,
-					      &iface,
-					      get_copy_last_edited,
-					      SNLightNote,
-					      SN,
-					      LIGHT_NOTE,
-					      NULL);
+  SN_GET_IFACE_OR_RETURN_VAL(object,
+			     &iface,
+			     get_copy_last_edited,
+			     SNLightNote,
+			     SN,
+			     LIGHT_NOTE,
+			     NULL);
 
   return iface->get_copy_last_edited(object);
 }

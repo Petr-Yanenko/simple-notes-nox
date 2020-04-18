@@ -23,7 +23,7 @@ sn_imodel_new_data(SNIModel *self, void *data)
 	       new_data,
 	       SNIModel,
 	       SN,
-	       IModel);
+	       IMODEL);
 
   iface->new_data(self, data);
 }
@@ -37,7 +37,7 @@ sn_imodel_error(SNIModel *self, SNError error, void *data)
 	       error,
 	       SNIModel,
 	       SN,
-	       IModel);
+	       IMODEL);
 
   iface->error(self, error, data);
 }

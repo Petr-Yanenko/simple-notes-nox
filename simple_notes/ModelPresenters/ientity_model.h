@@ -17,8 +17,8 @@ G_DECLARE_INTERFACE(SNIEntityModel,
 		    SNIModel)
 
 
-  struct _SNIEntityModel {
-    SNIModel _parent;
+  struct _SNIEntityModelInterface {
+    SNIModelInterface _parent;
 
     void (*changed)(SNIEntityModel *self, guint64 id);
   };

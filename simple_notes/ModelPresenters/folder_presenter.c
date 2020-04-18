@@ -5,6 +5,8 @@
 
 #include "folder_presenter.h"
 #include "ientity_model.h"
+#include <stdio.h>
+#include "folder.h"
 
 
 struct _SNFolderPresenter {
@@ -12,6 +14,7 @@ struct _SNFolderPresenter {
 
   SNStore *_unsafe_store;
   SNIEntityModel *_unsafe_model;
+  gulong _noteChanged;
 };
 
 
@@ -23,13 +26,29 @@ sn_folder_presenter_send_changed(SNFolderPresenter *self,
 				 gboolean changed,
 				 guint64 id);
 
+static void
+sn_folder_presenter_new_data_handler(GObject *sender,
+				     GParamSpec *pspec,
+				     gpointer user_data);
+
 
 static SNError kError = SNErrorFolderPresenter;
 
 
 static void
+sn_folder_presenter_dispose(GObject *self)
+{
+  SNFolderPresenter *pres = SN_FOLDER_PRESENTER(self);
+  g_signal_handler_disconnect(pres->_unsafe_store, pres->_noteChanged);
+
+  G_OBJECT_CLASS(sn_folder_presenter_parent_class)->dispose(self);
+}
+
+static void
 sn_folder_presenter_class_init(SNFolderPresenterClass *class)
 {
+  GObjectClass *gClass = G_OBJECT_CLASS(class);
+  gClass->dispose = sn_folder_presenter_dispose;
 }
 
 static void
@@ -37,6 +56,23 @@ sn_folder_presenter_init(SNFolderPresenter *self)
 {
   SNEntityPresenter *entities = SN_ENTITY_PRESENTER(self);
   self->_unsafe_store = sn_entity_presenter_get_store(entities);
+
+  gchar *signalName = "notify::";
+  gchar *signalDetail = kNoteChanged;
+  glong nameLen = strlen(signalName);
+  glong detailLen = strlen(signalDetail);
+  glong const fullLen = nameLen + detailLen +1;
+  gchar buff[fullLen];
+  sprintf(buff, "%s%s", signalName, signalDetail);
+
+  void (*callback)(GObject *, GParamSpec *, gpointer);
+  callback = sn_folder_presenter_new_data_handler;
+  gulong noteChanged = g_signal_connect(self->_unsafe_store,
+					buff,
+					G_CALLBACK(callback),
+					self);
+
+  self->_noteChanged = noteChanged;
 }
 
 SNFolderPresenter *
@@ -66,7 +102,7 @@ sn_folder_presenter_fetch(SNFolderPresenter *self)
     glong count = sn_folder_iterator_item_count(itr);
     gboolean selected = sn_folder_iterator_item_selected(itr);
 
-    sn_folder_copy_c_title(folder, title);
+    sn_folder_copy_title(folder, title);
     sn_folder_assign_count(folder, count);
     sn_folder_assign_selected(folder, selected);
 
@@ -91,7 +127,7 @@ void
 sn_folder_presenter_add_folder(SNFolderPresenter *self, gchar *title)
 {
   gboolean changed = sn_store_insert_folder(self->_unsafe_store, title);
-  sn_folder_presenter_send_changed(self, changed, kInsertedItem);
+  sn_folder_presenter_send_changed(self, changed, kItemInserted);
 }
 
 void
@@ -124,4 +160,13 @@ sn_folder_presenter_send_changed(SNFolderPresenter *self,
     }
 
   SN_RETURN_IF_FAIL(changed, &error);
+}
+
+static void
+sn_folder_presenter_new_data_handler(GObject *sender,
+				     GParamSpec *pspec,
+				     gpointer user_data)
+{
+  SNFolderPresenter *self = SN_FOLDER_PRESENTER(user_data);
+  sn_folder_presenter_fetch(self);
 }

@@ -23,10 +23,11 @@ struct _SNLightNoteInterface {
   GString * (*create_description)(SNLightNote *object);
   guint64 (*get_id)(SNLightNote *object);
   gboolean (*get_selected)(SNLightNote *object);
-  GByteArray * (*get_copy_content)(SNLightNote *object);
+  GString * (*get_copy_content)(SNLightNote *object);
   guint64 (*get_folder_id)(SNLightNote *object);
   GDateTime * (*get_copy_last_edited)(SNLightNote *object);
 };
+
 
 GString *
 sn_light_note_create_description(SNLightNote *object);
@@ -37,7 +38,7 @@ sn_light_note_get_id(SNLightNote *object);
 gboolean
 sn_light_note_get_selected(SNLightNote *object);
 
-GByteArray *
+GString *
 sn_light_note_get_copy_content(SNLightNote *object);
 
 guint64

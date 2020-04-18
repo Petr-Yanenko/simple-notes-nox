@@ -7,14 +7,15 @@
 //
 
 
-#ifndef sn_folder_iface____FILEEXTENSION___
-#define sn_folder_iface____FILEEXTENSION___
+#ifndef sn_light_folder____FILEEXTENSION___
+#define sn_light_folder____FILEEXTENSION___
 
 #include "simple_notes.h"
 
 
 #define SN_TYPE_LIGHT_FOLDER sn_light_folder_get_type()
 G_DECLARE_INTERFACE(SNLightFolder, sn_light_folder, SN, LIGHT_FOLDER, GObject)
+
 
 struct _SNLightFolderInterface {
   GTypeInterface _parent;
@@ -25,6 +26,7 @@ struct _SNLightFolderInterface {
   GString * (*get_copy_title)(SNLightFolder *object);
   glong (*get_count)(SNLightFolder *object);
 };
+
 
 GString *
 sn_light_folder_create_description(SNLightFolder *object);

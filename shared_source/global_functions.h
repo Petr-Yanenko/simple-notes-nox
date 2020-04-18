@@ -130,7 +130,7 @@ extern gchar *const kNotePathFormat;
 		     OBJECT_NAME)                               \
   {                                                             \
     SN_GET_CLASS_OR_IFACE(object,                                       \
-			  outKlass,                                     \
+			  outIface,                                     \
 			  func_name,                                    \
 			  ModuleObjectName,                             \
 			  MODULE,                                       \
@@ -181,7 +181,7 @@ extern gchar *const kNotePathFormat;
 				   returnVal)                           \
   {                                                                     \
     SN_GET_CLASS_OR_IFACE_WITH_RETURN_VAL(object,                       \
-					  outKlass,                     \
+					  outIface,                     \
 					  func_name,                    \
 					  ModuleObjectName,             \
 					  MODULE,                       \
@@ -212,9 +212,7 @@ gboolean
 simple_notes_trash_file (gchar *fileName);
 
 void
-sn_print_byte_array(GByteArray *array,
-		    GString *string,
-		    gchar *title);
+sn_print_ustring(GString *ustring, GString *string, gchar *title);
 
 void
 sn_copy(GType type,

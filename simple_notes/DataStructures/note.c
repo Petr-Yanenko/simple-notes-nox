@@ -15,18 +15,19 @@ struct _SNNote {
   SNObject _parent;
 
   guint64 _folderID;
-  GByteArray *_content;
+  GString *_content;
   GDateTime *_lastEdited;
 };
+
+
+static void
+sn_light_note_interface_init(SNLightNoteInterface *iface);
 
 
 G_DEFINE_TYPE_WITH_CODE(SNNote, sn_note, SN_TYPE_OBJECT,
 			G_IMPLEMENT_INTERFACE(SN_TYPE_LIGHT_NOTE,
 					      sn_light_note_interface_init))
 
-
-static void
-sn_light_note_interface_init(SNLightNoteInterface *iface);
 
 static GString *
 sn_light_note_real_create_description(SNLightNote *object);
@@ -37,7 +38,7 @@ sn_light_note_real_get_id(SNLightNote *object);
 static gboolean
 sn_light_note_real_get_selected(SNLightNote *object);
 
-static GByteArray *
+static GString *
 sn_light_note_real_get_copy_content(SNLightNote *object);
 
 static guint64
@@ -53,7 +54,7 @@ sn_note_real_create_description(SNObject *object)
   SNNote *note = SN_NOTE(object);
   SNObjectClass *parentClass = SN_OBJECT_CLASS(sn_note_parent_class);
   GString *description = parentClass->create_description(object);
-  sn_print_byte_array(note->_content, description, "Content\0");
+  sn_print_ustring(note->_content, description, "Content\0");
   g_string_append_printf(description, "\nFolder id: %llu\n", note->_folderID);
   if (note->_lastEdited)
     {
@@ -74,7 +75,7 @@ sn_note_dispose(GObject *object)
   SNNote *note = SN_NOTE(object);
   if (note->_content)
     {
-      g_byte_array_unref(note->_content);
+      g_string_free(note->_content, TRUE);
     }
   if (note->_lastEdited)
     {
@@ -108,7 +109,7 @@ static void
 sn_note_init(SNNote *object)
 {
   object->_folderID = 0;
-  object->_content = NULL;
+  object->_content = g_string_new(NULL);
   object->_lastEdited = NULL;
 }
 
@@ -151,16 +152,16 @@ sn_note_assign_selected(SNNote *object, gboolean selected)
   sn_object_assign_selected(SN_OBJECT(object), selected);
 }
 
-GByteArray *
+GString *
 sn_note_get_copy_content(SNNote *object)
 {
-  return sn_get_copy_byte_array(object->_content);
+  return g_string_new(object->_content->str);
 }
 
 void
-sn_note_copy_content(SNNote *object, GByteArray *content)
+sn_note_copy_content(SNNote *object, gchar *content)
 {
-    sn_set_copy_byte_array(content, &object->_content);
+  g_string_assign(object->_content, content);
 }
 
 guint64
@@ -193,7 +194,7 @@ sn_note_get_copy_last_edited(SNNote *object)
       }
   }
 
-  simple_notes_copy(G_TYPE_DATE_TIME, setter, getter);
+  sn_copy(G_TYPE_DATE_TIME, setter, getter);
 
   return copy;
 }
@@ -240,7 +241,7 @@ sn_light_note_real_get_selected(SNLightNote *object)
   return sn_note_get_selected(SN_NOTE(object));
 }
 
-static GByteArray *
+static GString *
 sn_light_note_real_get_copy_content(SNLightNote *object)
 {
   return sn_note_get_copy_content(SN_NOTE(object));

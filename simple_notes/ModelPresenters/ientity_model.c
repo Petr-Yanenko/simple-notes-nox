@@ -23,7 +23,7 @@ sn_ientity_model_changed(SNIEntityModel *self, guint64 id)
 	       changed,
 	       SNIEntityModel,
 	       SN,
-	       IEntityModel);
+	       IENTITY_MODEL);
 
   iface->changed(self, id);
 }

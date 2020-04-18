@@ -42,7 +42,7 @@ sn_object_class_init(SNObjectClass *classObject)
 }
 
 static void
-sn_object_init(SimpleNotesObject *object)
+sn_object_init(SNObject *object)
 {
   SNObjectPrivate *objectPrivate = sn_object_get_instance_private(object);
   objectPrivate->_id = 0;
@@ -87,12 +87,12 @@ GString *
 sn_object_create_description(SNObject *object)
 {
   SNObjectClass *klass;
-  SN_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object,
-					      &klass,
-					      create_description,
-					      SNObject,
-					      SN,
-					      OBJECT,
-					      NULL);
+  SN_GET_CLASS_OR_RETURN_VAL(object,
+			     &klass,
+			     create_description,
+			     SNObject,
+			     SN,
+			     OBJECT,
+			     NULL);
   return klass->create_description(object);
 }
