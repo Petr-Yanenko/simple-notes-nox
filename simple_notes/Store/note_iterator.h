@@ -9,7 +9,11 @@
 
 
 #define SN_TYPE_NOTE_ITERATOR  sn_note_iterator_get_type()
-G_DECLARE_FINAL_TYPE(SNNoteIterator, sn_note_iterator, SN, NOTE_ITERATOR, SNEntityIterator)
+G_DECLARE_FINAL_TYPE(SNNoteIterator,
+		     sn_note_iterator,
+		     SN,
+		     NOTE_ITERATOR,
+		     SNEntityIterator)
 
 
 SNNoteIterator *
@@ -30,6 +34,6 @@ sn_note_iterator_create_item_last_edited(SNNoteIterator *self);
 
 gboolean
 sn_note_iterator_item_selected(SNNoteIterator *self);
-  
+
 
 #endif

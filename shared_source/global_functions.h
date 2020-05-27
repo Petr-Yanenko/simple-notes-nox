@@ -204,7 +204,8 @@ typedef enum {
 	      SNErrorNotFound = 9,
 	      SNErrorFolderPresenter = 10,
 	      SNErrorEntityPresenter = 11,
-	      SNErrorEntityFetch = 12
+	      SNErrorEntityFetch = 12,
+	      SNErrorNotePresenter = 13
 } SNError;
 
 
@@ -245,7 +246,13 @@ void
 sn_print_long_value(gchar *buff, glong value);
 
 void
-simple_notes_free_objects_array (gpointer *array, gulong count);
+sn_free_objects_array(gpointer *array, gulong count);
+
+gulong
+sn_notify_connect(GObject *subject,
+		  gchar *const notify,
+		  void (*callback)(GObject *, GParamSpec *, gpointer),
+		  gpointer user_data);
 
 
 #endif

@@ -125,7 +125,7 @@ sn_print_long_value(gchar *buff, glong value)
 }
 
 void
-simple_notes_free_objects_array (gpointer *array, gulong count)
+sn_free_objects_array(gpointer *array, gulong count)
 {
   for (glong i = 0; i < count; i++)
     {
@@ -135,4 +135,25 @@ simple_notes_free_objects_array (gpointer *array, gulong count)
     {
       g_free (array);
     }
+}
+
+gulong
+sn_notify_connect(GObject *subject,
+		  gchar *const notify,
+		  void (*callback)(GObject *, GParamSpec *, gpointer),
+		  gpointer user_data)
+{
+  gchar *signalName = "notify::";
+  gchar *signalDetail = notify;
+  glong nameLen = strlen(signalName);
+  glong detailLen = strlen(signalDetail);
+  glong const fullLen = nameLen + detailLen +1;
+  gchar buff[fullLen];
+
+  gulong identifier = g_signal_connect(subject,
+				       buff,
+				       G_CALLBACK(callback),
+				       user_data);
+
+  return identifier;
 }
