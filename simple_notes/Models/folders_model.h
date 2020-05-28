@@ -15,7 +15,7 @@
 #define SIMPLE_NOTES_TYPE_FOLDERS_MODEL simple_notes_folders_model_get_type ()
 G_DECLARE_FINAL_TYPE(SimpleNotesFoldersModel, simple_notes_folders_model, SIMPLE_NOTES, FOLDERS_MODEL, SimpleNotesSelectedListModel)
 
-SimpleNotesFoldersModel *simple_notes_folders_model_new (SimpleNotesMediator *mediator);
+SimpleNotesFoldersModel *simple_notes_folders_model_new (void);
 
 void simple_notes_folders_model_insert_folder (SimpleNotesFoldersModel *object, guint8 *name);
 SimpleNotesLightFolder **simple_notes_folders_model_copy_folders (SimpleNotesFoldersModel *object, guint *out_count);
