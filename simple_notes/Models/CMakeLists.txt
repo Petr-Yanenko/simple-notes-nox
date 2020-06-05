@@ -3,7 +3,7 @@ add_library (model
   base_model.c
   list_model.c
   selected_list_model.c
-#  folders_model.c
+  folders_model.c
 #  notes_model.c
 )
 

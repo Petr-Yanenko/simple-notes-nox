@@ -21,11 +21,15 @@ G_DECLARE_INTERFACE(SNIEntityModel,
     SNIModelInterface _parent;
 
     void (*changed)(SNIEntityModel *self, guint64 id);
+    void (*selected)(SNIEntityModel *self, guint64 id);
   };
 
 
 void
 sn_ientity_model_changed(SNIEntityModel *self, guint64 id);
+
+void
+sn_ientity_model_selected(SNIEntityModel *self, guint64 id);
 
 
 #endif

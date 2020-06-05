@@ -8,118 +8,85 @@
 
 #include "folders_model.h"
 #include "model_utility.h"
-#include "mediator.h"
 #include "folder.h"
-#include "sqlite_controller.h"
+#include "folder_presenter.h"
 #include <stdio.h>
 #include <string.h>
 
-struct _SimpleNotesFoldersModel {
-    SimpleNotesSelectedListModel parent;
+
+struct _SNFoldersModel {
+  SNSelectedListModel _parent;
+
+  SNFolderPresenter *_pres;
 };
 
-G_DEFINE_TYPE(SimpleNotesFoldersModel, simple_notes_folders_model, SIMPLE_NOTES_TYPE_SELECTED_LIST_MODEL)
 
-static void simple_notes_folders_model_real_save_objects (
-        SimpleNotesSelectedListModel *object,
-        SimpleNotesObject *items[],
-        glong count
-);
-static GList *simple_notes_folders_model_real_create_items (SimpleNotesListModel *object);
-static void simple_notes_folders_model_changed (SimpleNotesFoldersModel *object);
-static void simple_notes_folders_model_save_objects (
-        SimpleNotesFoldersModel *object,
-        SimpleNotesObject *items[],
-        glong count
-);
+G_DEFINE_TYPE(SNFoldersModel, sn_folders_model, SN_TYPE_SELECTED_LIST_MODEL)
 
-static void simple_notes_folders_model_class_init (SimpleNotesFoldersModelClass *klass) {
-    SimpleNotesSelectedListModelClass *selectedModelClass = SIMPLE_NOTES_SELECTED_LIST_MODEL_CLASS(klass);
-    selectedModelClass->save_objects = simple_notes_folders_model_real_save_objects;
 
-    SimpleNotesListModelClass *listModelClass = SIMPLE_NOTES_LIST_MODEL_CLASS(klass);
-    listModelClass->create_items = simple_notes_folders_model_real_create_items;
+static void
+sn_folders_model_real_fetch(SNListModel *object);
+
+
+static void
+sn_folders_model_class_init(SNFoldersModelClass *klass)
+{
+  SNListModelClass *listModelClass = SN_LIST_MODEL_CLASS(klass);
+  listModelClass->fetch = sn_folders_model_real_fetch;
 }
 
-static void simple_notes_folders_model_init (SimpleNotesFoldersModel *object) {
-
+static void
+sn_folders_model_init(SNFoldersModel *object)
+{
+  SNIEntityModel *imodel = SN_IENTITY_MODEL(object);
+  object->_pres = sn_folder_presenter_new(imodel);
 }
 
-SimpleNotesFoldersModel *simple_notes_folders_model_new (SimpleNotesMediator *mediator) {
-    SimpleNotesFoldersModel *instance = g_object_new(SIMPLE_NOTES_TYPE_FOLDERS_MODEL, NULL);
-    simple_notes_selected_list_model_set_weak_ref_mediator(SIMPLE_NOTES_SELECTED_LIST_MODEL(instance), mediator);
-    return instance;
+SNFoldersModel *
+sn_folders_model_new(void)
+{
+  SNFoldersModel *instance = g_object_new(SN_TYPE_FOLDERS_MODEL, NULL);
+
+  return instance;
 }
 
-void simple_notes_folders_model_insert_folder (SimpleNotesFoldersModel *object, guint8 *name) {
-    simple_notes_sqlite_controller_insert_folder(name);
-    simple_notes_folders_model_changed(object);
+void
+sn_folders_model_insert_folder(SNFoldersModel *object, gchar *name)
+{
+  sn_folder_presenter_add_folder(object->_pres, name);
 }
 
-SimpleNotesLightFolder **simple_notes_folders_model_copy_folders (SimpleNotesFoldersModel *object, guint *out_count) {
-    return (SimpleNotesLightFolder **) SIMPLE_NOTES_SELECTED_LIST_MODEL_CLASS(simple_notes_folders_model_parent_class)->copy_items(
-            SIMPLE_NOTES_SELECTED_LIST_MODEL(object), out_count
-    );
+SNLightFolder **
+sn_folders_model_copy_folders(SNFoldersModel *object, guint *out_count)
+{
+  SNSelectedListModelClass *parent;
+  parent = SN_SELECTED_LIST_MODEL_CLASS(sn_folders_model_parent_class);
+  return (SNLightFolder **)parent->copy_items(SN_SELECTED_LIST_MODEL(object),
+					      out_count);
 }
 
-void simple_notes_folders_model_delete_folder (SimpleNotesFoldersModel *object, guint64 identifier) {
-
-  void deleteHandler (SimpleNotesObject *deletedObject) {
-    simple_notes_sqlite_controller_delete_folder(SIMPLE_NOTES_FOLDER(deletedObject));
-    gchar path[kFolderPathSymbols + 1];
-    sprintf(path, kFolderPathFormat, kNoteFolder, identifier);
-    simple_notes_trash_file(path);
-  }
-
-    simple_notes_delete_object(SIMPLE_NOTES_SELECTED_LIST_MODEL(object), identifier, deleteHandler);
-    simple_notes_folders_model_changed(object);
+void
+sn_folders_model_delete_folder(SNFoldersModel *object, guint64 identifier)
+{
+  sn_folder_presenter_delete_folder(object->_pres, identifier);
 }
 
-void simple_notes_folders_model_select_folder (SimpleNotesFoldersModel *object, guint64 identifier) {
-    simple_notes_selected_list_model_assign_selected_object_id(SIMPLE_NOTES_SELECTED_LIST_MODEL(object), identifier);
-    simple_notes_folders_model_changed(object);
+void
+sn_folders_model_select_folder(SNFoldersModel *object, guint64 identifier)
+{
+  sn_folder_presenter_select_folder(object->_pres, identifier);
 }
 
-void simple_notes_folders_model_change_folder_title (SimpleNotesFoldersModel *object, guint64 identifier, guint8 *newTitle, guint len) {
-    SimpleNotesObject *foundItem = simple_notes_selected_list_model_find_object(SIMPLE_NOTES_SELECTED_LIST_MODEL(object), identifier);
-    if (foundItem) {
-        SimpleNotesFolder *foundFolder = SIMPLE_NOTES_FOLDER(foundItem);
-        GByteArray *newTitleArray = g_byte_array_new();
-        g_byte_array_append(newTitleArray, newTitle, len);
-        simple_notes_folder_copy_title(foundFolder, newTitleArray);
-        g_byte_array_unref(newTitleArray);
-        SimpleNotesObject *items[] = { foundItem };
-        simple_notes_folders_model_save_objects(object, items, 1);
-        simple_notes_folders_model_changed(object);
-    }
+void
+sn_folders_model_change_folder_title(SNFoldersModel *object,
+				     guint64 identifier,
+				     gchar *newTitle)
+{
+  sn_folder_presenter_change_title(object->_pres, identifier, newTitle);
 }
 
-static void simple_notes_folders_model_changed (SimpleNotesFoldersModel *object) {
-    simple_notes_model_changed(SIMPLE_NOTES_BASE_MODEL(object));
-}
-
-static void simple_notes_folders_model_save_objects (
-        SimpleNotesFoldersModel *object,
-        SimpleNotesObject *items[],
-        glong count
-) {
-    SimpleNotesSelectedListModelClass *klass = SIMPLE_NOTES_SELECTED_LIST_MODEL_CLASS(G_OBJECT(object)->g_type_instance.g_class);
-    klass->save_objects(SIMPLE_NOTES_SELECTED_LIST_MODEL(object), items, count);
-}
-
-static void simple_notes_folders_model_real_save_objects (
-        SimpleNotesSelectedListModel *object,
-        SimpleNotesObject *items[],
-        glong count) {
-
-    void handler (SimpleNotesObject *item) {
-          SimpleNotesFolder *folder = SIMPLE_NOTES_FOLDER(item);
-          simple_notes_sqlite_controller_save_folder(folder);
-    }
-
-    simple_notes_save_objects(object, items, count, handler);
-}
-
-static GList *simple_notes_folders_model_real_create_items (SimpleNotesListModel *object) {
-    return simple_notes_sqlite_controller_copy_folders();
+static void
+sn_folders_model_real_fetch(SNListModel *object)
+{
+  sn_folder_presenter_fetch(SN_FOLDERS_MODEL(object)->_pres);
 }

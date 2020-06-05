@@ -9,10 +9,15 @@
 #include "base_model.h"
 
 
+gchar *const kLoading = "loading";
+gchar *const kNewData = "new-data";
+gchar *const kErrorCode = "error-code";
+
+
 enum {
       PROP_LOADING = 1,
       PROP_NEW_DATA,
-      PROP_ERROR_REASON,
+      PROP_ERROR_CODE,
       N_PROPERTIES
 };
 
@@ -20,7 +25,7 @@ enum {
 typedef struct {
   gboolean _loading;
   gboolean _newData;
-  gchar *_errorReason;
+  SNError _errorCode;
 } SNBaseModelPrivate;
 
 
@@ -48,9 +53,6 @@ sn_base_model_real_cancel(SNBaseModel *object);
 static void
 sn_base_model_real_changed(SNBaseModel *object);
 
-static void
-sn_base_model_changed(SNBaseModel *object);
-
 
 static void
 sn_base_model_set_property(GObject *object,
@@ -71,10 +73,8 @@ sn_base_model_set_property(GObject *object,
       modelPrivate->_newData = g_value_get_boolean(value);
       break;
 
-    case PROP_ERROR_REASON:
-      g_free(modelPrivate->_errorReason);
-      modelPrivate->_errorReason = g_value_dup_string(value);
-      g_print("\nerror reason: %s\n", modelPrivate->_errorReason);
+    case PROP_ERROR_CODE:
+      modelPrivate->_errorCode = g_value_get_long(value);
       break;
 
     default:
@@ -103,8 +103,8 @@ sn_base_model_get_property(GObject *object,
       g_value_set_boolean(value, modelPrivate->_newData);
       break;
 
-    case PROP_ERROR_REASON:
-      g_value_set_string(value, modelPrivate->_errorReason);
+    case PROP_ERROR_CODE:
+      g_value_set_long(value, modelPrivate->_errorCode);
       break;
 
     default:
@@ -117,9 +117,6 @@ sn_base_model_get_property(GObject *object,
 static void
 sn_base_model_dispose(GObject *object)
 {
-  SNBaseModelPrivate *modelPrivate = sn_base_model_get_instance_private(SN_BASE_MODEL(object));
-  g_free(modelPrivate->_errorReason);
-
   G_OBJECT_CLASS(sn_base_model_parent_class)->dispose(object);
 }
 
@@ -154,11 +151,11 @@ sn_base_model_class_init(SNBaseModelClass *klass)
 						      G_PARAM_READWRITE);
 
   gchar *description = "Error reason of loading data.";
-  objProperties[PROP_ERROR_REASON] = g_param_spec_string(kErrorReason,
-							 "Error Reason",
-							 description,
-							 NULL,
-							 G_PARAM_READWRITE);
+  objProperties[PROP_ERROR_CODE] = g_param_spec_string(kErrorCode,
+						       "Error Reason",
+						       description,
+						       NULL,
+						       G_PARAM_READWRITE);
 
   g_object_class_install_properties(objectClass,
 				    N_PROPERTIES,
@@ -171,7 +168,7 @@ sn_base_model_init(SNBaseModel *object)
   SNBaseModelPrivate *modelPrivate = sn_base_model_get_instance_private(object);
   modelPrivate->_loading = FALSE;
   modelPrivate->_newData = FALSE;
-  modelPrivate->_errorReason = NULL;
+  modelPrivate->_errorCode = -1;
 }
 
 void
@@ -226,18 +223,28 @@ sn_base_model_assign_new_data(SNBaseModel *object, gboolean newData)
   g_object_set(G_OBJECT(object), kNewData, newData, NULL);
 }
 
-gchar *
-sn_base_model_get_copy_error_reason(SNBaseModel *object)
+SNError
+sn_base_model_get_error_code(SNBaseModel *object)
 {
-  gchar *copy;
-  g_object_get(G_OBJECT(object), kErrorReason, &copy, NULL);
-  return copy;
+  SNError value;
+  g_object_get(G_OBJECT(object), kErrorCode, &value, NULL);
+  return value;
 }
 
 void
-sn_base_model_copy_error_reason(SNBaseModel *object, gchar *errorReason)
+sn_base_model_assign_error_code(SNBaseModel *object, SNError errorCode)
 {
-  g_object_set(G_OBJECT(object), kErrorReason, errorReason, NULL);
+  g_object_set(G_OBJECT(object), kErrorCode, errorCode, NULL);
+}
+
+void
+sn_base_model_changed(SNBaseModel *object)
+{
+  SNBaseModelClass *klass;
+
+  SN_GET_CLASS(object, &klass, changed, SNBaseModel, SN, BASE_MODEL);
+
+  klass->changed(object);
 }
 
 static void
@@ -251,21 +258,10 @@ sn_base_model_load(SNBaseModel *object)
 }
 
 static void
-sn_base_model_changed(SNBaseModel *object)
-{
-  SNBaseModelClass *klass;
-
-  SN_GET_CLASS(object, &klass, changed, SNBaseModel, SN, BASE_MODEL);
-
-  klass->changed(object);
-}
-
-static void
 sn_base_model_real_load_data(SNBaseModel *object)
 {
   sn_base_model_assign_loading(object, TRUE);
   sn_base_model_load(object);
-  sn_base_model_assign_new_data(object, TRUE);
   sn_base_model_assign_loading(object, FALSE);
 }
 

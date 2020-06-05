@@ -16,16 +16,16 @@ G_DECLARE_INTERFACE(SNIModel, sn_imodel, SN, IMODEL, GObject)
   struct _SNIModelInterface {
     GTypeInterface _parent;
 
-    void (*new_data)(SNIModel *self, void *data);
-    void (*error)(SNIModel *self, SNError error, void *data);
+    void (*new_data)(SNIModel *self, gpointer data);
+    void (*error)(SNIModel *self, SNError error, gpointer data);
   };
 
 
 void
-sn_imodel_new_data(SNIModel *self, void *data);
+sn_imodel_new_data(SNIModel *self, gpointer data);
 
 void
-sn_imodel_error(SNIModel *self, SNError error, void *data);
+sn_imodel_error(SNIModel *self, SNError error, gpointer data);
 
 
 #endif

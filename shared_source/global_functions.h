@@ -86,24 +86,24 @@ extern gchar *const kNotePathFormat;
       }                                                 \
   }
 
-#define SN_GET_CLASS_OR_IFACE(object,                                   \
-			      outKlass,                                 \
-			      func_name,                                \
-			      ModuleObjectName,                         \
-			      MODULE,                                   \
-			      OBJECT_NAME,                              \
-			      CLASS_OR_IFACE)                           \
-  {                                                                     \
-    g_return_if_fail (MODULE##_IS_##OBJECT_NAME (object));              \
-    g_return_if_fail (outKlass);                                        \
-    *outKlass = MODULE##_##OBJECT_NAME##_GET_##CLASS_OR_IFACE (object); \
-    /* if the method is purely virtual, then it is a good idea to       \
-     * check that it has been overridden before calling it, and,        \
-     * depending on the intent of the class, either ignore it silently  \
-     * or warn the user.                                                \
-     */                                                                 \
-    g_return_if_fail (*outKlass != NULL);                               \
-    g_return_if_fail ((*outKlass)->func_name != NULL);                  \
+#define SN_GET_CLASS_OR_IFACE(object,					\
+			      outKlass,				\
+			      func_name,				\
+			      ModuleObjectName,			\
+			      MODULE,					\
+			      OBJECT_NAME,				\
+			      CLASS_OR_IFACE)				\
+  {									\
+    g_return_if_fail(MODULE##_IS_##OBJECT_NAME(object));		\
+    g_return_if_fail(outKlass);					\
+    *outKlass = MODULE##_##OBJECT_NAME##_GET_##CLASS_OR_IFACE(object);	\
+    /* if the method is purely virtual, then it is a good idea to	\
+     * check that it has been overridden before calling it, and,	\
+     * depending on the intent of the class, either ignore it silently	\
+     * or warn the user.						\
+     */								\
+    g_return_if_fail(*outKlass != NULL);				\
+    g_return_if_fail((*outKlass)->func_name != NULL);			\
   }
 
 #define SN_GET_CLASS(object,                                    \

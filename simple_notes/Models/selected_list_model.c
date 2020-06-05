@@ -8,7 +8,8 @@
 
 #include "selected_list_model.h"
 #include "model_utility.h"
-#include "stdint.h"
+#include "ientity_model.h"
+#include <stdint.h>
 
 
 enum {
@@ -20,7 +21,21 @@ enum {
 static GParamSpec *objProperties[N_PROPERTIES] = { NULL, };
 
 
-G_DEFINE_TYPE(SNSelectedListModel, sn_selected_list_model, SN_TYPE_LIST_MODEL)
+static void
+sn_ientity_model_interface_init(SNIEntityModelInterface *iface);
+
+
+G_DEFINE_TYPE_WITH_CODE(SNSelectedListModel,
+			sn_selected_list_model,
+			SN_TYPE_LIST_MODEL,
+			G_IMPLEMENT_INTERFACE(SN_TYPE_IENTITY_MODEL,
+					      sn_ientity_model_interface_init))
+
+
+static SNObject *
+sn_selected_list_model_find_object_with_condition(SNSelectedListModel *object,
+						  gboolean
+						  (*condition)(SNObject *item));
 
 
 static SNObject *
@@ -43,10 +58,18 @@ static void
 sn_selected_list_model_real_changed(SNBaseModel *object);
 
 
-static SNObject *
-sn_selected_list_model_find_object_with_condition(SNSelectedListModel *object,
-						  gboolean
-						  (*condition)(SNObject *item));
+static void
+sn_ientity_model_real_changed(SNIEntityModel *self, guint64 id);
+
+static void
+sn_ientity_model_real_selected(SNIEntityModel *self, guint64 id);
+
+static void
+sn_ientity_model_real_new_data(SNIModel *self, gpointer data);
+
+static void
+sn_ientity_model_real_error(SNIModel *self, SNError error, gpointer data);
+
 
 static void
 sn_base_model_set_property(GObject *object,
@@ -62,15 +85,20 @@ sn_base_model_set_property(GObject *object,
     case PROP_SELECTED_OBJECT_ID:
       objectID = g_value_get_uint64(value);
       SNObject *item = sn_selected_list_model_find_object(self, objectID);
+      SNObject *previousSelected;
+      previousSelected = sn_selected_list_model_find_selected_object(self);
+      if (previousSelected)
+	{
+	  sn_object_assign_selected(previousSelected, FALSE);
+	}
+
       if (item)
 	{
-	  SNObject *previousSelected;
-	  previousSelected = sn_selected_list_model_find_selected_object(self);
-	  if (previousSelected)
-	    {
-	      sn_object_assign_selected(previousSelected, FALSE);
-	    }
 	  sn_object_assign_selected(item, TRUE);
+	}
+      else
+	{
+	  sn_base_model_changed(SN_BASE_MODEL(object));
 	}
 
       break;
@@ -109,6 +137,16 @@ sn_base_model_get_property(GObject *object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID(object, property_id, pspec);
       break;
     }
+}
+
+static void
+sn_ientity_model_interface_init(SNIEntityModelInterface *iface)
+{
+  iface->changed = sn_ientity_model_real_changed;
+  iface->selected = sn_ientity_model_real_selected;
+
+  iface->_parent.new_data = sn_ientity_model_real_new_data;
+  iface->_parent.error = sn_ientity_model_real_error;
 }
 
 static void
@@ -313,4 +351,29 @@ sn_selected_list_model_real_changed(SNBaseModel *object)
 
   SNSelectedListModel *self = SN_SELECTED_LIST_MODEL(object);
   g_return_if_fail(self);
+}
+
+static void
+sn_ientity_model_real_changed(SNIEntityModel *self, guint64 id)
+{
+  sn_base_model_changed(SN_BASE_MODEL(self));
+}
+
+static void
+sn_ientity_model_real_selected(SNIEntityModel *self, guint64 id)
+{
+  SNSelectedListModel *list = SN_SELECTED_LIST_MODEL(self);
+  sn_selected_list_model_assign_selected_object_id(list, id);
+}
+
+static void
+sn_ientity_model_real_new_data(SNIModel *self, gpointer data)
+{
+  sn_list_model_assign_list(SN_LIST_MODEL(self), (GList *)data);
+}
+
+static void
+sn_ientity_model_real_error(SNIModel *self, SNError error, gpointer data)
+{
+  sn_base_model_assign_error_code(SN_BASE_MODEL(self), error);
 }

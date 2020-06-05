@@ -35,14 +35,14 @@ sn_list_model_real_reset(SNBaseModel *object);
 static void
 sn_list_model_real_changed(SNBaseModel *object);
 
-static GList *
-sn_list_model_real_create_items(SNListModel *object);
+static void
+sn_list_model_real_fetch(SNListModel *object);
 
 static void
 sn_list_model_delete_list(SNListModelPrivate *modelPrivate);
 
-static GList *
-sn_list_model_create_items(SNListModel *object);
+static void
+sn_list_model_fetch(SNListModel *object);
 
 
 static void
@@ -71,7 +71,7 @@ sn_list_model_class_init(SNListModelClass *klass)
   klass->get_item = sn_list_model_real_get_item;
   klass->append = sn_list_model_real_append;
   klass->delete =sn_list_model_real_delete;
-  klass->create_items = sn_list_model_real_create_items;
+  klass->fetch = sn_list_model_real_fetch;
 }
 
 static void
@@ -82,11 +82,15 @@ sn_list_model_init(SNListModel *object)
 }
 
 void
-sn_list_model_copy_list(SNListModel *object, GList *list)
+sn_list_model_assign_list(SNListModel *object, GList *list)
 {
   SNListModelPrivate *modelPrivate = sn_list_model_get_instance_private(object);
-  sn_list_model_delete_list(modelPrivate);
-  modelPrivate->_list = g_list_copy_deep(list, (GCopyFunc)g_object_ref, NULL);
+  if (modelPrivate->_list != list)
+    {
+      sn_list_model_delete_list(modelPrivate);
+      modelPrivate->_list = list;
+      sn_base_model_assign_new_data(SN_BASE_MODEL(object), TRUE);
+    }
 }
 
 GList *
@@ -140,19 +144,18 @@ sn_list_model_get_count(SNListModel *object)
   return g_list_length(modelPrivate->_list);
 }
 
-static GList *
-sn_list_model_create_items(SNListModel *object)
+static void
+sn_list_model_fetch(SNListModel *object)
 {
   SNListModelClass *klass;
-  SN_GET_CLASS_OR_RETURN_VAL(object,
-			     &klass,
-			     create_items,
-			     SNListModel,
-			     SN,
-			     LIST_MODEL,
-			     NULL);
+  SN_GET_CLASS(object,
+	       &klass,
+	       fetch,
+	       SNListModel,
+	       SN,
+	       LIST_MODEL);
 
-  return klass->create_items(object);
+  klass->fetch(object);
 }
 
 static GList *
@@ -192,9 +195,7 @@ sn_list_model_real_load(SNBaseModel *object)
   SNListModel *self = SN_LIST_MODEL(object);
   g_return_if_fail(self);
 
-  GList *items = sn_list_model_create_items(self);
-  sn_list_model_copy_list(SN_LIST_MODEL(object), items);
-  g_list_free_full(items, g_object_unref);
+  sn_list_model_fetch(self);
 }
 
 static void
@@ -203,7 +204,7 @@ sn_list_model_real_reset(SNBaseModel *object)
   SNListModel *listModel = SN_LIST_MODEL(object);
   g_return_if_fail(listModel);
 
-  sn_list_model_copy_list(listModel, NULL);
+  sn_list_model_assign_list(listModel, NULL);
 }
 
 static void
@@ -218,8 +219,7 @@ sn_list_model_real_changed(SNBaseModel *object)
   sn_base_model_load_data(object);
 }
 
-static GList *
-sn_list_model_real_create_items(SNListModel *object)
+static void
+sn_list_model_real_fetch(SNListModel *object)
 {
-  return NULL;
 }

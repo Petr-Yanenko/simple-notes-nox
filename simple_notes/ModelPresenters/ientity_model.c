@@ -27,3 +27,17 @@ sn_ientity_model_changed(SNIEntityModel *self, guint64 id)
 
   iface->changed(self, id);
 }
+
+void
+sn_ientity_model_selected(SNIEntityModel *self, guint64 id)
+{
+  SNIEntityModelInterface *iface = NULL;
+  SN_GET_IFACE(self,
+	       &iface,
+	       selected,
+	       SNIEntityModel,
+	       SN,
+	       IENTITY_MODEL);
+
+  iface->selected(self, id);
+}

@@ -15,7 +15,7 @@ sn_imodel_default_init(SNIModelInterface *self)
 }
 
 void
-sn_imodel_new_data(SNIModel *self, void *data)
+sn_imodel_new_data(SNIModel *self, gpointer data)
 {
   SNIModelInterface *iface = NULL;
   SN_GET_IFACE(self,
@@ -29,7 +29,7 @@ sn_imodel_new_data(SNIModel *self, void *data)
 }
 
 void
-sn_imodel_error(SNIModel *self, SNError error, void *data)
+sn_imodel_error(SNIModel *self, SNError error, gpointer data)
 {
   SNIModelInterface *iface = NULL;
   SN_GET_IFACE(self,

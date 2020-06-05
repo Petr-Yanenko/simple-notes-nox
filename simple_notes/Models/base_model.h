@@ -12,9 +12,9 @@
 #include "simple_notes.h"
 
 
-static gchar *const kLoading = "loading\0";
-static gchar *const kNewData = "new-data\0";
-static gchar *const kErrorReason = "error-reason\0";
+extern gchar *const kLoading;
+extern gchar *const kNewData;
+extern gchar *const kErrorCode;
 
 
 #define SN_TYPE_BASE_MODEL sn_base_model_get_type()
@@ -63,11 +63,17 @@ void
 sn_base_model_assign_new_data(SNBaseModel *object, gboolean newData);
 
 
-gchar *
-sn_base_model_get_copy_error_reason(SNBaseModel *object);
+SNError
+sn_base_model_get_error_code(SNBaseModel *object);
 
 void
-sn_base_model_copy_error_reason(SNBaseModel *object, gchar *errorReason);
+sn_base_model_assign_error_code(SNBaseModel *object, SNError errorCode);
+
+
+//Internal
+//ToDo: Create separate header for internal or protected methods.
+void
+sn_base_model_changed(SNBaseModel *object);
 
 
 #endif

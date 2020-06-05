@@ -28,12 +28,12 @@ struct _SNListModelClass {
   void (*delete)(SNListModel *object, gpointer item);
 
   //private
-  GList * (*create_items)(SNListModel *object);
+  void (*fetch)(SNListModel *object);
 };
 
 
 void
-sn_list_model_copy_list(SNListModel *object, GList *list);
+sn_list_model_assign_list(SNListModel *object, GList *list);
 
 GList *
 sn_list_model_get_item(SNListModel *object, guint position);

@@ -131,7 +131,7 @@ sn_entity_presenter_send_changed(SNEntityPresenter *self,
     }
   else
     {
-      sn_imodel_error(SN_IMODEL(prv->_unsafe_model), error, &id);
+      sn_imodel_error(SN_IMODEL(prv->_unsafe_model), error, NULL);
     }
 
   SN_RETURN_IF_FAIL(changed, &error);
