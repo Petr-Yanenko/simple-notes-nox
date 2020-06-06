@@ -106,7 +106,7 @@ static void
 sn_sql_controller_init(SNSQLController *self)
 {
   gchar *stmts[] = {
-		    "CREATE TABLE IF NOT EXIST folders (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, count TEXT, selected INT)",
+		    "CREATE TABLE IF NOT EXISTS folders (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, count TEXT, selected INT)",
 		    "SELECT * FROM folders",
 		    "UPDATE folders SET title = $TITLE WHERE id == $ID",
 		    "UPDATE folders SET count = count + $INCREMENT WHERE id == $ID",
@@ -114,9 +114,9 @@ sn_sql_controller_init(SNSQLController *self)
 		    "UPDATE folders SET selected = $SELECTED WHERE id == $ID",
 		    "INSERT INTO folders (title, count, selected) VALUES ($TITLE, 0, $SELECTED)",
 		    "DELETE FROM folders WHERE id == $ID",
-		    "CREATE TABLE IF NOT EXIST notes (id INTEGER PRIMARY KEY AUTOINCREMENT, folder_id INT REFERENCES folders (id) ON DELETE CASCADE, content TEXT, last_edited INT, selected INT)",
+		    "CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, folder_id INT REFERENCES folders (id) ON DELETE CASCADE, content TEXT, last_edited INT, selected INT)",
 		    "SELECT * FROM notes WHERE folder_id == $FOLDER_ID",
-		    "UPDATE notes SET folder_id = $NEW_FOLDER_ID selected = 0 WHERE id == $NOTE_ID AND folder_id == $FOLDER_ID",
+		    "UPDATE notes SET folder_id = $NEW_FOLDER_ID, selected = 0 WHERE id == $NOTE_ID AND folder_id == $FOLDER_ID",
 		    "UPDATE notes SET last_edited = $LAST_EDITED WHERE id == $NOTE_ID AND folder_id == $FOLDER_ID",
 		    "UPDATE notes SET selected = 0 WHERE folder_id == $FOLDER_ID",
 		    "UPDATE notes SET selected = $SELECTED WHERE id == $NOTE_ID AND folder_id == $FOLDER_ID",
@@ -128,12 +128,14 @@ sn_sql_controller_init(SNSQLController *self)
 
   self->_db = sn_data_base_new();
 
-  for (glong i = 0; i < INDEXES_NUMBER; i++)
-    {
-      gboolean success = sn_data_base_add(self->_db, kStmtKeys[i], stmts[i]);
-      SN_RETURN_IF_FAIL(success, &kError);
-    }
-
+  gboolean prepareFolders = sn_data_base_add(self->_db,
+					     kStmtKeys[CREATE_FOLDERS_INDEX],
+					     stmts[CREATE_FOLDERS_INDEX]);
+  SN_RETURN_IF_FAIL(prepareFolders, &kError);
+  gboolean prepareNotes = sn_data_base_add(self->_db,
+					   kStmtKeys[CREATE_NOTES_INDEX],
+					   stmts[CREATE_NOTES_INDEX]);
+  SN_RETURN_IF_FAIL(prepareNotes, &kError);
   gboolean folders = sn_data_base_execute(self->_db,
 					  kStmtKeys[CREATE_FOLDERS_INDEX],
 					  0,
@@ -143,6 +145,11 @@ sn_sql_controller_init(SNSQLController *self)
 					0,
 					NULL);
   SN_RETURN_IF_FAIL(folders && notes, &kError);
+  for (glong i = 0; i < INDEXES_NUMBER; i++)
+    {
+      gboolean success = sn_data_base_add(self->_db, kStmtKeys[i], stmts[i]);
+      SN_RETURN_IF_FAIL(success, &kError);
+    }
 }
 
 SNSQLController *
