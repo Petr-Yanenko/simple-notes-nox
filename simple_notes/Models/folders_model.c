@@ -7,11 +7,7 @@
 //
 
 #include "folders_model.h"
-#include "model_utility.h"
-#include "folder.h"
 #include "folder_presenter.h"
-#include <stdio.h>
-#include <string.h>
 
 
 struct _SNFoldersModel {

@@ -7,15 +7,12 @@
 //
 
 #include "notes_model.h"
-#include "note.h"
 #include "note_presenter.h"
-#include <stdio.h>
 
 
 struct _SNNotesModel {
   SNSelectedListModel _parent;
 
-  guint64 _folderID;
   SNNotePresenter *_pres;
 };
 
@@ -36,7 +33,6 @@ sn_notes_model_class_init(SNNotesModelClass *klass)
 static void
 sn_notes_model_init(SNNotesModel *object)
 {
-  object->_folderID = 0;
   object->_pres = sn_note_presenter_new(SN_IENTITY_MODEL(object));
 }
 
