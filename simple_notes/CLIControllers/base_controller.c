@@ -13,7 +13,7 @@ typedef struct _SimpleNotesBaseControllerPrivate {
   gchar **_options;
   gchar ***_requiredOptions;
 
-  SimpleNotesMediator *_model;
+  SNBaseModel *_model;
 } SimpleNotesBaseControllerPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(SimpleNotesBaseController, simple_notes_base_controller, G_TYPE_OBJECT)
@@ -37,6 +37,11 @@ void simple_notes_base_controller_dispose (GObject *object) {
     }
     g_free(private->_requiredOptions);
   }
+
+  if (private->_model)
+    {
+      g_clear_object(&private->_model);
+    }
 
   G_OBJECT_CLASS(simple_notes_base_controller_parent_class)->dispose(object);
 }
@@ -67,17 +72,16 @@ void simple_notes_base_controller_init (SimpleNotesBaseController *object) {
     private->_model = NULL;
 }
 
-SimpleNotesMediator *simple_notes_base_controller_get_model (SimpleNotesBaseController *object) {
-  SimpleNotesBaseControllerPrivate *private = simple_notes_base_controller_get_instance_private(object);
-  return private->_model;
-}
-
-void simple_notes_base_controller_set_ref_model (SimpleNotesBaseController *object, SimpleNotesMediator *model) {
-  SimpleNotesBaseControllerPrivate *private = simple_notes_base_controller_get_instance_private(object);
-  if (private->_model != model) {
-    g_clear_object(&(private->_model));
-    private->_model = g_object_ref(model);
-  }
+void simple_notes_base_controller_ref_model(SimpleNotesBaseController *self, SNBaseModel *model) {
+  SimpleNotesBaseControllerPrivate *private = simple_notes_base_controller_get_instance_private(self);
+  if (private->_model != model)
+    {
+      if (private->_model)
+	{
+	  g_object_unref(private->_model);
+	}
+      private->_model = g_object_ref(model);
+    }
 }
 
 SimpleNotesBaseControllerEventResult simple_notes_base_controller_handle_event (
@@ -159,31 +163,30 @@ SimpleNotesBaseControllerEventResult simple_notes_base_controller_handle_event (
 
 static gchar *simple_notes_base_controller_create_command_name (SimpleNotesBaseController *object) {
     SimpleNotesBaseControllerClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, create_command_name, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, NULL);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, create_command_name, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, NULL);
     return klass->create_command_name(object);
 }
 
 static gchar **simple_notes_base_controller_create_options_names (SimpleNotesBaseController *object) {
     SimpleNotesBaseControllerClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, create_options_names, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, NULL);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, create_options_names, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, NULL);
     return klass->create_options_names(object);
 }
 
 static gchar ***simple_notes_base_controller_create_required_options_names (SimpleNotesBaseController *object) {
     SimpleNotesBaseControllerClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, create_required_options_names, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, NULL);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, create_required_options_names, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, NULL);
     return klass->create_required_options_names(object);
 }
 
 static gboolean simple_notes_base_controller_check_value_for_option (SimpleNotesBaseController *object, gchar *option, gchar *value) {
     SimpleNotesBaseControllerClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, check_value_for_option, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, FALSE);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, check_value_for_option, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, FALSE);
     return klass->check_value_for_option(object, option, value);
 }
 
 static gboolean simple_notes_base_controller_perform_command (SimpleNotesBaseController *object, gchar *command, GHashTable *options) {
     SimpleNotesBaseControllerClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, perform_command, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, FALSE);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, perform_command, SimpleNotesBaseController, SIMPLE_NOTES, BASE_CONTROLLER, FALSE);
     return klass->perform_command(object, command, options);
 }
-

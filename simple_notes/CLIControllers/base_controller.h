@@ -10,7 +10,8 @@
 #define simple_notes_base_controller____FILEEXTENSION___
 
 #include "event.h"
-#include "mediator.h"
+#include "base_model.h"
+
 
 typedef enum _SimpleNotesBaseControllerEventResult {
   SimpleNotesBaseControllerEventResultError = -1,
@@ -36,13 +37,14 @@ struct _SimpleNotesBaseControllerClass {
   gboolean (*perform_command) (SimpleNotesBaseController *object, gchar *command, GHashTable *options);
 };
 
+
+void simple_notes_base_controller_ref_model(SimpleNotesBaseController *self, SNBaseModel *model);
+
 SimpleNotesBaseControllerEventResult simple_notes_base_controller_handle_event (
                                                                                 SimpleNotesBaseController *object,
                                                                                 SimpleNotesEvent *event,
                                                                                 GError **error
                                                                                 );
 
-SimpleNotesMediator *simple_notes_base_controller_get_model (SimpleNotesBaseController *object);
-void simple_notes_base_controller_set_ref_model (SimpleNotesBaseController *object, SimpleNotesMediator *model);
 
 #endif

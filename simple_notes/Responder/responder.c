@@ -51,13 +51,13 @@ void simple_notes_responder_set_ref_next_responder (SimpleNotesResponder *object
 
 gboolean simple_notes_responder_handle_event (SimpleNotesResponder *object, SimpleNotesEvent *event) {
     SimpleNotesResponderClass *klass = NULL;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, handle_event, SimpleNotesResponder, SIMPLE_NOTES, RESPONDER, FALSE);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, handle_event, SimpleNotesResponder, SIMPLE_NOTES, RESPONDER, FALSE);
     return klass->handle_event(object, event);
 }
 
 void simple_notes_responder_handle_error (SimpleNotesResponder *object, GError *error) {
     SimpleNotesResponderClass *klass = NULL;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC(object, &klass, handle_error, SimpleNotesResponder, SIMPLE_NOTES, RESPONDER);
+    SN_GET_CLASS(object, &klass, handle_error, SimpleNotesResponder, SIMPLE_NOTES, RESPONDER);
     klass->handle_error(object, error);
 }
 

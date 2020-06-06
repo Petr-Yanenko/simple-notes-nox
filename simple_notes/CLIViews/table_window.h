@@ -29,18 +29,18 @@ struct _SimpleNotesTableWindowClass {
     SimpleNotesTableViewCell * (*create_header_for_column) (SimpleNotesTableWindow *object, gulong column);
     gulong (*get_rows_number) (SimpleNotesTableWindow *object);
     gulong (*get_columns_number) (SimpleNotesTableWindow *object);
-    SimpleNotesBaseController * (*create_controller) (SimpleNotesTableWindow *object, SimpleNotesMediator *model);
-    SimpleNotesBaseModel * (*get_model_to_connect_signal) (SimpleNotesTableWindow *object, SimpleNotesMediator *model);
+    SimpleNotesBaseController * (*create_controller) (SimpleNotesTableWindow *object, SNBaseModel *model);
 };
 
 SimpleNotesTableWindow *simple_notes_table_window_new (
         GType type,
         SimpleNotesResponder *next,
-        SimpleNotesMediator *model
+        SNBaseModel *model
 );
 
 SimpleNotesLabelCell *simple_notes_table_window_create_cell (gchar *text, SimpleNotesLabelTextAlignment alignment);
 SimpleNotesTableView *simple_notes_table_window_get_table (SimpleNotesTableWindow *object);
-SimpleNotesMediator *simple_notes_table_window_get_model (SimpleNotesTableWindow *object);
+SNBaseModel *simple_notes_table_window_get_model (SimpleNotesTableWindow *object);
+
 
 #endif

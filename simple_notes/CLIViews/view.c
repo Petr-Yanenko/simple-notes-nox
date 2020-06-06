@@ -203,7 +203,7 @@ void simple_notes_view_size_to_fit (SimpleNotesView *object) {
 
 SimpleNotesSize simple_notes_view_size_that_fits (SimpleNotesView *object, SimpleNotesSize size) {
     SimpleNotesViewClass *klass = NULL;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(
+    SN_GET_CLASS_OR_RETURN_VAL(
     object,
     &klass,
     size_that_fits,
@@ -232,7 +232,7 @@ void simple_notes_view_layout_if_needed (SimpleNotesView *object) {
 
 void simple_notes_view_display (SimpleNotesView *object) {
     SimpleNotesViewClass *klass = NULL;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC(object, &klass, display, SimpleNotesView, SIMPLE_NOTES, VIEW);
+    SN_GET_CLASS(object, &klass, display, SimpleNotesView, SIMPLE_NOTES, VIEW);
     klass->display(object);
 }
 
@@ -338,13 +338,13 @@ SimpleNotesRect simple_notes_view_convert_rect_from_view (SimpleNotesView *objec
 
 static void simple_notes_view_layout_subviews (SimpleNotesView *object) {
     SimpleNotesViewClass *klass = NULL;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC(object, &klass, layout_subviews, SimpleNotesView, SIMPLE_NOTES, VIEW)
+    SN_GET_CLASS(object, &klass, layout_subviews, SimpleNotesView, SIMPLE_NOTES, VIEW)
     klass->layout_subviews(object);
 }
 
 static void simple_notes_view_draw_rect (SimpleNotesView *object, SimpleNotesRect rect) {
     SimpleNotesViewClass *klass = NULL;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC(object, &klass, draw_rect, SimpleNotesView, SIMPLE_NOTES, VIEW)
+    SN_GET_CLASS(object, &klass, draw_rect, SimpleNotesView, SIMPLE_NOTES, VIEW)
     klass->draw_rect(object, rect);
 }
 

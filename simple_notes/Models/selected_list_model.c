@@ -22,12 +22,17 @@ static GParamSpec *objProperties[N_PROPERTIES] = { NULL, };
 
 
 static void
+sn_imodel_interface_init(SNIModelInterface *iface);
+
+static void
 sn_ientity_model_interface_init(SNIEntityModelInterface *iface);
 
 
 G_DEFINE_TYPE_WITH_CODE(SNSelectedListModel,
 			sn_selected_list_model,
 			SN_TYPE_LIST_MODEL,
+			G_IMPLEMENT_INTERFACE(SN_TYPE_IMODEL,
+					      sn_imodel_interface_init)
 			G_IMPLEMENT_INTERFACE(SN_TYPE_IENTITY_MODEL,
 					      sn_ientity_model_interface_init))
 
@@ -65,10 +70,10 @@ static void
 sn_ientity_model_real_selected(SNIEntityModel *self, guint64 id);
 
 static void
-sn_ientity_model_real_new_data(SNIModel *self, gpointer data);
+sn_imodel_real_new_data(SNIModel *self, gpointer data);
 
 static void
-sn_ientity_model_real_error(SNIModel *self, SNError error, gpointer data);
+sn_imodel_real_error(SNIModel *self, SNError error, gpointer data);
 
 
 static void
@@ -140,13 +145,17 @@ sn_base_model_get_property(GObject *object,
 }
 
 static void
+sn_imodel_interface_init(SNIModelInterface *iface)
+{
+  iface->new_data = sn_imodel_real_new_data;
+  iface->error = sn_imodel_real_error;
+}
+
+static void
 sn_ientity_model_interface_init(SNIEntityModelInterface *iface)
 {
   iface->changed = sn_ientity_model_real_changed;
   iface->selected = sn_ientity_model_real_selected;
-
-  iface->_parent.new_data = sn_ientity_model_real_new_data;
-  iface->_parent.error = sn_ientity_model_real_error;
 }
 
 static void
@@ -367,13 +376,13 @@ sn_ientity_model_real_selected(SNIEntityModel *self, guint64 id)
 }
 
 static void
-sn_ientity_model_real_new_data(SNIModel *self, gpointer data)
+sn_imodel_real_new_data(SNIModel *self, gpointer data)
 {
   sn_list_model_assign_list(SN_LIST_MODEL(self), (GList *)data);
 }
 
 static void
-sn_ientity_model_real_error(SNIModel *self, SNError error, gpointer data)
+sn_imodel_real_error(SNIModel *self, SNError error, gpointer data)
 {
   sn_base_model_assign_error_code(SN_BASE_MODEL(self), error);
 }

@@ -10,10 +10,12 @@
 #define simple_notes_folder_window____FILEEXTENSION___
 
 #include "table_window.h"
+#include "folders_model.h"
+
 
 #define SIMPLE_NOTES_TYPE_FOLDER_WINDOW simple_notes_folder_window_get_type ()
 G_DECLARE_FINAL_TYPE(SimpleNotesFolderWindow, simple_notes_folder_window, SIMPLE_NOTES, FOLDER_WINDOW, SimpleNotesTableWindow)
 
-SimpleNotesFolderWindow *simple_notes_folder_window_new (SimpleNotesResponder *next, SimpleNotesMediator *model);
+SimpleNotesFolderWindow *simple_notes_folder_window_new (SimpleNotesResponder *next, SNFoldersModel *model);
 
 #endif
