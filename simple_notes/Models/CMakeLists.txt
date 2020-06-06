@@ -4,7 +4,7 @@ add_library (model
   list_model.c
   selected_list_model.c
   folders_model.c
-#  notes_model.c
+  notes_model.c
 )
 
 target_include_directories (model PUBLIC ./)
