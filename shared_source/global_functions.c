@@ -149,6 +149,7 @@ sn_notify_connect(GObject *subject,
   glong detailLen = strlen(signalDetail);
   glong const fullLen = nameLen + detailLen +1;
   gchar buff[fullLen];
+  sprintf(buff, "%s%s", signalName, signalDetail);
 
   gulong identifier = g_signal_connect(subject,
 				       buff,
