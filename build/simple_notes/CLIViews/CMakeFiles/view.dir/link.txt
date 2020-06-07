@@ -1,2 +1,0 @@
-/usr/bin/ar qc libview.a  CMakeFiles/view.dir/help.c.o CMakeFiles/view.dir/view_utility.c.o CMakeFiles/view.dir/view.c.o CMakeFiles/view.dir/window.c.o CMakeFiles/view.dir/table_window.c.o CMakeFiles/view.dir/folder_window.c.o CMakeFiles/view.dir/note_window.c.o CMakeFiles/view.dir/table_view.c.o CMakeFiles/view.dir/table_view_cell.c.o CMakeFiles/view.dir/label.c.o CMakeFiles/view.dir/label_cell.c.o
-/usr/bin/ranlib libview.a

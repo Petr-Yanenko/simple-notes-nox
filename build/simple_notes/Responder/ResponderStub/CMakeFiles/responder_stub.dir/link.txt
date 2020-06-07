@@ -1,2 +1,0 @@
-/usr/bin/ar qc libresponder_stub.a  CMakeFiles/responder_stub.dir/responder_stub.c.o
-/usr/bin/ranlib libresponder_stub.a
