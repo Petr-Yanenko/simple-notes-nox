@@ -205,7 +205,8 @@ typedef enum {
 	      SNErrorFolderPresenter = 10,
 	      SNErrorEntityPresenter = 11,
 	      SNErrorEntityFetch = 12,
-	      SNErrorNotePresenter = 13
+	      SNErrorNotePresenter = 13,
+	      SNErrorNotSelected = 14
 } SNError;
 
 
