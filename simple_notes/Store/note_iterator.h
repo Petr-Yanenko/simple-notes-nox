@@ -8,7 +8,7 @@
 #include "entity_iterator.h"
 
 
-#define SN_TYPE_NOTE_ITERATOR  sn_note_iterator_get_type()
+#define SN_TYPE_NOTE_ITERATOR sn_note_iterator_get_type()
 G_DECLARE_FINAL_TYPE(SNNoteIterator,
 		     sn_note_iterator,
 		     SN,

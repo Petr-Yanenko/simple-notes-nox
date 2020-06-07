@@ -7,7 +7,7 @@
 
 
 struct _SNFolderIterator {
-  SNDataIterator _parent;
+  SNEntityIterator _parent;
 };
 
 

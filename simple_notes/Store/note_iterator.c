@@ -7,11 +7,11 @@
 
 
 struct _SNNoteIterator {
-  GObject _parent;
+  SNEntityIterator _parent;
 };
 
 
-G_DEFINE_TYPE(SNNoteIterator, sn_note_iterator, SN_TYPE_DATA_ITERATOR)
+G_DEFINE_TYPE(SNNoteIterator, sn_note_iterator, SN_TYPE_ENTITY_ITERATOR)
 
 
 static SNError kError = SNErrorNoteIterator;
