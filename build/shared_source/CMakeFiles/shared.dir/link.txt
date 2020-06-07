@@ -1,0 +1,2 @@
+/usr/bin/ar qc libshared.a  CMakeFiles/shared.dir/global_functions.c.o CMakeFiles/shared.dir/commands.c.o
+/usr/bin/ranlib libshared.a

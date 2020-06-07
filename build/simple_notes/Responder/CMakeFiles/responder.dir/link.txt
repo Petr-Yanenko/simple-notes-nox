@@ -1,0 +1,2 @@
+/usr/bin/ar qc libresponder.a  CMakeFiles/responder.dir/responder.c.o
+/usr/bin/ranlib libresponder.a

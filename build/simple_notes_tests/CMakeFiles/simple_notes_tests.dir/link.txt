@@ -1,0 +1,1 @@
+/usr/bin/cc -g  -rdynamic CMakeFiles/simple_notes_tests.dir/main.c.o  -o simple_notes_tests -lglib-2.0 -lgobject-2.0 -lgio-2.0 -lsqlite3 ../shared_source/libshared.a 
