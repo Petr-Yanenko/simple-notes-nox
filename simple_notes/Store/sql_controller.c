@@ -513,7 +513,9 @@ sn_sql_controller_execute(SNSQLController *self,
 			  ...)
 {
   va_list args;
-  gboolean success = sn_data_base_execute(self->_db, stmt, paramCount, args);
+  va_start(args, paramCount);
+  gboolean success = sn_data_base_vexecute(self->_db, stmt, paramCount, args);
+  va_end(args);
   SN_RETURN_VAL_IF_FAIL(success, FALSE, &kError);
 
   return TRUE;

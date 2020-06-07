@@ -30,4 +30,11 @@ sn_data_base_bind(SNDataBase *self, gchar *const key, glong paramCount, ...);
 gboolean
 sn_data_base_execute(SNDataBase *self, gchar *const key, glong paramCount, ...);
 
+gboolean
+sn_data_base_vexecute(SNDataBase *self,
+		      gchar *const key,
+		      glong paramCount,
+		      va_list args);
+
+
 #endif
