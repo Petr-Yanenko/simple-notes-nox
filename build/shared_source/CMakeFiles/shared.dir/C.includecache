@@ -6,24 +6,6 @@
 
 #IncludeRegexTransform: 
 
-../include/simple_notes.h
-glib-object.h
--
-global_functions.h
-../include/global_functions.h
-
-../shared_source/global_functions.h
-gio.h
--
-
-/home/user/Documents/simple-notes-nox/shared_source/commands.c
-commands.h
-/home/user/Documents/simple-notes-nox/shared_source/commands.h
-
-/home/user/Documents/simple-notes-nox/shared_source/commands.h
-simple_notes.h
-/home/user/Documents/simple-notes-nox/shared_source/simple_notes.h
-
 /home/user/Documents/simple-notes-nox/shared_source/global_functions.c
 global_functions.h
 /home/user/Documents/simple-notes-nox/shared_source/global_functions.h

@@ -583,8 +583,18 @@ sn_store_print_note_path(SNStore *self, gchar *buff, guint64 folderID)
       seeded = TRUE;
     }
 
+  gchar folderPath[1000];
+  sprintf(folderPath, kFolderPathFormat, folderID);
+  GFile *folder = g_file_new_for_path(folderPath);
+  GError *folderErr = NULL;
+  gboolean folderCreated = g_file_make_directory(folder, NULL, &folderErr);
+  g_object_unref(folder);
+  gboolean exists;
+  exists = folderErr->domain == G_IO_ERROR && folderErr->code == G_IO_ERROR_EXISTS;
+  SN_RETURN_VAL_IF_FAIL(folderCreated || exists, FALSE, &kError);
+
   gboolean success = FALSE;
-  for (glong i = 0; !success, i < RAND_MAX; i++)
+  for (glong i = 0; !success && i < RAND_MAX; i++)
     {
       glong id = rand();
       sprintf(buff, kNotePathFormat, folderID, id);
@@ -597,10 +607,10 @@ sn_store_print_note_path(SNStore *self, gchar *buff, guint64 folderID)
       if (fileStream)
 	{
 	  success = TRUE;
+	  g_object_unref(fileStream);
 	}
 
       g_object_unref(file);
-      g_object_unref(fileStream);
     }
 
   if (success) return TRUE;
