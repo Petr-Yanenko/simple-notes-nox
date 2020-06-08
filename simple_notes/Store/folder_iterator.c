@@ -71,8 +71,6 @@ sn_folder_iterator_item_count(SNFolderIterator *self)
 gboolean
 sn_folder_iterator_item_selected(SNFolderIterator *self)
 {
-  ;
-
   return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self));
 }
 

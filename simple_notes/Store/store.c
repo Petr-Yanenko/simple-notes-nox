@@ -378,7 +378,7 @@ sn_store_create_note_iterator(SNStore *self)
 
   SNEntityIterator *itr = sn_store_create_iterator(self, stmt, constructor);
   SNNoteIterator *notes = SN_NOTE_ITERATOR(itr);
-  //  self->_noteSelected = sn_store_get_selected_item(self, itr);
+  self->_noteSelected = sn_store_get_selected_item(self, itr);
 
   return notes;
 }
