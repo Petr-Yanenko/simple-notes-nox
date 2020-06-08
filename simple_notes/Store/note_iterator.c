@@ -17,9 +17,15 @@ G_DEFINE_TYPE(SNNoteIterator, sn_note_iterator, SN_TYPE_ENTITY_ITERATOR)
 static SNError kError = SNErrorNoteIterator;
 
 
+static glong
+sn_note_iterator_real_selected_column(SNEntityIterator *self);
+
+
 static void
 sn_note_iterator_class_init(SNNoteIteratorClass *class)
 {
+  SNEntityIteratorClass *parent = SN_ENTITY_ITERATOR_CLASS(class);
+  parent->selected_column = sn_note_iterator_real_selected_column;
 }
 
 static void
@@ -78,8 +84,13 @@ sn_note_iterator_create_item_last_edited(SNNoteIterator *self)
 gboolean
 sn_note_iterator_item_selected(SNNoteIterator *self)
 {
+  return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self));
+}
+
+static glong
+sn_note_iterator_real_selected_column(SNEntityIterator *self)
+{
   glong selectedColumn = 4;
 
-  return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self),
-					  selectedColumn);
+  return selectedColumn;
 }

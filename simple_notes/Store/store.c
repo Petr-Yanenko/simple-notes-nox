@@ -54,10 +54,10 @@ static SNError const kError = SNErrorStore;
 static gboolean
 sn_store_print_note_path(SNStore *self, gchar *buff, guint64 folderID);
 
-static SNDataIterator *
+static SNEntityIterator *
 sn_store_create_iterator(SNStore *self,
 			 SNStatement *stmt,
-			 SNDataIterator * (*constructor)(SNStatement *));
+			 SNEntityIterator * (*constructor)(SNStatement *));
 
 static gboolean
 sn_store_assign_folder_changed(SNStore *self,
@@ -90,10 +90,7 @@ static GFile *
 sn_store_create_tmp_file(SNStore *self);
 
 static guint64
-sn_store_get_selected_folder(SNStore *self, SNFolderIterator *folders);
-
-static guint64
-sn_store_get_selected_note(SNStore *self, SNNoteIterator *notes);
+sn_store_get_selected_item(SNStore *self, SNEntityIterator *itr);
 
 
 static void
@@ -242,14 +239,14 @@ sn_store_create_folder_iterator(SNStore *self)
 {
   SNStatement *stmt = sn_sql_controller_select_folders(self->_sql);
 
-  SNDataIterator *constructor(SNStatement *stmt)
+  SNEntityIterator *constructor(SNStatement *stmt)
   {
-    return SN_DATA_ITERATOR(sn_folder_iterator_new(stmt));
+    return SN_ENTITY_ITERATOR(sn_folder_iterator_new(stmt));
   }
 
-  SNDataIterator *itr = sn_store_create_iterator(self, stmt, constructor);
+  SNEntityIterator *itr = sn_store_create_iterator(self, stmt, constructor);
   SNFolderIterator *folders = SN_FOLDER_ITERATOR(itr);
-  self->_folderSelected = sn_store_get_selected_folder(self, folders);
+  self->_folderSelected = sn_store_get_selected_item(self, itr);
 
   return folders;
 }
@@ -374,14 +371,14 @@ sn_store_create_note_iterator(SNStore *self)
   SNStatement *stmt = sn_sql_controller_select_notes(self->_sql,
 						     self->_folderSelected);
 
-  SNDataIterator *constructor(SNStatement *stmt)
+  SNEntityIterator *constructor(SNStatement *stmt)
   {
-    return SN_DATA_ITERATOR(sn_note_iterator_new(stmt));
+    return SN_ENTITY_ITERATOR(sn_note_iterator_new(stmt));
   }
 
-  SNDataIterator *itr = sn_store_create_iterator(self, stmt, constructor);
+  SNEntityIterator *itr = sn_store_create_iterator(self, stmt, constructor);
   SNNoteIterator *notes = SN_NOTE_ITERATOR(itr);
-  self->_noteSelected = sn_store_get_selected_note(self, notes);
+  //  self->_noteSelected = sn_store_get_selected_item(self, itr);
 
   return notes;
 }
@@ -589,9 +586,14 @@ sn_store_print_note_path(SNStore *self, gchar *buff, guint64 folderID)
   GError *folderErr = NULL;
   gboolean folderCreated = g_file_make_directory(folder, NULL, &folderErr);
   g_object_unref(folder);
-  gboolean exists;
-  exists = folderErr->domain == G_IO_ERROR && folderErr->code == G_IO_ERROR_EXISTS;
-  SN_RETURN_VAL_IF_FAIL(folderCreated || exists, FALSE, &kError);
+  if (!folderCreated)
+    {
+      gboolean exists, gioDomain, existsErr;
+      gioDomain = folderErr->domain == G_IO_ERROR;
+      existsErr = folderErr->code == G_IO_ERROR_EXISTS;
+      exists = gioDomain && existsErr;
+      SN_RETURN_VAL_IF_FAIL(exists, FALSE, &kError);
+    }
 
   gboolean success = FALSE;
   for (glong i = 0; !success && i < RAND_MAX; i++)
@@ -618,12 +620,12 @@ sn_store_print_note_path(SNStore *self, gchar *buff, guint64 folderID)
   SN_RETURN_VAL_IF_FAIL(success, FALSE, &kError);
 }
 
-static SNDataIterator *
+static SNEntityIterator *
 sn_store_create_iterator(SNStore *self,
 			 SNStatement *stmt,
-			 SNDataIterator * (*constructor)(SNStatement *))
+			 SNEntityIterator * (*constructor)(SNStatement *))
 {
-  SNDataIterator *iterator = NULL;
+  SNEntityIterator *iterator = NULL;
   if (stmt)
     {
       iterator = constructor(stmt);
@@ -800,45 +802,22 @@ sn_store_create_content_file(SNStore *self, SNError *error)
 }
 
 static guint64
-sn_store_get_selected_folder(SNStore *self, SNFolderIterator *folders)
+sn_store_get_selected_item(SNStore *self, SNEntityIterator *itr)
 {
-  SN_RETURN_VAL_IF_FAIL(folders, 0, &kError);
-  SNEntityIterator *itr = SN_ENTITY_ITERATOR(folders);
+  SN_RETURN_VAL_IF_FAIL(itr, 0, &kError);
 
   gboolean condition(SNEntityIterator *itr)
   {
-    return sn_folder_iterator_item_selected(folders);
+    return sn_entity_iterator_item_selected(itr);
   }
 
-  guint64 selectedFolder = 0;
+  guint64 selectedItem = 0;
   void handler(SNEntityIterator *itr)
   {
-    selectedFolder = sn_folder_iterator_item_id(folders);
+    selectedItem = sn_entity_iterator_item_id(itr);
   }
 
   sn_store_iterate_entities(self, itr, condition, handler);
 
-  return selectedFolder;
-}
-
-static guint64
-sn_store_get_selected_note(SNStore *self, SNNoteIterator *notes)
-{
-  SN_RETURN_VAL_IF_FAIL(notes, 0, &kError);
-  SNEntityIterator *itr = SN_ENTITY_ITERATOR(notes);
-
-  gboolean condition(SNEntityIterator *itr)
-  {
-    return sn_note_iterator_item_selected(notes);
-  }
-
-  guint64 selectedNote = 0;
-  void handler(SNEntityIterator *itr)
-  {
-    selectedNote = sn_note_iterator_item_id(notes);
-  }
-
-  sn_store_iterate_entities(self, itr, condition, handler);
-
-  return selectedNote;
+  return selectedItem;
 }
