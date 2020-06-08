@@ -151,11 +151,13 @@ sn_base_model_class_init(SNBaseModelClass *klass)
 						      G_PARAM_READWRITE);
 
   gchar *description = "Error reason of loading data.";
-  objProperties[PROP_ERROR_CODE] = g_param_spec_string(kErrorCode,
-						       "Error Reason",
-						       description,
-						       NULL,
-						       G_PARAM_READWRITE);
+  objProperties[PROP_ERROR_CODE] = g_param_spec_long(kErrorCode,
+						     "Error Reason",
+						     description,
+						     G_MINLONG,
+						     G_MAXLONG,
+						     -1,
+						     G_PARAM_READWRITE);
 
   g_object_class_install_properties(objectClass,
 				    N_PROPERTIES,

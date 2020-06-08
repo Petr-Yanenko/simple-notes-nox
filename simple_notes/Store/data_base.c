@@ -175,7 +175,8 @@ sn_data_base_sqlite_bind(SNDataBase *self,
   gint result = SQLITE_OK;
   for (glong i = 0; i < paramCount; i++)
     {
-      result = sqlite3_bind_text(stmt, i + 1, va_arg(args, gchar *), -1, NULL);
+      gchar *arg = va_arg(args, gchar *);
+      result = sqlite3_bind_text(stmt, i + 1, arg, -1, NULL);
       if (result != SQLITE_OK) break;
     }
 
