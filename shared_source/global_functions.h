@@ -24,48 +24,48 @@ extern gchar *const kFolderPathFormat;
 extern gchar *const kNotePathFormat;
 
 
-#define SIMPLE_NOTES_CREATE_ERROR(error,                        \
-				  errorCode,                    \
-				  format,                       \
-				  argsNumber,                   \
-				  args)                         \
-  {                                                             \
-    if (error)                                                  \
-      {                                                         \
-	GString *description = g_string_new ("\0");             \
-	g_string_append_vprintf (description, format, args);    \
-	*error = g_error_new (kSimpleNotesDomain,               \
-			      errorCode,                        \
-			      description->str,                 \
-			      NULL);                            \
-	g_string_free (description, TRUE);                      \
-      }                                                         \
+#define SIMPLE_NOTES_CREATE_ERROR(error,				\
+				  errorCode,				\
+				  format,				\
+				  argsNumber,				\
+				  args)				\
+  {									\
+    if (error)								\
+      {								\
+	GString *description = g_string_new("\0");			\
+	g_string_append_vprintf(description, format, args);		\
+	*error = g_error_new(kSimpleNotesDomain,			\
+			     errorCode,				\
+			     description->str,				\
+			     NULL);					\
+	g_string_free (description, TRUE);				\
+      }								\
   }
 
-#define SIMPLE_NOTES_PRINT_ERROR(error)         \
-  {                                             \
-    if (error && (*error))                      \
-      {                                         \
-	g_printerr ("\n%s %d %d\n",             \
-		    (*error)->message,          \
-		    (*error)->code,             \
-		    (*error)->domain);          \
-      }                                         \
+#define SIMPLE_NOTES_PRINT_ERROR(error)				\
+  {									\
+    if (error && (*error))						\
+      {								\
+	g_printerr("\n%s %d %d\n",					\
+		   (*error)->message,					\
+		   (*error)->code,					\
+		   (*error)->domain);					\
+      }								\
   }
 
-#define SIMPLE_NOTES_CLEAR_ERROR(error)         \
-  {                                             \
-    if (error)                                  \
-      {                                         \
-	g_clear_error (error);                  \
-      }                                         \
+#define SIMPLE_NOTES_CLEAR_ERROR(error)				\
+  {									\
+    if (error)								\
+      {								\
+	g_clear_error(error);						\
+      }								\
   }
 
 #define SN_HANDLE_ERROR(error)				\
   {							\
     SNError *pError = (SNError *)error;		\
     SNError code = pError ? *pError : SNErrorUnknown;	\
-    g_warning("\nError with code %d\n", code);		\
+    g_critical("Error code %X", code);			\
   }
 
 #define SN_RETURN_IF_FAIL(expression, error)    \
@@ -73,7 +73,7 @@ extern gchar *const kNotePathFormat;
     if (!(expression))				\
       {                                         \
 	SN_HANDLE_ERROR(error);		\
-	return;				\
+	g_return_if_reached();			\
       }                                         \
   }
 
@@ -82,7 +82,7 @@ extern gchar *const kNotePathFormat;
     if (!(expression))					\
       {                                                 \
 	SN_HANDLE_ERROR(error);			\
-	return val;					\
+	g_return_val_if_reached(val);			\
       }                                                 \
   }
 
@@ -192,21 +192,21 @@ extern gchar *const kNotePathFormat;
 
 
 typedef enum {
-	      SNErrorUnknown = 0,
-	      SNErrorDataBase = 1,
-	      SNErrorStore = 2,
-	      SNErrorStatement = 3,
-	      SNErrorDataIterator = 4,
-	      SNErrorEntityIterator = 5,
-	      SNErrorFolderIterator = 6,
-	      SNErrorNoteIterator = 7,
-	      SNErrorSQLController = 8,
-	      SNErrorNotFound = 9,
-	      SNErrorFolderPresenter = 10,
-	      SNErrorEntityPresenter = 11,
-	      SNErrorEntityFetch = 12,
-	      SNErrorNotePresenter = 13,
-	      SNErrorNotSelected = 14
+	      SNErrorUnknown = 0x0,
+	      SNErrorNotFound = 0x1,
+	      SNErrorNotSelected = 0x2,
+	      SNErrorDataBase = 0x1000,
+	      SNErrorStore = 0x2000,
+	      SNErrorStatement = 0x3000,
+	      SNErrorDataIterator = 0x4000,
+	      SNErrorEntityIterator = 0x5000,
+	      SNErrorFolderIterator = 0x6000,
+	      SNErrorNoteIterator = 0x7000,
+	      SNErrorSQLController = 0x8000,
+	      SNErrorFolderPresenter = 0x9000,
+	      SNErrorEntityPresenter = 0xA000,
+	      SNErrorEntityFetch = 0xB000,
+	      SNErrorNotePresenter = 0xC000,
 } SNError;
 
 
