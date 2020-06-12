@@ -1,4 +1,5 @@
 add_executable(simple_notes main.c)
+#set_property(TARGET simple_notes PROPERTY C_STANDART 11)
 
 add_subdirectory(DataStructures)
 add_subdirectory(Models)
@@ -14,7 +15,6 @@ target_link_libraries(simple_notes
   glib-2.0
   gobject-2.0
   gio-2.0
-  sqlite3
   model
   application
   view

@@ -21,62 +21,63 @@
 gint32
 sn_command_line(GApplication *application, GApplicationCommandLine *cmdline)
 {
-  SimpleNotesResponderStub *stub = simple_notes_responder_stub_new ();
+  SimpleNotesResponderStub *stub = simple_notes_responder_stub_new();
   SNNotesModel *notes = sn_notes_model_new();
-  SimpleNotesNoteWindow *notesWindow
-    = simple_notes_note_window_new (SIMPLE_NOTES_RESPONDER (stub), notes);
+  SimpleNotesNoteWindow *notesWindow;
+  notesWindow = simple_notes_note_window_new(SIMPLE_NOTES_RESPONDER(stub),
+					     notes);
   SNFoldersModel *folders = sn_folders_model_new();
-  SimpleNotesFolderWindow *foldersWindow
-    = simple_notes_folder_window_new (SIMPLE_NOTES_RESPONDER (notesWindow),
-                                      folders);
-  SimpleNotesHelpWindow *help
-    = simple_notes_help_window_new (SIMPLE_NOTES_RESPONDER (foldersWindow));
-  SimpleNotesApplication *notesApplication
-    = simple_notes_application_new (SIMPLE_NOTES_RESPONDER (help));
+  SimpleNotesResponder *notesResponder = SIMPLE_NOTES_RESPONDER(notesWindow);
+  SimpleNotesFolderWindow *foldersWindow;
+  foldersWindow = simple_notes_folder_window_new(notesResponder, folders);
+  SimpleNotesHelpWindow *help;
+  help = simple_notes_help_window_new(SIMPLE_NOTES_RESPONDER(foldersWindow));
+  SimpleNotesApplication *notesApplication;
+  notesApplication = simple_notes_application_new(SIMPLE_NOTES_RESPONDER(help));
 
-  GInputStream *stdStream = g_application_command_line_get_stdin (cmdline);
+  GInputStream *stdStream = g_application_command_line_get_stdin(cmdline);
   gssize const buffSize = 1000;
   gchar buff[buffSize];
 
   g_print ("\nType help to show commands list\n");
-  while (simple_notes_application_get_proceed (notesApplication))
+  while (simple_notes_application_get_proceed(notesApplication))
     {
       GError *error = NULL;
-      memset (buff, '\0', buffSize);
-      g_print ("\nsimple-notes> ");
+      memset(buff, '\0', buffSize);
+      g_print("\nsimple-notes> ");
       gsize symbolsMax = buffSize - 1;
       //        gchar buff[] = {'n','o','t','e',' ','-','-','a','l','l','\0'};
-      gssize count = g_input_stream_read (stdStream,
-					  buff,
-					  symbolsMax,
-					  NULL,
-					  &error);
+      gssize count = g_input_stream_read(stdStream,
+					 buff,
+					 symbolsMax,
+					 NULL,
+					 &error);
       /*buff[0] = 'f';buff[1] = 'o';buff[2] = 'l';buff[3] = 'd';buff[4] = 'e';buff[5] = 'r';buff[6] = ' ';buff[7] = '-';buff[8] = '-';buff[9] = 'i';buff[10] = 'n';buff[11] = 's';buff[12] = 'e';buff[13] = 'r';buff[14] = 't';buff[15] = ' ';
 	for (; count < buffSize; count++) {
 	buff[count] = 't';
 	}*/
-   gboolean success = count > -1;
+      SimpleNotesResponder *responderApp;
+      responderApp = SIMPLE_NOTES_RESPONDER(notesApplication);
+      gboolean success = count > -1;
       if (success)
 	{
 	  if (!count)
 	    {
 	      count = symbolsMax;
 	    }
-	  SimpleNotesEvent *event = simple_notes_event_new (buff,
-							    count,
-							    &error);
+	  SimpleNotesEvent *event = simple_notes_event_new(buff,
+							   count,
+							   &error);
 	  success = event != NULL;
 	  if (success)
 	    {
-	      simple_notes_responder_handle_event
-		(SIMPLE_NOTES_RESPONDER (notesApplication), event);
-	      g_object_unref (event);
+	      simple_notes_responder_handle_event(responderApp, event);
+	      g_object_unref(event);
 	    }
 	}
       if (!success)
 	{
-	  simple_notes_responder_handle_error
-	    (SIMPLE_NOTES_RESPONDER (notesApplication), error);
+	  simple_notes_responder_handle_error(responderApp, error);
 	}
       g_clear_error (&error);
     }
@@ -92,8 +93,8 @@ sn_command_line(GApplication *application, GApplicationCommandLine *cmdline)
   return 0;
 }
 
-gint32
-main(int argc, char **argv)
+int
+main(int argc, char *argv[])
 {
   setlocale(LC_ALL, "");
 

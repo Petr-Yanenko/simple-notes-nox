@@ -4,7 +4,6 @@
 
 
 #include "folder_presenter.h"
-#include <stdio.h>
 #include "folder.h"
 
 
