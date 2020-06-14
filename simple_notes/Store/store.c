@@ -501,6 +501,8 @@ sn_store_create_note_for_editing(SNStore *self)
   if (!copied)
     {
       g_clear_object(&tmpNote);
+      g_warning("tmp file for editing not created.");
+      g_warn_if_reached();
     }
 
   g_clear_object(&source);
@@ -550,9 +552,12 @@ sn_store_save_note(SNStore *self, SNError *error)
   g_object_unref(tmpNote);
   if (!copied && error)
     {
-      if (copyErr->code == G_IO_ERROR_NOT_FOUND)
+      gboolean domain = copyErr->domain == G_IO_ERROR;
+      gboolean code = copyErr->code == G_IO_ERROR_NOT_FOUND;
+      if (domain && code)
 	{
 	  *error = SNErrorNotFound;
+	  return FALSE;
 	}
       else
 	{
@@ -724,9 +729,12 @@ static GFile *
 sn_store_create_tmp_file(SNStore *self)
 {
   gchar const *tmp = g_get_tmp_dir();
-  glong const tmpLen = strlen(tmp) + strlen(kNoteName) + 1;
+  gchar const *slash = "/";
+  glong const tmpLen = strlen(tmp) + strlen(slash) + strlen(kNoteName) + 1;
   gchar path[tmpLen];
+  path[0] = '\0';
   strcat(path, tmp);
+  strcat(path, slash);
   strcat(path, kNoteName);
   GFile *tmpNote = g_file_new_for_path(path);
 

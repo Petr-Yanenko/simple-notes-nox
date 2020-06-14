@@ -92,7 +92,11 @@ sn_data_base_add(SNDataBase *self, gchar *const key, gchar *const stmt)
   SN_RETURN_VAL_IF_FAIL(self->_stmts, FALSE, &kError);
 
   sqlite3_stmt *preparedStmt = NULL;
-  gint stmtResult = sqlite3_prepare_v2(self->_db, stmt, -1, &preparedStmt, NULL);
+  gint stmtResult = sqlite3_prepare_v2(self->_db,
+				       stmt,
+				       -1,
+				       &preparedStmt,
+				       NULL);
 
   gboolean ok = sn_data_base_check_result(self, stmtResult);
   SN_RETURN_VAL_IF_FAIL(ok, FALSE, &kError);
