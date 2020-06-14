@@ -64,9 +64,12 @@ static gboolean simple_notes_note_controller_real_perform_command (SimpleNotesBa
       return TRUE;
     } else if (g_hash_table_lookup_extended(options, kEditOption, NULL, &value)) {
       SNStore *store = sn_store_get_instance();
+      guint64 selected = sn_store_get_note_selected(store);
+      if (!selected) return FALSE;
       GFile *note = sn_store_create_note_for_editing(store);
       gchar *path = g_file_get_path(note);
       g_object_unref(note);
+      SN_RETURN_VAL_IF_FAIL(path, FALSE, NULL);
       GError *error = NULL;
       GSubprocess *vim = g_subprocess_new(G_SUBPROCESS_FLAGS_STDIN_INHERIT, &error, "vim", path, NULL);
       g_free(path);

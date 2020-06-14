@@ -84,7 +84,12 @@ static gboolean
 sn_store_update_note_last_edited(SNStore *self);
 
 static GFile *
-sn_store_create_content_file(SNStore *self, SNError *error);
+sn_store_create_selected_content_file(SNStore *self, SNError *error);
+
+static GFile *
+sn_store_create_content_file(SNStore *self,
+			     gboolean (*condition)(SNEntityIterator *),
+			     SNError *error);
 
 static GFile *
 sn_store_create_tmp_file(SNStore *self);
@@ -419,8 +424,14 @@ sn_store_delete_note(SNStore *self, guint64 id)
   gboolean edit = sn_store_end_editing(self);
   SN_RETURN_VAL_IF_FAIL(edit, FALSE, &kError);
 
+  gboolean condition(SNEntityIterator *itr)
+  {
+    SNNoteIterator *notes = SN_NOTE_ITERATOR(itr);
+    return sn_note_iterator_item_id(notes) == id;
+  }
+
   SNError error = -1;
-  GFile *content = sn_store_create_content_file(self, &error);
+  GFile *content = sn_store_create_content_file(self, condition, &error);
   if (content)
     {
       GError *deletingErr = NULL;
@@ -484,7 +495,7 @@ sn_store_create_note_for_editing(SNStore *self)
   SN_RETURN_VAL_IF_FAIL(self->_noteSelected, NULL, &kError);
 
   SNError contentError = -1;
-  GFile *source = sn_store_create_content_file(self, &contentError);
+  GFile *source = sn_store_create_selected_content_file(self, &contentError);
   if (!source && contentError == SNErrorNotSelected) return NULL;
   SN_RETURN_VAL_IF_FAIL(source, NULL, &contentError);
 
@@ -534,7 +545,7 @@ sn_store_end_editing(SNStore *self)
 gboolean
 sn_store_save_note(SNStore *self, SNError *error)
 {
-  GFile *source = sn_store_create_content_file(self, error);
+  GFile *source = sn_store_create_selected_content_file(self, error);
   if (!source && error && *error == SNErrorNotSelected) return FALSE;
   SN_RETURN_VAL_IF_FAIL(source, FALSE, error);
 
@@ -782,18 +793,26 @@ sn_store_iterate_entities(SNStore *self,
 }
 
 static GFile *
-sn_store_create_content_file(SNStore *self, SNError *error)
+sn_store_create_selected_content_file(SNStore *self, SNError *error)
+{
+  gboolean condition(SNEntityIterator *itr)
+  {
+    SNNoteIterator *notes = SN_NOTE_ITERATOR(itr);
+    return sn_note_iterator_item_selected(notes);
+  }
+  return sn_store_create_content_file(self, condition, error);
+}
+
+static GFile *
+sn_store_create_content_file(SNStore *self,
+			     gboolean (*condition)(SNEntityIterator *),
+			     SNError *error)
 {
   SNNoteIterator *notes = sn_store_create_note_iterator(self);
   if (error) *error = kError;
   SN_RETURN_VAL_IF_FAIL(notes, NULL, error);
 
   SNEntityIterator *itr = SN_ENTITY_ITERATOR(notes);
-
-  gboolean condition(SNEntityIterator *itr)
-  {
-    return sn_note_iterator_item_selected(notes);
-  }
 
   GFile *content = NULL;
   void handler(SNEntityIterator *itr)
