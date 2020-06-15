@@ -11,7 +11,7 @@ typedef struct {
 
 } SNDataIteratorPrivate;
 
-G_DEFINE_TYPE_WITH_PRIVATE(SNDataIterator, sn_data_iterator,G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE(SNDataIterator, sn_data_iterator, G_TYPE_OBJECT)
 
 
 static SNError const kError = SNErrorDataIterator;
@@ -65,12 +65,12 @@ sn_data_iterator_first(SNDataIterator *self)
 {
   SNDataIteratorClass *class = NULL;
   SN_GET_CLASS_OR_RETURN_VAL(self,
-                             &class,
-                             first,
-                             SNDataIterator,
-                             SN,
-                             DATA_ITERATOR,
-                             SNIteratorResultError);
+			     &class,
+			     first,
+			     SNDataIterator,
+			     SN,
+			     DATA_ITERATOR,
+			     SNIteratorResultError);
   return class->first(self);
 }
 
@@ -79,12 +79,12 @@ sn_data_iterator_next(SNDataIterator *self)
 {
   SNDataIteratorClass *class = NULL;
   SN_GET_CLASS_OR_RETURN_VAL(self,
-                             &class,
-                             next,
-                             SNDataIterator,
-                             SN,
-                             DATA_ITERATOR,
-                             SNIteratorResultError);
+			     &class,
+			     next,
+			     SNDataIterator,
+			     SN,
+			     DATA_ITERATOR,
+			     SNIteratorResultError);
   return class->next(self);
 }
 

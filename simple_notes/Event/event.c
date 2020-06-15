@@ -218,7 +218,8 @@ static gchar **simple_notes_event_create_split (SimpleNotesEvent *object, gchar 
     }
     gchar *spaceBeforeQuote = previousSearch;
     gchar *openQuoteSearch = NULL, *closeQuoteSearch = NULL;
-    SIMPLE_NOTES_TRY_WITHOUT_ERROR(simple_notes_event_find_quotes(object, previousSearch, len, &openQuoteSearch, &closeQuoteSearch, error));
+    gboolean quotes = simple_notes_event_find_quotes(object, previousSearch, len, &openQuoteSearch, &closeQuoteSearch, error);
+    SN_RETURN_VAL_IF_FAIL(quotes, NULL, NULL);
     GPtrArray *splitBuff = g_ptr_array_new_with_free_func(g_free);
     while ((search = g_strstr_len(previousSearch, len, " "))) {
         if (!(openQuoteSearch != NULL && search > openQuoteSearch && search < closeQuoteSearch)) {

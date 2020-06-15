@@ -9,6 +9,8 @@
 #include "note_window.h"
 #include "note_controller.h"
 #include "view_utility.h"
+#include "light_note.h"
+
 
 static const glong kContentColumn = 3;
 static const glong kFolderIdColumn = 2;
@@ -17,7 +19,7 @@ static const gulong kLastEditedColumn = 4;
 struct _SimpleNotesNoteWindow {
     SimpleNotesTableWindow parent;
 
-    SimpleNotesLightNote **_notes;
+    SNLightNote **_notes;
     gulong _count;
 };
 
@@ -26,8 +28,7 @@ G_DEFINE_TYPE(SimpleNotesNoteWindow, simple_notes_note_window, SIMPLE_NOTES_TYPE
 static gulong simple_notes_note_window_real_height_for_row (SimpleNotesTableView *object, gulong row);
 static gulong simple_notes_note_window_real_width_for_column (SimpleNotesTableView *object, gulong column);
 static SimpleNotesTableView *simple_notes_note_window_real_create_table (SimpleNotesTableWindow *object);
-static SimpleNotesBaseController *simple_notes_note_window_real_create_controller (SimpleNotesTableWindow *object, SimpleNotesMediator *model);
-static SimpleNotesBaseModel *simple_notes_note_window_real_get_model_to_connect_signal (SimpleNotesTableWindow *object, SimpleNotesMediator *model);
+static SimpleNotesBaseController *simple_notes_note_window_real_create_controller (SimpleNotesTableWindow *object, SNBaseModel *model);
 static gulong simple_notes_note_window_real_get_rows_number (SimpleNotesTableWindow *object);
 static gulong simple_notes_note_window_real_get_columns_number (SimpleNotesTableWindow *object);
 static SimpleNotesTableViewCell *simple_notes_note_window_real_create_header_for_column (SimpleNotesTableWindow *object, gulong column);
@@ -35,7 +36,7 @@ static SimpleNotesTableViewCell *simple_notes_note_window_real_create_cell_for_r
 
 static void simple_notes_note_window_dispose (GObject *object) {
     SimpleNotesNoteWindow *window = SIMPLE_NOTES_NOTE_WINDOW(object);
-    simple_notes_free_objects_array((gpointer *)window->_notes, window->_count);
+    sn_free_objects_array((gpointer *)window->_notes, window->_count);
 
     G_OBJECT_CLASS(simple_notes_note_window_parent_class)->dispose(object);
 }
@@ -44,7 +45,6 @@ void simple_notes_note_window_class_init (SimpleNotesNoteWindowClass *klass) {
     SimpleNotesTableWindowClass *parentClass = SIMPLE_NOTES_TABLE_WINDOW_CLASS(klass);
     parentClass->create_table = simple_notes_note_window_real_create_table;
     parentClass->create_controller = simple_notes_note_window_real_create_controller;
-    parentClass->get_model_to_connect_signal = simple_notes_note_window_real_get_model_to_connect_signal;
     parentClass->get_rows_number = simple_notes_note_window_real_get_rows_number;
     parentClass->get_columns_number = simple_notes_note_window_real_get_columns_number;
     parentClass->create_header_for_column = simple_notes_note_window_real_create_header_for_column;
@@ -58,11 +58,11 @@ void simple_notes_note_window_init (SimpleNotesNoteWindow *object) {
     object->_count = 0;
 }
 
-SimpleNotesNoteWindow *simple_notes_note_window_new (SimpleNotesResponder *next, SimpleNotesMediator *model) {
+SimpleNotesNoteWindow *simple_notes_note_window_new (SimpleNotesResponder *next, SNNotesModel *model) {
     SimpleNotesNoteWindow *window = SIMPLE_NOTES_NOTE_WINDOW(simple_notes_table_window_new(
             SIMPLE_NOTES_TYPE_NOTE_WINDOW,
             next,
-            model
+            SN_BASE_MODEL(model)
     ));
     return window;
 }
@@ -77,14 +77,10 @@ static SimpleNotesTableView *simple_notes_note_window_real_create_table (SimpleN
     );
 }
 
-static SimpleNotesBaseController *simple_notes_note_window_real_create_controller (SimpleNotesTableWindow *object, SimpleNotesMediator *model) {
-    SimpleNotesNoteController *controller = simple_notes_note_controller_new(model);
-    return SIMPLE_NOTES_BASE_CONTROLLER(controller);
-}
-
-static SimpleNotesBaseModel *simple_notes_note_window_real_get_model_to_connect_signal (SimpleNotesTableWindow *object, SimpleNotesMediator *model) {
-    SimpleNotesNotesModel *noteModel = simple_notes_mediator_get_notes_model(model);
-    return SIMPLE_NOTES_BASE_MODEL(noteModel);
+static SimpleNotesBaseController *simple_notes_note_window_real_create_controller (SimpleNotesTableWindow *object, SNBaseModel *model) {
+  SNNotesModel *notes = SN_NOTES_MODEL(model);
+  SimpleNotesNoteController *controller = simple_notes_note_controller_new(notes);
+  return SIMPLE_NOTES_BASE_CONTROLLER(controller);
 }
 
 static gulong simple_notes_note_window_real_height_for_row (SimpleNotesTableView *object, gulong row) {
@@ -128,28 +124,28 @@ static SimpleNotesTableViewCell *simple_notes_note_window_real_create_cell_for_r
     SimpleNotesLabelCell *cell = NULL;
     if (column == kIdColumn) {
             gchar buff[kLongLongSymbols];
-            guint64 identifier = simple_notes_light_note_get_id(window->_notes[row]);
-            simple_notes_print_guint64_value(buff, identifier);
+            guint64 identifier = sn_light_note_get_id(window->_notes[row]);
+            sn_print_guint64_value(buff, identifier);
             cell = simple_notes_table_window_create_cell(buff, SimpleNotesLabelTextAlignmentRight);
         }
     else if (column == kSelectedColumn) {
             gchar buff[kSelectedSymbols];
-            simple_notes_print_boolean_value(buff, simple_notes_light_note_get_selected(window->_notes[row]));
+            sn_print_boolean_value(buff, sn_light_note_get_selected(window->_notes[row]));
             cell = simple_notes_table_window_create_cell(buff, SimpleNotesLabelTextAlignmentRight);
         }
     else if (column == kContentColumn) {
-            GByteArray *content = simple_notes_light_note_get_copy_content(window->_notes[row]);
-            gchar *text = (gchar *)content->data;
+            GString *content = sn_light_note_get_copy_content(window->_notes[row]);
+            gchar *text = content->str;
             cell = simple_notes_table_window_create_cell(text, SimpleNotesLabelTextAlignmentLeft);
-            g_byte_array_unref(content);
+            g_string_free(content, TRUE);
         }
     else if (column == kFolderIdColumn) {
             gchar buff[kLongLongSymbols];
-            simple_notes_print_guint64_value(buff, simple_notes_light_note_get_folder_id(window->_notes[row]));
+            sn_print_guint64_value(buff, sn_light_note_get_folder_id(window->_notes[row]));
             cell = simple_notes_table_window_create_cell(buff, SimpleNotesLabelTextAlignmentRight);
         }
     else if (column == kLastEditedColumn) {
-            GDateTime *lastEdited = simple_notes_light_note_get_copy_last_edited(window->_notes[row]);
+            GDateTime *lastEdited = sn_light_note_get_copy_last_edited(window->_notes[row]);
             gchar *date = g_date_time_format(lastEdited, "%c");
             cell = simple_notes_table_window_create_cell(date, SimpleNotesLabelTextAlignmentRight);
             g_free(date);
@@ -163,10 +159,13 @@ static SimpleNotesTableViewCell *simple_notes_note_window_real_create_cell_for_r
 
 static gulong simple_notes_note_window_real_get_rows_number (SimpleNotesTableWindow *object) {
     SimpleNotesNoteWindow *window = SIMPLE_NOTES_NOTE_WINDOW(object);
-    simple_notes_free_objects_array((gpointer *)window->_notes, window->_count);
+    sn_free_objects_array((gpointer *)window->_notes, window->_count);
+    SimpleNotesTableWindow *table = SIMPLE_NOTES_TABLE_WINDOW(window);
+    SNBaseModel *model = simple_notes_table_window_get_model(table);
+    SNNotesModel *notes = SN_NOTES_MODEL(model);
     guint count = 0;
-    window->_notes = simple_notes_notes_model_copy_notes(
-            simple_notes_mediator_get_notes_model(simple_notes_table_window_get_model(SIMPLE_NOTES_TABLE_WINDOW(window))),
+    window->_notes = sn_notes_model_copy_notes(
+            notes,
             &count
     );
     window->_count = count;

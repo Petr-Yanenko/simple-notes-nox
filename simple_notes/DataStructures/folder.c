@@ -6,126 +6,183 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
+
 #include "folder.h"
 #include "light_folder.h"
 
-struct _SimpleNotesFolder {
-    SimpleNotesObject parent;
 
-    GByteArray *_title;
-    glong _count;
+struct _SNFolder {
+  SNObject _parent;
+
+  GString *_title;
+  glong _count;
 };
 
-static void simple_notes_light_folder_interface_init (SimpleNotesLightFolderInterface *iface);
-static GString *simple_notes_light_folder_real_create_description (SimpleNotesLightFolder *object);
-static guint64 simple_notes_light_folder_real_get_id (SimpleNotesLightFolder *object);
-static gboolean simple_notes_light_folder_real_get_selected (SimpleNotesLightFolder *object);
-static GByteArray *simple_notes_light_folder_real_get_copy_title (SimpleNotesLightFolder *object);
-static glong simple_notes_light_folder_real_get_count (SimpleNotesLightFolder *object);
 
-G_DEFINE_TYPE_WITH_CODE(SimpleNotesFolder, simple_notes_folder, SIMPLE_NOTES_TYPE_OBJECT,
-G_IMPLEMENT_INTERFACE (
-        SIMPLE_NOTES_TYPE_LIGHT_FOLDER,
-        simple_notes_light_folder_interface_init)
-);
+static void
+sn_light_folder_interface_init(SNLightFolderInterface *iface);
 
-static GString *simple_notes_folder_real_create_description (SimpleNotesObject *object) {
-    SimpleNotesFolder *folder = SIMPLE_NOTES_FOLDER(object);
-    GString *description = SIMPLE_NOTES_OBJECT_CLASS(simple_notes_folder_parent_class)->create_description(object);
-    simple_notes_print_byte_array(folder->_title, description, "Title\0");
-    g_string_append_printf(description, "\nCount: %ld\n", folder->_count);
-    return description;
+
+G_DEFINE_TYPE_WITH_CODE(SNFolder, sn_folder, SN_TYPE_OBJECT,
+			G_IMPLEMENT_INTERFACE(SN_TYPE_LIGHT_FOLDER,
+					      sn_light_folder_interface_init))
+
+
+static GString *
+sn_light_folder_real_create_description(SNLightFolder *object);
+
+static guint64
+sn_light_folder_real_get_id(SNLightFolder *object);
+
+static gboolean
+sn_light_folder_real_get_selected(SNLightFolder *object);
+
+static GString *
+sn_light_folder_real_get_copy_title(SNLightFolder *object);
+
+static glong
+sn_light_folder_real_get_count(SNLightFolder *object);
+
+
+static GString *
+sn_folder_real_create_description(SNObject *object)
+{
+  SNFolder *folder = SN_FOLDER(object);
+  SNObjectClass *parentClass = SN_OBJECT_CLASS(sn_folder_parent_class);
+  GString *description = parentClass->create_description(object);
+  sn_print_ustring(folder->_title, description, "Title\0");
+  g_string_append_printf(description, "\nCount: %ld\n", folder->_count);
+
+  return description;
 }
 
-static void simple_notes_folder_dispose (GObject *object) {
-    SimpleNotesFolder *folder = SIMPLE_NOTES_FOLDER(object);
-    if (folder->_title) {
-        g_byte_array_unref(folder->_title);
+static void
+sn_folder_dispose(GObject *object)
+{
+  SNFolder *folder = SN_FOLDER(object);
+  if (folder->_title)
+    {
+      g_string_free(folder->_title, TRUE);
     }
 
-    G_OBJECT_CLASS(simple_notes_folder_parent_class)->dispose(object);
+  G_OBJECT_CLASS(sn_folder_parent_class)->dispose(object);
 }
 
-static void simple_notes_light_folder_interface_init (SimpleNotesLightFolderInterface *iface) {
-    iface->create_description = simple_notes_light_folder_real_create_description;
-    iface->get_id = simple_notes_light_folder_real_get_id;
-    iface->get_selected = simple_notes_light_folder_real_get_selected;
-    iface->get_copy_title = simple_notes_light_folder_real_get_copy_title;
-    iface->get_count = simple_notes_light_folder_real_get_count;
+static void
+sn_light_folder_interface_init(SNLightFolderInterface *iface)
+{
+  iface->create_description = sn_light_folder_real_create_description;
+  iface->get_id = sn_light_folder_real_get_id;
+  iface->get_selected = sn_light_folder_real_get_selected;
+  iface->get_copy_title = sn_light_folder_real_get_copy_title;
+  iface->get_count = sn_light_folder_real_get_count;
 }
 
-static void simple_notes_folder_class_init (SimpleNotesFolderClass *classObject) {
-    GObjectClass *gClassObject = G_OBJECT_CLASS(classObject);
-    SimpleNotesObjectClass *parent = SIMPLE_NOTES_OBJECT_CLASS(classObject);
-    gClassObject->dispose = simple_notes_folder_dispose;
-    parent->create_description = simple_notes_folder_real_create_description;
+static void
+sn_folder_class_init(SNFolderClass *classObject)
+{
+  GObjectClass *gClassObject = G_OBJECT_CLASS(classObject);
+  SNObjectClass *parent = SN_OBJECT_CLASS(classObject);
+  gClassObject->dispose = sn_folder_dispose;
+  parent->create_description = sn_folder_real_create_description;
 }
 
-static void simple_notes_folder_init (SimpleNotesFolder *object) {
-    object->_title = NULL;
-    object->_count = 0;
+static void
+sn_folder_init(SNFolder *object)
+{
+  object->_title = g_string_new(NULL);
+  object->_count = 0;
 }
 
-SimpleNotesFolder *simple_notes_folder_new (void) {
-    return g_object_new(SIMPLE_NOTES_TYPE_FOLDER, NULL);
+SNFolder *sn_folder_new(void)
+{
+  return g_object_new(SN_TYPE_FOLDER, NULL);
 }
 
-guint64 simple_notes_folder_get_id (SimpleNotesFolder *object) {
-    return simple_notes_object_get_id(SIMPLE_NOTES_OBJECT(object));
+guint64
+sn_folder_get_id(SNFolder *object)
+{
+  return sn_object_get_id(SN_OBJECT(object));
 }
 
-void simple_notes_folder_assign_id (SimpleNotesFolder *object, guint64 id) {
-    simple_notes_object_assign_id(SIMPLE_NOTES_OBJECT(object), id);
+void
+sn_folder_assign_id(SNFolder *object, guint64 id)
+{
+  sn_object_assign_id(SN_OBJECT(object), id);
 }
 
-gboolean simple_notes_folder_get_selected (SimpleNotesFolder *object) {
-    return simple_notes_object_get_selected(SIMPLE_NOTES_OBJECT(object));
+gboolean
+sn_folder_get_selected(SNFolder *object)
+{
+  return sn_object_get_selected(SN_OBJECT(object));
 }
 
-void simple_notes_folder_assign_selected (SimpleNotesFolder *object, gboolean selected) {
-    simple_notes_object_assign_selected(SIMPLE_NOTES_OBJECT(object), selected);
+void
+sn_folder_assign_selected(SNFolder *object, gboolean selected)
+{
+  sn_object_assign_selected(SN_OBJECT(object), selected);
 }
 
-GByteArray *simple_notes_folder_get_copy_title (SimpleNotesFolder *object) {
-    return simple_notes_get_copy_byte_array(object->_title);
+GString *
+sn_folder_get_copy_title(SNFolder *object)
+{
+  return g_string_new(object->_title->str);
 }
 
-void simple_notes_folder_copy_title (SimpleNotesFolder *object, GByteArray *title) {
-    simple_notes_set_copy_byte_array(title, &object->_title);
+void
+sn_folder_copy_title(SNFolder *object, gchar *title)
+{
+  g_string_assign(object->_title, title);
 }
 
-glong simple_notes_folder_get_count (SimpleNotesFolder *object) {
-    return object->_count;
+glong
+sn_folder_get_count(SNFolder *object)
+{
+  return object->_count;
 }
 
-void simple_notes_folder_assign_count (SimpleNotesFolder *object, glong count) {
-    object->_count = count;
+void
+sn_folder_assign_count(SNFolder *object, glong count)
+{
+  object->_count = count;
 }
 
-GString *simple_notes_folder_create_description (SimpleNotesFolder *object) {
-    SimpleNotesObjectClass *klass;
-    g_return_val_if_fail(SIMPLE_NOTES_IS_FOLDER(object), NULL);
-    klass = SIMPLE_NOTES_OBJECT_CLASS(G_OBJECT(object)->g_type_instance.g_class);
-    g_return_val_if_fail(klass->create_description != NULL, NULL);
-    return klass->create_description(SIMPLE_NOTES_OBJECT(object));
+GString *
+sn_folder_create_description(SNFolder *object)
+{
+  SNObjectClass *klass;
+  g_return_val_if_fail(SN_IS_FOLDER(object), NULL);
+  klass = SN_OBJECT_CLASS(G_OBJECT(object)->g_type_instance.g_class);
+  g_return_val_if_fail(klass->create_description != NULL, NULL);
+  return klass->create_description(SN_OBJECT(object));
 }
 
-static GString *simple_notes_light_folder_real_create_description (SimpleNotesLightFolder *object) {
-    return simple_notes_folder_create_description(SIMPLE_NOTES_FOLDER(object));
+static GString *
+sn_light_folder_real_create_description(SNLightFolder *object)
+{
+  return sn_folder_create_description(SN_FOLDER(object));
 }
 
-static guint64 simple_notes_light_folder_real_get_id (SimpleNotesLightFolder *object) {
-    return simple_notes_folder_get_id(SIMPLE_NOTES_FOLDER(object));
+static guint64
+sn_light_folder_real_get_id(SNLightFolder *object)
+{
+  return sn_folder_get_id(SN_FOLDER(object));
 }
 
-static gboolean simple_notes_light_folder_real_get_selected (SimpleNotesLightFolder *object) {
-    return simple_notes_folder_get_selected(SIMPLE_NOTES_FOLDER(object));
+static gboolean
+sn_light_folder_real_get_selected(SNLightFolder *object)
+{
+  return sn_folder_get_selected(SN_FOLDER(object));
 }
 
-static GByteArray *simple_notes_light_folder_real_get_copy_title (SimpleNotesLightFolder *object) {
-    return simple_notes_folder_get_copy_title(SIMPLE_NOTES_FOLDER(object));
+static GString *
+sn_light_folder_real_get_copy_title(SNLightFolder *object)
+{
+  return sn_folder_get_copy_title(SN_FOLDER(object));
 }
 
-static glong simple_notes_light_folder_real_get_count (SimpleNotesLightFolder *object) {
-    return simple_notes_folder_get_count(SIMPLE_NOTES_FOLDER(object));
+static glong
+sn_light_folder_real_get_count(SNLightFolder *object)
+{
+  return sn_folder_get_count(SN_FOLDER(object));
 }

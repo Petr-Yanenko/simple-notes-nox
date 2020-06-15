@@ -10,3 +10,4 @@ add_library(store
   )
 
 target_include_directories(store PUBLIC ./)
+target_link_libraries(store sqlite3)

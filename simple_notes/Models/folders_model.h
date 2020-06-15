@@ -6,21 +6,41 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
-#ifndef simple_notes_folders_model____FILEEXTENSION___
-#define simple_notes_folders_model____FILEEXTENSION___
+#ifndef sn_folders_model____FILEEXTENSION___
+#define sn_folders_model____FILEEXTENSION___
 
 #include "selected_list_model.h"
 #include "light_folder.h"
 
-#define SIMPLE_NOTES_TYPE_FOLDERS_MODEL simple_notes_folders_model_get_type ()
-G_DECLARE_FINAL_TYPE(SimpleNotesFoldersModel, simple_notes_folders_model, SIMPLE_NOTES, FOLDERS_MODEL, SimpleNotesSelectedListModel)
 
-SimpleNotesFoldersModel *simple_notes_folders_model_new (SimpleNotesMediator *mediator);
+#define SN_TYPE_FOLDERS_MODEL sn_folders_model_get_type()
+G_DECLARE_FINAL_TYPE(SNFoldersModel,
+		     sn_folders_model,
+		     SN,
+		     FOLDERS_MODEL,
+		     SNSelectedListModel)
 
-void simple_notes_folders_model_insert_folder (SimpleNotesFoldersModel *object, guint8 *name);
-SimpleNotesLightFolder **simple_notes_folders_model_copy_folders (SimpleNotesFoldersModel *object, guint *out_count);
-void simple_notes_folders_model_delete_folder (SimpleNotesFoldersModel *object, guint64 identifier);
-void simple_notes_folders_model_select_folder (SimpleNotesFoldersModel *object, guint64 identifier);
-void simple_notes_folders_model_change_folder_title (SimpleNotesFoldersModel *object, guint64 identifier, guint8 *newTitle, guint len);
+
+SNFoldersModel *
+sn_folders_model_new(void);
+
+
+void
+sn_folders_model_insert_folder(SNFoldersModel *object, gchar *name);
+
+SNLightFolder **
+sn_folders_model_copy_folders(SNFoldersModel *object, guint *out_count);
+
+void
+sn_folders_model_delete_folder(SNFoldersModel *object, guint64 identifier);
+
+void
+sn_folders_model_select_folder(SNFoldersModel *object, guint64 identifier);
+
+void
+sn_folders_model_change_folder_title(SNFoldersModel *object,
+				     guint64 identifier,
+				     gchar *newTitle);
+
 
 #endif

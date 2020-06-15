@@ -9,14 +9,16 @@
 #include "folder_window.h"
 #include "folder_controller.h"
 #include "view_utility.h"
+#include "light_folder.h"
+
 
 static glong const kTitleColumn = 2;
 static glong const kNotesColumn = 3;
 
 struct _SimpleNotesFolderWindow {
-    SimpleNotesWindow parent;
+    SimpleNotesWindow _parent;
 
-    SimpleNotesLightFolder **_folders;
+    SNLightFolder **_folders;
     gulong _count;
 };
 
@@ -25,8 +27,7 @@ G_DEFINE_TYPE(SimpleNotesFolderWindow, simple_notes_folder_window, SIMPLE_NOTES_
 static gulong simple_notes_folder_window_real_height_for_row (SimpleNotesTableView *object, gulong row);
 static gulong simple_notes_folder_window_real_width_for_column (SimpleNotesTableView *object, gulong column);
 static SimpleNotesTableView *simple_notes_folder_window_real_create_table (SimpleNotesTableWindow *object);
-static SimpleNotesBaseController *simple_notes_folder_window_real_create_controller (SimpleNotesTableWindow *object, SimpleNotesMediator *model);
-static SimpleNotesBaseModel *simple_notes_folder_window_real_get_model_to_connect_signal (SimpleNotesTableWindow *object, SimpleNotesMediator *model);
+static SimpleNotesBaseController *simple_notes_folder_window_real_create_controller (SimpleNotesTableWindow *object, SNBaseModel *model);
 static gulong simple_notes_folder_window_real_get_rows_number (SimpleNotesTableWindow *object);
 static gulong simple_notes_folder_window_real_get_columns_number (SimpleNotesTableWindow *object);
 static SimpleNotesTableViewCell *simple_notes_folder_window_real_create_header_for_column (SimpleNotesTableWindow *object, gulong column);
@@ -34,7 +35,7 @@ static SimpleNotesTableViewCell *simple_notes_folder_window_real_create_cell_for
 
 static void simple_notes_folder_window_dispose (GObject *object) {
     SimpleNotesFolderWindow *window = SIMPLE_NOTES_FOLDER_WINDOW(object);
-    simple_notes_free_objects_array((gpointer *)window->_folders, window->_count);
+    sn_free_objects_array((gpointer *)window->_folders, window->_count);
 
     G_OBJECT_CLASS(simple_notes_folder_window_parent_class)->dispose(object);
 }
@@ -43,12 +44,11 @@ void simple_notes_folder_window_class_init (SimpleNotesFolderWindowClass *klass)
     SimpleNotesTableWindowClass *parentClass = SIMPLE_NOTES_TABLE_WINDOW_CLASS(klass);
     parentClass->create_table = simple_notes_folder_window_real_create_table;
     parentClass->create_controller = simple_notes_folder_window_real_create_controller;
-    parentClass->get_model_to_connect_signal = simple_notes_folder_window_real_get_model_to_connect_signal;
     parentClass->get_rows_number = simple_notes_folder_window_real_get_rows_number;
     parentClass->get_columns_number = simple_notes_folder_window_real_get_columns_number;
     parentClass->create_header_for_column = simple_notes_folder_window_real_create_header_for_column;
     parentClass->create_cell_for_row_column = simple_notes_folder_window_real_create_cell_for_row_column;
-    
+
     G_OBJECT_CLASS(klass)->dispose = simple_notes_folder_window_dispose;
 }
 
@@ -57,11 +57,11 @@ void simple_notes_folder_window_init (SimpleNotesFolderWindow *object) {
     object->_count = 0;
 }
 
-SimpleNotesFolderWindow *simple_notes_folder_window_new (SimpleNotesResponder *next, SimpleNotesMediator *model) {
+SimpleNotesFolderWindow *simple_notes_folder_window_new (SimpleNotesResponder *next, SNFoldersModel *model) {
     SimpleNotesFolderWindow *window = SIMPLE_NOTES_FOLDER_WINDOW(simple_notes_table_window_new(
             SIMPLE_NOTES_TYPE_FOLDER_WINDOW,
             next,
-            model
+            SN_BASE_MODEL(model)
     ));
     return window;
 }
@@ -76,14 +76,9 @@ static SimpleNotesTableView *simple_notes_folder_window_real_create_table (Simpl
     );
 }
 
-static SimpleNotesBaseController *simple_notes_folder_window_real_create_controller (SimpleNotesTableWindow *object, SimpleNotesMediator *model) {
-    SimpleNotesFolderController *controller = simple_notes_folder_controller_new(model);
-    return SIMPLE_NOTES_BASE_CONTROLLER(controller);
-}
-
-static SimpleNotesBaseModel *simple_notes_folder_window_real_get_model_to_connect_signal (SimpleNotesTableWindow *object, SimpleNotesMediator *model) {
-    SimpleNotesFoldersModel *foldersModel = simple_notes_mediator_get_folders_model(model);
-    return SIMPLE_NOTES_BASE_MODEL(foldersModel);
+static SimpleNotesBaseController *simple_notes_folder_window_real_create_controller (SimpleNotesTableWindow *object, SNBaseModel *model) {
+  SimpleNotesFolderController *controller = simple_notes_folder_controller_new(SN_FOLDERS_MODEL(model));
+  return SIMPLE_NOTES_BASE_CONTROLLER(controller);
 }
 
 static gulong simple_notes_folder_window_real_height_for_row (SimpleNotesTableView *object, gulong row) {
@@ -126,24 +121,24 @@ static SimpleNotesTableViewCell *simple_notes_folder_window_real_create_cell_for
     SimpleNotesLabelCell *cell = NULL;
     if (column == kIdColumn) {
             gchar buff[kLongLongSymbols];
-            guint64 identifier = simple_notes_light_folder_get_id(window->_folders[row]);
-            simple_notes_print_guint64_value(buff, identifier);
+            guint64 identifier = sn_light_folder_get_id(window->_folders[row]);
+            sn_print_guint64_value(buff, identifier);
             cell = simple_notes_table_window_create_cell(buff, SimpleNotesLabelTextAlignmentRight);
         }
     else if (column == kSelectedColumn) {
             gchar buff[kSelectedSymbols];
-            simple_notes_print_boolean_value(buff, simple_notes_light_folder_get_selected(window->_folders[row]));
+            sn_print_boolean_value(buff, sn_light_folder_get_selected(window->_folders[row]));
             cell = simple_notes_table_window_create_cell(buff, SimpleNotesLabelTextAlignmentRight);
         }
     else if (column == kTitleColumn) {
-            GByteArray *title = simple_notes_light_folder_get_copy_title(window->_folders[row]);
-            gchar *text = (gchar *)title->data;
+            GString *title = sn_light_folder_get_copy_title(window->_folders[row]);
+            gchar *text = title->str;
             cell = simple_notes_table_window_create_cell(text, SimpleNotesLabelTextAlignmentLeft);
-            g_byte_array_unref(title);
+            g_string_free(title, TRUE);
         }
     else if (column == kNotesColumn) {
             gchar buff[kLongLongSymbols];
-            simple_notes_print_long_value(buff, simple_notes_light_folder_get_count(window->_folders[row]));
+            sn_print_long_value(buff, sn_light_folder_get_count(window->_folders[row]));
             cell = simple_notes_table_window_create_cell(buff, SimpleNotesLabelTextAlignmentRight);
         }
     else {
@@ -154,10 +149,13 @@ static SimpleNotesTableViewCell *simple_notes_folder_window_real_create_cell_for
 
 static gulong simple_notes_folder_window_real_get_rows_number (SimpleNotesTableWindow *object) {
     SimpleNotesFolderWindow *window = SIMPLE_NOTES_FOLDER_WINDOW(object);
-    simple_notes_free_objects_array((gpointer *)window->_folders, window->_count);
+    sn_free_objects_array((gpointer *)window->_folders, window->_count);
+    SimpleNotesTableWindow *table = SIMPLE_NOTES_TABLE_WINDOW(window);
+    SNBaseModel *model = simple_notes_table_window_get_model(table);
+    SNFoldersModel *folders = SN_FOLDERS_MODEL(model);
     guint count = 0;
-    window->_folders = simple_notes_folders_model_copy_folders(
-            simple_notes_mediator_get_folders_model(simple_notes_table_window_get_model(SIMPLE_NOTES_TABLE_WINDOW(window))),
+    window->_folders = sn_folders_model_copy_folders(
+            folders,
             &count
     );
     window->_count = count;

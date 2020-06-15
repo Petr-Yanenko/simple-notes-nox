@@ -54,10 +54,10 @@ static SNError const kError = SNErrorStore;
 static gboolean
 sn_store_print_note_path(SNStore *self, gchar *buff, guint64 folderID);
 
-static SNDataIterator *
+static SNEntityIterator *
 sn_store_create_iterator(SNStore *self,
 			 SNStatement *stmt,
-			 SNDataIterator * (*constructor)(SNStatement *));
+			 SNEntityIterator * (*constructor)(SNStatement *));
 
 static gboolean
 sn_store_assign_folder_changed(SNStore *self,
@@ -84,16 +84,18 @@ static gboolean
 sn_store_update_note_last_edited(SNStore *self);
 
 static GFile *
-sn_store_create_content_file(SNStore *self);
+sn_store_create_selected_content_file(SNStore *self, SNError *error);
+
+static GFile *
+sn_store_create_content_file(SNStore *self,
+			     gboolean (*condition)(SNEntityIterator *),
+			     SNError *error);
 
 static GFile *
 sn_store_create_tmp_file(SNStore *self);
 
 static guint64
-sn_store_get_selected_folder(SNStore *self, SNFolderIterator *folders);
-
-static guint64
-sn_store_get_selected_note(SNStore *self, SNNoteIterator *notes);
+sn_store_get_selected_item(SNStore *self, SNEntityIterator *itr);
 
 
 static void
@@ -242,14 +244,14 @@ sn_store_create_folder_iterator(SNStore *self)
 {
   SNStatement *stmt = sn_sql_controller_select_folders(self->_sql);
 
-  SNDataIterator *constructor(SNStatement *stmt)
+  SNEntityIterator *constructor(SNStatement *stmt)
   {
-    return SN_DATA_ITERATOR(sn_folder_iterator_new(stmt));
+    return SN_ENTITY_ITERATOR(sn_folder_iterator_new(stmt));
   }
 
-  SNDataIterator *itr = sn_store_create_iterator(self, stmt, constructor);
+  SNEntityIterator *itr = sn_store_create_iterator(self, stmt, constructor);
   SNFolderIterator *folders = SN_FOLDER_ITERATOR(itr);
-  self->_folderSelected = sn_store_get_selected_folder(self, folders);
+  self->_folderSelected = sn_store_get_selected_item(self, itr);
 
   return folders;
 }
@@ -286,39 +288,51 @@ sn_store_delete_folder(SNStore *self, guint64 id)
 						     NULL,
 						     &enumErr);
   g_object_unref(folder);
-  SN_RETURN_VAL_IF_FAIL(notes, FALSE, &kError);
+  gboolean notFound(GError *error)
+  {
+    return error->domain == G_IO_ERROR && error->code == G_IO_ERROR_NOT_FOUND;
+  }
 
-  GError *infoErr = NULL;
-  GFileInfo *childInfo = g_file_enumerator_next_file(notes, NULL, &infoErr);
   gboolean delete = TRUE;
   GError *deleteErr = NULL;
-  while(childInfo)
+  if (!notes)
     {
-      gchar const *name = g_file_info_get_name(childInfo);
-      glong folderLen = strlen(kFolderPathFormat) - strlen("%llu");
-      folderLen += kLongLongSymbols;
-      glong const noteLen = folderLen + strlen(name) + 1;
-      gchar buff[noteLen];
-      sprintf(buff, kFolderPathFormat, id);
-      strcat(buff, name);
-      GFile *note = g_file_new_for_path(buff);
-      delete = g_file_delete(note, NULL, &deleteErr);
-
-      g_object_unref(note);
-      g_object_unref(childInfo);
-      if(!delete) break;
-      childInfo = g_file_enumerator_next_file(notes, NULL, &infoErr);
+      SN_RETURN_VAL_IF_FAIL(notFound(enumErr), FALSE, &kError);
     }
+  else {
+    GError *infoErr = NULL;
+    GFileInfo *childInfo = g_file_enumerator_next_file(notes, NULL, &infoErr);
+    while(childInfo)
+      {
+	gchar const *name = g_file_info_get_name(childInfo);
+	glong folderLen = strlen(kFolderPathFormat) - strlen("%llu");
+	folderLen += kLongLongSymbols;
+	glong const noteLen = folderLen + strlen(name) + 1;
+	gchar buff[noteLen];
+	sprintf(buff, kFolderPathFormat, id);
+	strcat(buff, name);
+	GFile *note = g_file_new_for_path(buff);
+	delete = g_file_delete(note, NULL, &deleteErr);
 
-  g_file_enumerator_close(notes, NULL, NULL);
-  g_object_unref(notes);
-  SN_RETURN_VAL_IF_FAIL(delete, FALSE, &kError);
-  SN_RETURN_VAL_IF_FAIL(infoErr == NULL, FALSE, &kError);
+	g_object_unref(note);
+	g_object_unref(childInfo);
+	if(!delete) break;
+	childInfo = g_file_enumerator_next_file(notes, NULL, &infoErr);
+      }
+
+    g_file_enumerator_close(notes, NULL, NULL);
+    g_object_unref(notes);
+    SN_RETURN_VAL_IF_FAIL(delete, FALSE, &kError);
+    SN_RETURN_VAL_IF_FAIL(infoErr == NULL, FALSE, &kError);
+  }
 
   GFile *deletedFolder = g_file_new_for_path(buff);
   delete = g_file_delete(deletedFolder, NULL, &deleteErr);
   g_object_unref(deletedFolder);
-  SN_RETURN_VAL_IF_FAIL(delete, FALSE, &kError);
+  if (!delete)
+    {
+      SN_RETURN_VAL_IF_FAIL(notFound(deleteErr), FALSE, &kError);
+    }
 
   gboolean success = sn_sql_controller_delete_folder(self->_sql, id);
   if (self->_folderSelected == id)
@@ -359,18 +373,17 @@ sn_store_get_folder_selected(SNStore *self)
 SNNoteIterator *
 sn_store_create_note_iterator(SNStore *self)
 {
-  if (!self->_folderSelected) return NULL;
   SNStatement *stmt = sn_sql_controller_select_notes(self->_sql,
 						     self->_folderSelected);
 
-  SNDataIterator *constructor(SNStatement *stmt)
+  SNEntityIterator *constructor(SNStatement *stmt)
   {
-    return SN_DATA_ITERATOR(sn_note_iterator_new(stmt));
+    return SN_ENTITY_ITERATOR(sn_note_iterator_new(stmt));
   }
 
-  SNDataIterator *itr = sn_store_create_iterator(self, stmt, constructor);
+  SNEntityIterator *itr = sn_store_create_iterator(self, stmt, constructor);
   SNNoteIterator *notes = SN_NOTE_ITERATOR(itr);
-  self->_noteSelected = sn_store_get_selected_note(self, notes);
+  self->_noteSelected = sn_store_get_selected_item(self, itr);
 
   return notes;
 }
@@ -411,11 +424,25 @@ sn_store_delete_note(SNStore *self, guint64 id)
   gboolean edit = sn_store_end_editing(self);
   SN_RETURN_VAL_IF_FAIL(edit, FALSE, &kError);
 
-  GFile *content = sn_store_create_content_file(self);
-  GError *deletingErr = NULL;
-  gboolean deleted = g_file_delete(content, NULL, &deletingErr);
-  g_object_unref(content);
-  SN_RETURN_VAL_IF_FAIL(deleted, FALSE, &kError);
+  gboolean condition(SNEntityIterator *itr)
+  {
+    SNNoteIterator *notes = SN_NOTE_ITERATOR(itr);
+    return sn_note_iterator_item_id(notes) == id;
+  }
+
+  SNError error = -1;
+  GFile *content = sn_store_create_content_file(self, condition, &error);
+  if (content)
+    {
+      GError *deletingErr = NULL;
+      gboolean deleted = g_file_delete(content, NULL, &deletingErr);
+      g_object_unref(content);
+      SN_RETURN_VAL_IF_FAIL(deleted, FALSE, &kError);
+    }
+  else
+    {
+      SN_RETURN_VAL_IF_FAIL(error == SNErrorNotSelected, FALSE, &error);
+    }
 
   gboolean success = sn_sql_controller_delete_note(self->_sql,
 						   id,
@@ -467,8 +494,10 @@ sn_store_create_note_for_editing(SNStore *self)
   SN_RETURN_VAL_IF_FAIL(end, NULL, &kError);
   SN_RETURN_VAL_IF_FAIL(self->_noteSelected, NULL, &kError);
 
-  GFile *source = sn_store_create_content_file(self);
-  SN_RETURN_VAL_IF_FAIL(source, NULL, &kError);
+  SNError contentError = -1;
+  GFile *source = sn_store_create_selected_content_file(self, &contentError);
+  if (!source && contentError == SNErrorNotSelected) return NULL;
+  SN_RETURN_VAL_IF_FAIL(source, NULL, &contentError);
 
   GFile *tmpNote = sn_store_create_tmp_file(self);
 
@@ -483,6 +512,8 @@ sn_store_create_note_for_editing(SNStore *self)
   if (!copied)
     {
       g_clear_object(&tmpNote);
+      g_warning("tmp file for editing not created.");
+      g_warn_if_reached();
     }
 
   g_clear_object(&source);
@@ -495,7 +526,9 @@ sn_store_end_editing(SNStore *self)
 {
   SNError error;
   gboolean saved = sn_store_save_note(self, &error);
-  if (!saved && error == SNErrorNotFound) return TRUE;
+  if (!saved && (error == SNErrorNotFound || error == SNErrorNotSelected))
+    return TRUE;
+
   SN_RETURN_VAL_IF_FAIL(saved, FALSE, &error);
   GFile *tmpNote = sn_store_create_tmp_file(self);
 
@@ -512,9 +545,9 @@ sn_store_end_editing(SNStore *self)
 gboolean
 sn_store_save_note(SNStore *self, SNError *error)
 {
-  if (error) *error = kError;
-  GFile *source = sn_store_create_content_file(self);
-  SN_RETURN_VAL_IF_FAIL(source, FALSE, &kError);
+  GFile *source = sn_store_create_selected_content_file(self, error);
+  if (!source && error && *error == SNErrorNotSelected) return FALSE;
+  SN_RETURN_VAL_IF_FAIL(source, FALSE, error);
 
   GFile *tmpNote = sn_store_create_tmp_file(self);
 
@@ -530,17 +563,23 @@ sn_store_save_note(SNStore *self, SNError *error)
   g_object_unref(tmpNote);
   if (!copied && error)
     {
-      if (copyErr->code == G_IO_ERROR_NOT_FOUND)
+      gboolean domain = copyErr->domain == G_IO_ERROR;
+      gboolean code = copyErr->code == G_IO_ERROR_NOT_FOUND;
+      if (domain && code)
 	{
 	  *error = SNErrorNotFound;
+	  return FALSE;
+	}
+      else
+	{
+	  *error = kError;
 	}
     }
   SN_RETURN_VAL_IF_FAIL(copied, FALSE, error);
 
   gboolean time = sn_store_update_note_last_edited(self);
-  SN_RETURN_VAL_IF_FAIL(time, FALSE, &kError);
-
-  if (error) *error = SNErrorUnknown;
+  if (!time && error) *error = kError;
+  SN_RETURN_VAL_IF_FAIL(time, FALSE, error);
 
   return TRUE;
 }
@@ -557,8 +596,23 @@ sn_store_print_note_path(SNStore *self, gchar *buff, guint64 folderID)
       seeded = TRUE;
     }
 
+  gchar folderPath[1000];
+  sprintf(folderPath, kFolderPathFormat, folderID);
+  GFile *folder = g_file_new_for_path(folderPath);
+  GError *folderErr = NULL;
+  gboolean folderCreated = g_file_make_directory(folder, NULL, &folderErr);
+  g_object_unref(folder);
+  if (!folderCreated)
+    {
+      gboolean exists, gioDomain, existsErr;
+      gioDomain = folderErr->domain == G_IO_ERROR;
+      existsErr = folderErr->code == G_IO_ERROR_EXISTS;
+      exists = gioDomain && existsErr;
+      SN_RETURN_VAL_IF_FAIL(exists, FALSE, &kError);
+    }
+
   gboolean success = FALSE;
-  for (glong i = 0; !success, i < RAND_MAX; i++)
+  for (glong i = 0; !success && i < RAND_MAX; i++)
     {
       glong id = rand();
       sprintf(buff, kNotePathFormat, folderID, id);
@@ -571,10 +625,10 @@ sn_store_print_note_path(SNStore *self, gchar *buff, guint64 folderID)
       if (fileStream)
 	{
 	  success = TRUE;
+	  g_object_unref(fileStream);
 	}
 
       g_object_unref(file);
-      g_object_unref(fileStream);
     }
 
   if (success) return TRUE;
@@ -582,12 +636,12 @@ sn_store_print_note_path(SNStore *self, gchar *buff, guint64 folderID)
   SN_RETURN_VAL_IF_FAIL(success, FALSE, &kError);
 }
 
-static SNDataIterator *
+static SNEntityIterator *
 sn_store_create_iterator(SNStore *self,
 			 SNStatement *stmt,
-			 SNDataIterator * (*constructor)(SNStatement *))
+			 SNEntityIterator * (*constructor)(SNStatement *))
 {
-  SNDataIterator *iterator = NULL;
+  SNEntityIterator *iterator = NULL;
   if (stmt)
     {
       iterator = constructor(stmt);
@@ -686,9 +740,12 @@ static GFile *
 sn_store_create_tmp_file(SNStore *self)
 {
   gchar const *tmp = g_get_tmp_dir();
-  glong const tmpLen = strlen(tmp) + strlen(kNoteName) + 1;
+  gchar const *slash = "/";
+  glong const tmpLen = strlen(tmp) + strlen(slash) + strlen(kNoteName) + 1;
   gchar path[tmpLen];
+  path[0] = '\0';
   strcat(path, tmp);
+  strcat(path, slash);
   strcat(path, kNoteName);
   GFile *tmpNote = g_file_new_for_path(path);
 
@@ -736,17 +793,26 @@ sn_store_iterate_entities(SNStore *self,
 }
 
 static GFile *
-sn_store_create_content_file(SNStore *self)
+sn_store_create_selected_content_file(SNStore *self, SNError *error)
 {
-  SNNoteIterator *notes = sn_store_create_note_iterator(self);
-  SN_RETURN_VAL_IF_FAIL(notes, NULL, &kError);
-
-  SNEntityIterator *itr = SN_ENTITY_ITERATOR(notes);
-
   gboolean condition(SNEntityIterator *itr)
   {
+    SNNoteIterator *notes = SN_NOTE_ITERATOR(itr);
     return sn_note_iterator_item_selected(notes);
   }
+  return sn_store_create_content_file(self, condition, error);
+}
+
+static GFile *
+sn_store_create_content_file(SNStore *self,
+			     gboolean (*condition)(SNEntityIterator *),
+			     SNError *error)
+{
+  SNNoteIterator *notes = sn_store_create_note_iterator(self);
+  if (error) *error = kError;
+  SN_RETURN_VAL_IF_FAIL(notes, NULL, error);
+
+  SNEntityIterator *itr = SN_ENTITY_ITERATOR(notes);
 
   GFile *content = NULL;
   void handler(SNEntityIterator *itr)
@@ -757,50 +823,28 @@ sn_store_create_content_file(SNStore *self)
 
   sn_store_iterate_entities(self, itr, condition, handler);
   g_object_unref(notes);
+  if (!content && error) *error = SNErrorNotSelected;
 
   return content;
 }
 
 static guint64
-sn_store_get_selected_folder(SNStore *self, SNFolderIterator *folders)
+sn_store_get_selected_item(SNStore *self, SNEntityIterator *itr)
 {
-  SN_RETURN_VAL_IF_FAIL(folders, 0, &kError);
-  SNEntityIterator *itr = SN_ENTITY_ITERATOR(folders);
+  SN_RETURN_VAL_IF_FAIL(itr, 0, &kError);
 
   gboolean condition(SNEntityIterator *itr)
   {
-    return sn_folder_iterator_item_selected(folders);
+    return sn_entity_iterator_item_selected(itr);
   }
 
-  guint64 selectedFolder = 0;
+  guint64 selectedItem = 0;
   void handler(SNEntityIterator *itr)
   {
-    selectedFolder = sn_folder_iterator_item_id(folders);
+    selectedItem = sn_entity_iterator_item_id(itr);
   }
 
   sn_store_iterate_entities(self, itr, condition, handler);
 
-  return selectedFolder;
-}
-
-static guint64
-sn_store_get_selected_note(SNStore *self, SNNoteIterator *notes)
-{
-  SN_RETURN_VAL_IF_FAIL(notes, 0, &kError);
-  SNEntityIterator *itr = SN_ENTITY_ITERATOR(notes);
-
-  gboolean condition(SNEntityIterator *itr)
-  {
-    return sn_note_iterator_item_selected(notes);
-  }
-
-  guint64 selectedNote = 0;
-  void handler(SNEntityIterator *itr)
-  {
-    selectedNote = sn_note_iterator_item_id(notes);
-  }
-
-  sn_store_iterate_entities(self, itr, condition, handler);
-
-  return selectedNote;
+  return selectedItem;
 }

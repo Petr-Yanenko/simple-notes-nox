@@ -7,7 +7,7 @@
 
 
 struct _SNFolderIterator {
-  SNDataIterator _parent;
+  SNEntityIterator _parent;
 };
 
 
@@ -17,9 +17,15 @@ G_DEFINE_TYPE(SNFolderIterator, sn_folder_iterator, SN_TYPE_ENTITY_ITERATOR)
 static SNError kError = SNErrorFolderIterator;
 
 
+static glong
+sn_folder_iterator_real_selected_column(SNEntityIterator *self);
+
+
 static void
 sn_folder_iterator_class_init(SNFolderIteratorClass *class)
 {
+  SNEntityIteratorClass *parent = SN_ENTITY_ITERATOR_CLASS(class);
+  parent->selected_column = sn_folder_iterator_real_selected_column;
 }
 
 static void
@@ -65,8 +71,12 @@ sn_folder_iterator_item_count(SNFolderIterator *self)
 gboolean
 sn_folder_iterator_item_selected(SNFolderIterator *self)
 {
-  glong selectedColumn = 3;
+  return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self));
+}
 
-  return sn_entity_iterator_item_selected(SN_ENTITY_ITERATOR(self),
-					  selectedColumn);
+static glong
+sn_folder_iterator_real_selected_column(SNEntityIterator *self)
+{
+  glong selectedColumn = 3;
+  return selectedColumn;
 }

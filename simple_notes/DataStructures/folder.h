@@ -6,28 +6,51 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
-#ifndef simple_notes_folder____FILEEXTENSION___
-#define simple_notes_folder____FILEEXTENSION___
+
+#ifndef sn_folder____FILEEXTENSION___
+#define sn_folder____FILEEXTENSION___
 
 #include "object.h"
 
-#define SIMPLE_NOTES_TYPE_FOLDER simple_notes_folder_get_type ()
-G_DECLARE_FINAL_TYPE(SimpleNotesFolder, simple_notes_folder, SIMPLE_NOTES, FOLDER, SimpleNotesObject);
 
-SimpleNotesFolder *simple_notes_folder_new (void);
+#define SN_TYPE_FOLDER sn_folder_get_type()
+G_DECLARE_FINAL_TYPE(SNFolder,
+		     sn_folder,
+		     SN,
+		     FOLDER,
+		     SNObject);
 
-GString *simple_notes_folder_create_description (SimpleNotesFolder *object);
 
-guint64 simple_notes_folder_get_id (SimpleNotesFolder *object);
-void simple_notes_folder_assign_id (SimpleNotesFolder *object, guint64 id);
+SNFolder *
+sn_folder_new(void);
 
-gboolean simple_notes_folder_get_selected (SimpleNotesFolder *object);
-void simple_notes_folder_assign_selected (SimpleNotesFolder *object, gboolean selected);
 
-GByteArray *simple_notes_folder_get_copy_title (SimpleNotesFolder *object);
-void simple_notes_folder_copy_title (SimpleNotesFolder *object, GByteArray *title);
+GString *
+sn_folder_create_description(SNFolder *object);
 
-glong simple_notes_folder_get_count (SimpleNotesFolder *object);
-void simple_notes_folder_assign_count (SimpleNotesFolder *object, glong count);
+guint64
+sn_folder_get_id(SNFolder *object);
+
+void
+sn_folder_assign_id(SNFolder *object, guint64 id);
+
+gboolean
+sn_folder_get_selected(SNFolder *object);
+
+void
+sn_folder_assign_selected(SNFolder *object, gboolean selected);
+
+GString *
+sn_folder_get_copy_title(SNFolder *object);
+
+void
+sn_folder_copy_title(SNFolder *object, gchar *title);
+
+glong
+sn_folder_get_count(SNFolder *object);
+
+void
+sn_folder_assign_count(SNFolder *object, glong count);
+
 
 #endif

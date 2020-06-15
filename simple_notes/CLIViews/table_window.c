@@ -11,8 +11,8 @@
 typedef struct _SimpleNotesTableWindowPrivate {
     SimpleNotesTableView *_table;
     SimpleNotesBaseController *_controller;
-    SimpleNotesMediator *_model;
-    
+    SNBaseModel *_model;
+
     gulong _connectSignalModel;
 } SimpleNotesTableWindowPrivate;
 
@@ -26,15 +26,13 @@ static void simple_notes_table_window_real_new_data (
 );
 
 
-
 static SimpleNotesTableView *simple_notes_table_window_create_table (SimpleNotesTableWindow *object);
 static SimpleNotesTableViewCell *simple_notes_table_window_create_cell_for_row_column (SimpleNotesTableWindow *object, gulong row, gulong column);
 static SimpleNotesTableViewCell *simple_notes_table_window_create_header_for_column (SimpleNotesTableWindow *object, gulong column);
-static SimpleNotesBaseController *simple_notes_table_window_create_controller (SimpleNotesTableWindow *object, SimpleNotesMediator *model);
-static SimpleNotesBaseModel *simple_notes_table_window_get_model_to_connect_signal (SimpleNotesTableWindow *object, SimpleNotesMediator *model);
+static SimpleNotesBaseController *simple_notes_table_window_create_controller (SimpleNotesTableWindow *object, SNBaseModel *model);
 static gulong simple_notes_table_window_get_rows_number (SimpleNotesTableWindow *object);
 static gulong simple_notes_table_window_get_columns_number (SimpleNotesTableWindow *object);
-static void simple_notes_table_window_connect_signal (SimpleNotesTableWindow *object, SimpleNotesMediator *model);
+static void simple_notes_table_window_connect_signal (SimpleNotesTableWindow *object, SNBaseModel *model);
 
 static void simple_notes_table_window_dispose (GObject *object) {
     SimpleNotesTableWindow *window = SIMPLE_NOTES_TABLE_WINDOW(object);
@@ -63,14 +61,13 @@ void simple_notes_table_window_class_init (SimpleNotesTableWindowClass *klass) {
 
     klass->create_table = NULL;
     klass->create_controller = NULL;
-    klass->get_model_to_connect_signal = NULL;
 
     g_type_add_instance_private(SIMPLE_NOTES_TYPE_TABLE_WINDOW, sizeof(SimpleNotesTableWindowPrivate));
 }
 
 void simple_notes_table_window_init (SimpleNotesTableWindow *object) {
     SimpleNotesTableWindowPrivate *private = simple_notes_table_window_get_instance_private(object);
-    
+
     private->_model = NULL;
     private->_controller = NULL;
     private->_table = NULL;
@@ -89,7 +86,7 @@ SimpleNotesLabelCell *simple_notes_table_window_create_cell (gchar *text, Simple
 SimpleNotesTableWindow *simple_notes_table_window_new (
         GType type,
         SimpleNotesResponder *next,
-        SimpleNotesMediator *model
+        SNBaseModel *model
 ) {
     SimpleNotesTableWindow *object = SIMPLE_NOTES_TABLE_WINDOW(simple_notes_responder_new(type, next));
     SimpleNotesTableWindowPrivate *private = simple_notes_table_window_get_instance_private(object);
@@ -104,23 +101,25 @@ SimpleNotesTableView *simple_notes_table_window_get_table (SimpleNotesTableWindo
     return private->_table;
 }
 
-SimpleNotesMediator *simple_notes_table_window_get_model (SimpleNotesTableWindow *object) {
-    SimpleNotesTableWindowPrivate *private = simple_notes_table_window_get_instance_private(object);
-    return private->_model;
+static void simple_notes_table_window_connect_signal (SimpleNotesTableWindow *object, SNBaseModel *model) {
+  SNBaseModel *connectSignalModel = model;
+  SimpleNotesTableWindowPrivate *private = simple_notes_table_window_get_instance_private(object);
+  if (connectSignalModel && private->_connectSignalModel != (gulong)connectSignalModel)
+    {
+      g_signal_connect(connectSignalModel,
+		       "notify::new-data",
+		       G_CALLBACK(simple_notes_table_window_real_new_data),
+		       object);
+      private->_connectSignalModel = (gulong)connectSignalModel;
+    }
 }
 
-static void simple_notes_table_window_connect_signal (SimpleNotesTableWindow *object, SimpleNotesMediator *model) {
-    SimpleNotesBaseModel *connectSignalModel = simple_notes_table_window_get_model_to_connect_signal(object, model);
-    SimpleNotesTableWindowPrivate *private = simple_notes_table_window_get_instance_private(object);
-    if (connectSignalModel && private->_connectSignalModel != (gulong)connectSignalModel) {
-        g_signal_connect(
-                         connectSignalModel,
-                         "notify::new-data",
-                         G_CALLBACK(simple_notes_table_window_real_new_data),
-                         object
-                         );
-        private->_connectSignalModel = (gulong)connectSignalModel;
-    }
+SNBaseModel *simple_notes_table_window_get_model(SimpleNotesTableWindow *object)
+{
+  SimpleNotesTableWindowPrivate *private;
+  private = simple_notes_table_window_get_instance_private(object);
+
+  return private->_model;
 }
 
 static gboolean simple_notes_table_window_real_handle_event (SimpleNotesResponder *object, SimpleNotesEvent *event) {
@@ -178,7 +177,7 @@ static void simple_notes_table_window_real_new_data (
             rowsNumber,
             columnNumber
     );
-    simple_notes_free_objects_array((gpointer *)cellArray, cellNumber);
+    sn_free_objects_array((gpointer *)cellArray, cellNumber);
     simple_notes_view_layout_if_needed(SIMPLE_NOTES_VIEW(window));
     simple_notes_view_size_to_fit(SIMPLE_NOTES_VIEW(window));
     simple_notes_view_display(SIMPLE_NOTES_VIEW(window));
@@ -186,42 +185,36 @@ static void simple_notes_table_window_real_new_data (
 
 static SimpleNotesTableView *simple_notes_table_window_create_table (SimpleNotesTableWindow *object) {
     SimpleNotesTableWindowClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, create_table, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, NULL);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, create_table, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, NULL);
     return klass->create_table(object);
 }
 
 static SimpleNotesTableViewCell *simple_notes_table_window_create_cell_for_row_column (SimpleNotesTableWindow *object, gulong row, gulong column) {
     SimpleNotesTableWindowClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, create_cell_for_row_column, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, NULL);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, create_cell_for_row_column, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, NULL);
     return klass->create_cell_for_row_column(object, row, column);
 }
 
 static SimpleNotesTableViewCell *simple_notes_table_window_create_header_for_column (SimpleNotesTableWindow *object, gulong column) {
     SimpleNotesTableWindowClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, create_header_for_column, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, NULL);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, create_header_for_column, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, NULL);
     return klass->create_header_for_column(object, column);
 }
 
-static SimpleNotesBaseController *simple_notes_table_window_create_controller (SimpleNotesTableWindow *object, SimpleNotesMediator *model) {
+static SimpleNotesBaseController *simple_notes_table_window_create_controller (SimpleNotesTableWindow *object, SNBaseModel *model) {
     SimpleNotesTableWindowClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, create_controller, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, NULL);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, create_controller, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, NULL);
     return klass->create_controller(object, model);
-}
-
-static SimpleNotesBaseModel *simple_notes_table_window_get_model_to_connect_signal (SimpleNotesTableWindow *object, SimpleNotesMediator *model) {
-    SimpleNotesTableWindowClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, get_model_to_connect_signal, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, NULL);
-    return klass->get_model_to_connect_signal(object, model);
 }
 
 static gulong simple_notes_table_window_get_rows_number (SimpleNotesTableWindow *object) {
     SimpleNotesTableWindowClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, get_rows_number, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, 0);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, get_rows_number, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, 0);
     return klass->get_rows_number(object);
 }
 
 static gulong simple_notes_table_window_get_columns_number (SimpleNotesTableWindow *object) {
     SimpleNotesTableWindowClass *klass;
-    SIMPLE_NOTES_CHECK_VIRTUAL_CLASS_FUNC_WITH_RETURN_VAL(object, &klass, get_columns_number, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, 0);
+    SN_GET_CLASS_OR_RETURN_VAL(object, &klass, get_columns_number, SimpleNotesTableWindow, SIMPLE_NOTES, TABLE_WINDOW, 0);
     return klass->get_columns_number(object);
 }

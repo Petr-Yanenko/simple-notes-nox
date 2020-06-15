@@ -6,6 +6,7 @@
 //  Copyright (c) 2017 Petr Yanenko. All rights reserved.
 //
 
+
 #include "global_functions.h"
 #include <string.h>
 #include <stdio.h>
@@ -24,8 +25,8 @@ GQuark const kSimpleNotesDomain = 11111;
 long const kLongLongSymbols = 21;
 long const kSelectedSymbols = 2;
 
-gchar *const kFolderPathFormat ="~/simple_notes_nox/folder_%llu/";
-gchar *const kNotePathFormat = "~/simple_notes_nox/folder_%llu/note_%ld.txt";
+gchar *const kFolderPathFormat ="folder_%llu/";
+gchar *const kNotePathFormat = "folder_%llu/note_%ld.txt";
 
 
 gboolean
@@ -38,61 +39,32 @@ simple_notes_trash_file (gchar *fileName)
 }
 
 void
-simple_notes_print_byte_array (GByteArray *array,
-                               GString *string,
-                               gchar *title)
+sn_print_ustring(GString *ustring, GString *buff, gchar *title)
 {
-  if (array)
+  if (ustring)
     {
-      g_string_append_printf (string, "%s: 0x", title);
-      for (glong i = 0; i < array->len; i++)
-        {
-          g_string_append_printf (string, "%x", array->data[i]);
-        }
+      g_string_append_printf(buff, "%s: 0x", title);
+      for (glong i = 0; i < ustring->len; i++)
+	{
+	  g_string_append_printf(buff, "%x", ustring->str[i]);
+	}
     }
   else
     {
-      g_string_append_printf (string, "%s: 0x0", title);
+      g_string_append_printf(buff, "%s: 0x0", title);
     }
 }
 
 void
-simple_notes_copy (GType type,
-                   void (setter) (GValue *value),
-                   void (getter) (GValue *value))
+sn_copy(GType type,
+	void (setter)(GValue *value),
+	void (getter)(GValue *value))
 {
   GValue value = G_VALUE_INIT;
-  g_value_init (&value, type);
-  setter (&value);
-  getter (&value);
-  g_value_unset (&value);
-}
-
-void
-simple_notes_set_copy_byte_array (GByteArray *array, GByteArray **variable)
-{
-  if (*variable)
-    {
-      g_byte_array_unref (*variable);
-      *variable = NULL;
-    }
-  if (array)
-    {
-      *variable = g_byte_array_new ();
-      g_byte_array_append (*variable, array->data, array->len);
-    }
-}
-
-GByteArray *
-simple_notes_get_copy_byte_array (GByteArray *variable)
-{
-  GByteArray *copy = NULL;
-  if (variable)
-    {
-      copy = g_byte_array_new ();
-      g_byte_array_append (copy, variable->data, variable->len);
-    }
-  return copy;
+  g_value_init(&value, type);
+  setter(&value);
+  getter(&value);
+  g_value_unset(&value);
 }
 
 guint
@@ -153,7 +125,7 @@ sn_print_long_value(gchar *buff, glong value)
 }
 
 void
-simple_notes_free_objects_array (gpointer *array, gulong count)
+sn_free_objects_array(gpointer *array, gulong count)
 {
   for (glong i = 0; i < count; i++)
     {
@@ -163,4 +135,26 @@ simple_notes_free_objects_array (gpointer *array, gulong count)
     {
       g_free (array);
     }
+}
+
+gulong
+sn_notify_connect(GObject *subject,
+		  gchar *const notify,
+		  void (*callback)(GObject *, GParamSpec *, gpointer),
+		  gpointer user_data)
+{
+  gchar *signalName = "notify::";
+  gchar *signalDetail = notify;
+  glong nameLen = strlen(signalName);
+  glong detailLen = strlen(signalDetail);
+  glong const fullLen = nameLen + detailLen +1;
+  gchar buff[fullLen];
+  sprintf(buff, "%s%s", signalName, signalDetail);
+
+  gulong identifier = g_signal_connect(subject,
+				       buff,
+				       G_CALLBACK(callback),
+				       user_data);
+
+  return identifier;
 }

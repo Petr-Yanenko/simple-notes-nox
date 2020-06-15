@@ -23,10 +23,13 @@ G_DEFINE_TYPE(SNDataBase, sn_data_base, G_TYPE_OBJECT)
 
 
 static SNError const kError = SNErrorDataBase;
-  
-  
+
+
 static sqlite3_stmt *
-sn_data_base_sqlite_bind(SNDataBase *self, gchar *const key, glong paramCount, ...);
+sn_data_base_sqlite_bind(SNDataBase *self,
+			 gchar *const key,
+			 glong paramCount,
+			 va_list args);
 
 static void
 sn_data_base_dispose_sqlite(SNDataBase *self);
@@ -89,7 +92,11 @@ sn_data_base_add(SNDataBase *self, gchar *const key, gchar *const stmt)
   SN_RETURN_VAL_IF_FAIL(self->_stmts, FALSE, &kError);
 
   sqlite3_stmt *preparedStmt = NULL;
-  gint stmtResult = sqlite3_prepare_v2(self->_db, stmt, -1, &preparedStmt, NULL);
+  gint stmtResult = sqlite3_prepare_v2(self->_db,
+				       stmt,
+				       -1,
+				       &preparedStmt,
+				       NULL);
 
   gboolean ok = sn_data_base_check_result(self, stmtResult);
   SN_RETURN_VAL_IF_FAIL(ok, FALSE, &kError);
@@ -105,24 +112,39 @@ sn_data_base_bind(SNDataBase *self, gchar *const key, glong paramCount, ...)
 {
   SN_RETURN_VAL_IF_FAIL(key, NULL, NULL);
   SN_RETURN_VAL_IF_FAIL(self->_bindingStmts, NULL, &kError);
-  
+
   va_list args;
+  va_start(args, paramCount);
   sqlite3_stmt *stmt = sn_data_base_sqlite_bind(self, key, paramCount, args);
+  va_end(args);
   if (!stmt) return NULL;
-  
+
   SNStatement *bindingStmt = sn_statement_new(stmt);
   gchar *keyCopy = sn_copy_string(key);
   g_hash_table_insert(self->_bindingStmts, keyCopy, bindingStmt);
-  
+
   return bindingStmt;
 }
 
 gboolean
 sn_data_base_execute(SNDataBase *self, gchar *const key, glong paramCount, ...)
-{  
-  SN_RETURN_VAL_IF_FAIL(key, FALSE, NULL);
-  
+{
   va_list args;
+  va_start(args, paramCount);
+  gboolean execute = sn_data_base_vexecute(self, key, paramCount, args);
+  va_end(args);
+
+  return execute;
+}
+
+gboolean
+sn_data_base_vexecute(SNDataBase *self,
+		      gchar *const key,
+		      glong paramCount,
+		      va_list args)
+{
+  SN_RETURN_VAL_IF_FAIL(key, FALSE, NULL);
+
   sqlite3_stmt *stmt = sn_data_base_sqlite_bind(self, key, paramCount, args);
   if (!stmt) return FALSE;
 
@@ -138,28 +160,29 @@ sn_data_base_new(void)
 }
 
 static sqlite3_stmt *
-sn_data_base_sqlite_bind(SNDataBase *self, gchar *const key, glong paramCount, ...)
+sn_data_base_sqlite_bind(SNDataBase *self,
+			 gchar *const key,
+			 glong paramCount,
+			 va_list args)
 {
   SN_RETURN_VAL_IF_FAIL(self->_stmts, NULL, &kError);
   SN_RETURN_VAL_IF_FAIL(self->_bindingStmts, NULL, &kError)
   SN_RETURN_VAL_IF_FAIL(key, NULL, NULL);
 
   g_hash_table_remove(self->_bindingStmts, key);
-  
+
   sqlite3_stmt *stmt = g_hash_table_lookup(self->_stmts, key);
   SN_RETURN_VAL_IF_FAIL(stmt, NULL, &kError);
 
   SN_RETURN_VAL_IF_FAIL(sqlite3_reset(stmt) == SQLITE_OK, NULL, &kError);
 
   gint result = SQLITE_OK;
-  va_list args;
-  va_start(args, paramCount);
   for (glong i = 0; i < paramCount; i++)
     {
-      result = sqlite3_bind_text(stmt, i + 1, va_arg(args, gchar *), -1, NULL);
+      gchar *arg = va_arg(args, gchar *);
+      result = sqlite3_bind_text(stmt, i + 1, arg, -1, NULL);
       if (result != SQLITE_OK) break;
     }
-  va_end(args);
 
   SN_RETURN_VAL_IF_FAIL(result == SQLITE_OK, NULL, &kError);
 

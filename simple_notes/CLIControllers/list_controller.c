@@ -29,11 +29,11 @@ void simple_notes_list_controller_init (SimpleNotesListController *object) {}
 static gchar **simple_notes_list_controller_real_create_options_names (SimpleNotesBaseController *object) {
     gulong optionsNumber = 6;
     gchar **buff = g_malloc(sizeof(gchar *) * optionsNumber);
-    buff[0] = simple_notes_create_string(kAllOption);
-    buff[1] = simple_notes_create_string(kInsertOption);
-    buff[2] = simple_notes_create_string(kDeleteOption);
-    buff[3] = simple_notes_create_string(kSelectOption);
-    buff[4] = simple_notes_create_string(kEditOption);
+    buff[0] = sn_copy_string(kAllOption);
+    buff[1] = sn_copy_string(kInsertOption);
+    buff[2] = sn_copy_string(kDeleteOption);
+    buff[3] = sn_copy_string(kSelectOption);
+    buff[4] = sn_copy_string(kEditOption);
     buff[optionsNumber - 1] = NULL;
     return buff;
 }
@@ -48,11 +48,11 @@ static gchar ***simple_notes_list_controller_real_create_required_options_names 
         buff[i] = g_malloc(optionLen);
         memset(buff[i], 0, optionLen);
     }
-    buff[0][0] = simple_notes_create_string(kAllOption);
-    buff[1][0] = simple_notes_create_string(kInsertOption);
-    buff[2][0] = simple_notes_create_string(kDeleteOption);
-    buff[3][0] = simple_notes_create_string(kSelectOption);
-    buff[4][0] = simple_notes_create_string(kEditOption);
+    buff[0][0] = sn_copy_string(kAllOption);
+    buff[1][0] = sn_copy_string(kInsertOption);
+    buff[2][0] = sn_copy_string(kDeleteOption);
+    buff[3][0] = sn_copy_string(kSelectOption);
+    buff[4][0] = sn_copy_string(kEditOption);
     buff[5] = NULL;
     return buff;
 }
